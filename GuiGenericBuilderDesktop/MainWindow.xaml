@@ -5,8 +5,44 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GuiGenericBuilderDesktop"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Build Flags Generator" Height="900" Width="1600">
 
-    </Grid>
+    <!-- Replaced Grid with FlowDocumentScrollViewer containing a FlowDocument. -->
+    <FlowDocumentScrollViewer x:Name="docView" Margin="0" VerticalScrollBarVisibility="Auto" IsToolBarVisible="False">
+        <FlowDocument>
+            <BlockUIContainer>
+                <Border Background="#F5F5F5" Padding="12">
+                    <TextBlock Text="Build Flags Configuration" FontSize="22" FontWeight="Bold" Foreground="#333" />
+                </Border>
+            </BlockUIContainer>
+
+            <BlockUIContainer>
+                <DataGrid x:Name="FlagsDataGrid"
+                       Margin="12"
+                       AutoGenerateColumns="False"
+                       CanUserAddRows="False"
+                       ItemsSource="{Binding AllBuildFlags}">
+                    <DataGrid.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <DockPanel Background="#EFEFEF">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding ItemCount, StringFormat=' ({0})'}" Margin="6,0,0,0" VerticalAlignment="Center" />
+                                    </DockPanel>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </DataGrid.GroupStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Section" Binding="{Binding Section}" Width="30" IsReadOnly="True" />
+                        <DataGridTextColumn Header="Flag Name" Binding="{Binding FlagName}" Width="50" IsReadOnly="True" />
+                        <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding IsEnabled}" Width="50" />
+                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" IsReadOnly="True" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </BlockUIContainer>
+        </FlowDocument>
+    </FlowDocumentScrollViewer>
 </Window>
