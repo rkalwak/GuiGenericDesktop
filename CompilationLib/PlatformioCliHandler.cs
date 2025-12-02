@@ -1,11 +1,17 @@
 using CompilationLib;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
 
 public class PlatformioCliHandler : ICompileHandler
 {
+    string errors = string.Empty;
+    string logs = string.Empty;
+    List<string> _excludedBuildFlagsFromManipulation = new List<string>
+                {
+                    "SUPLA_EXCLUDE_LITTLEFS_CONFIG",
+                    "TEMPLATE_BOARD_JSON",
+                    "OPTIONS_HASH",
+                    "BUILD_VERSION",
+                };
     public PlatformioCliHandler()
     {
 
@@ -28,7 +34,7 @@ public class PlatformioCliHandler : ICompileHandler
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
-            CreateNoWindow = false,
+            CreateNoWindow = true,
         };
         Console.WriteLine($"Compiling: {processStartInfo.FileName} {arguments}");
 
@@ -59,10 +65,11 @@ public class PlatformioCliHandler : ICompileHandler
             process.WaitForExit();
             stopwatch.Stop();
 
-            compileResponse.ExitCode = process.ExitCode;
+            compileResponse.IsSuccessful = process.ExitCode==0;
             compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
             compileResponse.OutputDirectory = $"{request.ProjectDirectory}/.pio/build/{request.Platform}";
             compileResponse.OutputFile = $"firmware.bin";
+            compileResponse.Logs = logs +"Logs: \r\nErrors:\r\n"+ errors;
         }
 
         return compileResponse;
@@ -82,16 +89,17 @@ public class PlatformioCliHandler : ICompileHandler
         var endIndex = lines.FindIndex(line => line.Trim().Equals(";flagsend", StringComparison.OrdinalIgnoreCase));
         for (int i = startIndex + 1; i < endIndex; i++)
         {
-            string lineContent = lines[i].TrimStart();
-            string lineContentWithoutComment = lineContent.StartsWith(";") ? lineContent.Substring(1) : lineContent;
-            bool isFlagEnabled = !lineContent.StartsWith(";");
+            string lineContent = lines[i];
+            string lineContentWithoutComment = lineContent.Contains(";") ? lineContent.Substring(1) : lineContent;
+            bool isFlagEnabled = !lineContent.Contains(";");
             // flag already enabled, check if it should be enabled
             if (!string.IsNullOrWhiteSpace(lineContent) && isFlagEnabled)
             {
-                if (!allowedFlags.Any(flag => lineContentWithoutComment.Contains(flag)))
+                // lineContent has format -D but collection doesn't
+                if (!allowedFlags.Any(flag => lineContentWithoutComment.Contains(flag)) && !_excludedBuildFlagsFromManipulation.Any(x=> lineContentWithoutComment.Contains(x)))
                 {
-                    //comment out the line
-                    lines[i] = ";" + lines[i];
+                    //comment out the line - remove one space
+                    lines[i] = ";" + lines[i].Substring(1);
                 }
             }
             // flag is commented out, check if it should be enabled
@@ -100,7 +108,7 @@ public class PlatformioCliHandler : ICompileHandler
                 if (allowedFlags.Any(flag => lineContentWithoutComment.Contains(flag)))
                 {
                     // Uncomment the line
-                    lines[i] = lines[i].TrimStart().Substring(1); 
+                    lines[i] = lines[i].Replace(';',' '); 
                 }
             }
         }
@@ -125,11 +133,13 @@ public class PlatformioCliHandler : ICompileHandler
     {
         Console.WriteLine(e.Data); // Log the output to the console
         Debug.WriteLine(e.Data);
+        errors += e.Data;
     }
 
     private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
     {
         Console.WriteLine(e.Data); // Log the output to the console
         Debug.WriteLine(e.Data);
+        logs += e.Data;
     }
 }

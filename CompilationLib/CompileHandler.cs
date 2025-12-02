@@ -52,7 +52,7 @@ public class CompileHandler : ICompileHandler
             process.WaitForExit();
             stopwatch.Stop();
 
-            compileResponse.ExitCode = process.ExitCode;
+            compileResponse.IsSuccessful = process.ExitCode==0;
             compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
             compileResponse.OutputDirectory = $"{request.ProjectDirectory}/build";
         }
