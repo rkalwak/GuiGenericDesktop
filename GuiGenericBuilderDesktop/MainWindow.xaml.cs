@@ -44,22 +44,134 @@ namespace GuiGenericBuilderDesktop
                 string jsonContent = File.ReadAllText(jsonPath);
                 var deserialized = JsonSerializer.Deserialize<BuilderConfig>(jsonContent);
 
-                foreach (var sectionItem in deserialized.Sections.OrderBy(X=>X.Value.Order))
+                if (deserialized?.Sections == null)
+                {
+                    MessageBox.Show($"builder.json does not contain valid Sections", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // First pass: populate AllBuildFlags with metadata but keep IsEnabled as the deserialized default
+                foreach (var sectionItem in deserialized.Sections.OrderBy(X => X.Value.Order))
                 {
                     foreach (var flagItem in sectionItem.Value.Flags)
                     {
-                        flagItem.Value.Section= sectionItem.Key;
-                        flagItem.Value.Key= flagItem.Key;
-                        flagItem.Value.SectionOrder= sectionItem.Value.Order;
+                        flagItem.Value.Section = sectionItem.Key;
+                        flagItem.Value.Key = flagItem.Key;
+                        flagItem.Value.SectionOrder = sectionItem.Value.Order;
                         AllBuildFlags.Add(flagItem.Value);
                     }
                 }
+
+                // Second pass: evaluate dependencies for each flag and assign the computed enabled state
+                var memo = new Dictionary<string, bool>();
+                foreach (var flag in AllBuildFlags)
+                {
+                    flag.IsEnabled = FindOnDependencies(flag, memo, new HashSet<string>());
+                }
+
                 BuildFlowDocument();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error loading builder.json: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        private bool FindOnDependencies(BuildFlagItem flag, Dictionary<string, bool>? memo = null, HashSet<string>? visiting = null)
+        {
+            memo ??= new Dictionary<string, bool>();
+            visiting ??= new HashSet<string>();
+
+            if (flag == null)
+                return false;
+
+            // Key to identify flags uniquely for memoization/visiting (case-insensitive)
+            string id = $"{flag.Section}::{flag.Key}".ToLowerInvariant();
+
+            // If already computed, return cached result
+            if (memo.TryGetValue(id, out var cached))
+                return cached;
+
+            // If currently visiting, we found a cycle -> treat as unsatisfied
+            if (visiting.Contains(id))
+            {
+                memo[id] = false;
+                return false;
+            }
+
+            // If no dependencies declared, use the default value loaded from JSON (`defOn`)
+            if (flag.Dependencies == null || flag.Dependencies.Length == 0)
+            {
+                memo[id] = flag.IsEnabled;
+                return memo[id];
+            }
+
+            visiting.Add(id);
+
+            foreach (var rawDep in flag.Dependencies)
+            {
+                if (string.IsNullOrWhiteSpace(rawDep))
+                {
+                    memo[id] = false;
+                    visiting.Remove(id);
+                    return false;
+                }
+
+                var dep = rawDep.Trim();
+                string depSection = null;
+                string depKey = null;
+
+                // Support separators: ':', '/', '.'
+                int sepIndex = dep.IndexOf(':');
+                if (sepIndex < 0) sepIndex = dep.IndexOf('/');
+                if (sepIndex < 0) sepIndex = dep.IndexOf('.');
+                if (sepIndex >= 0)
+                {
+                    depSection = dep.Substring(0, sepIndex).Trim();
+                    depKey = dep.Substring(sepIndex + 1).Trim();
+                }
+                else
+                {
+                    depKey = dep;
+                }
+
+                // Find the dependency flag in AllBuildFlags
+                BuildFlagItem? depFlag = null;
+                if (!string.IsNullOrEmpty(depSection))
+                {
+                    depFlag = AllBuildFlags.FirstOrDefault(f =>
+                        string.Equals(f.Section, depSection, System.StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(f.Key, depKey, System.StringComparison.OrdinalIgnoreCase));
+                }
+                else
+                {
+                    // If no section specified, match by key (first match)
+                    depFlag = AllBuildFlags.FirstOrDefault(f =>
+                        string.Equals(f.Key, depKey, System.StringComparison.OrdinalIgnoreCase));
+                }
+
+                if (depFlag == null)
+                {
+                    // Missing dependency -> unsatisfied
+                    memo[id] = false;
+                    visiting.Remove(id);
+                    return false;
+                }
+
+                // Recursively evaluate dependency
+                bool depSatisfied = FindOnDependencies(depFlag, memo, visiting);
+                if (!depSatisfied)
+                {
+                    memo[id] = false;
+                    visiting.Remove(id);
+                    return false;
+                }
+            }
+
+            // All dependencies satisfied
+            visiting.Remove(id);
+            memo[id] = true;
+            return true;
         }
 
         private void BuildFlowDocument()
@@ -102,7 +214,7 @@ namespace GuiGenericBuilderDesktop
                 headerRow.Cells.Add(new TableCell(new Paragraph(new Run("Description")) { FontWeight = FontWeights.SemiBold }));
                 trg.Rows.Add(headerRow);
 
-                foreach (var item in group.OrderBy(i => i.SectionOrder).ThenBy(x=>x.Key))
+                foreach (var item in group.OrderBy(i => i.SectionOrder).ThenBy(x => x.Key))
                 {
                     var row = new TableRow();
 
