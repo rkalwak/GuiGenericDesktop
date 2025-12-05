@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompilationLib", "Compilati
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GuiGenericBuilderDesktop", "GuiGenericBuilderDesktop\GuiGenericBuilderDesktop.csproj", "{8A233BD0-64C3-4A4E-8938-E85BFED0EDB6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompilationLib.Tests", "CompilationLib.Tests\CompilationLib.Tests.csproj", "{EB470FC6-F2EB-0C34-D9FF-A389F0307CA6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,6 +58,10 @@ Global
 		{8A233BD0-64C3-4A4E-8938-E85BFED0EDB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A233BD0-64C3-4A4E-8938-E85BFED0EDB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A233BD0-64C3-4A4E-8938-E85BFED0EDB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB470FC6-F2EB-0C34-D9FF-A389F0307CA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB470FC6-F2EB-0C34-D9FF-A389F0307CA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB470FC6-F2EB-0C34-D9FF-A389F0307CA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB470FC6-F2EB-0C34-D9FF-A389F0307CA6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

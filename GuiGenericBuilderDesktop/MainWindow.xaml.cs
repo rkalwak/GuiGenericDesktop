@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.IO;
+﻿using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -16,12 +15,15 @@ namespace GuiGenericBuilderDesktop
     {
         public List<BuildFlagItem> AllBuildFlags { get; set; }
         GitHubRepoDownloader _gitHubRepoDownloader = new GitHubRepoDownloader();
+        DeviceDetector _deviceDetector = new(new EsptoolWrapper());
         string _repositoryPath = string.Empty;
+        string _port = string.Empty;
 
         // UI fields inside FlowDocument to show detected device
-        private TextBlock devicePortText;
         private TextBlock deviceModelText;
         private ComboBox boardSelector;
+        private ComboBox comPortSelector;
+        private ComboBox flashSizeSelector;
 
         public MainWindow()
         {
@@ -30,7 +32,8 @@ namespace GuiGenericBuilderDesktop
 
             InitializeBuildFlags();
             FlagsDataGrid.ItemsSource = AllBuildFlags;
-          
+            _repositoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo", "gg");
+            _repositoryPath = @"c:\repozytoria\platformio\GUI-Generic\";
         }
 
         private void InitializeBuildFlags()
@@ -186,8 +189,6 @@ namespace GuiGenericBuilderDesktop
             // Add Device detection panel
             // Device detection panel
             var devicePanel = new DockPanel { LastChildFill = false, Margin = new Thickness(12, 8, 12, 6) };
-            var portLabel = new TextBlock(new Run("Port:")) { FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center };
-            devicePortText = new TextBlock(new Run("Not checked")) { Margin = new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
             var modelLabel = new TextBlock(new Run("Model:")) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
             deviceModelText = new TextBlock(new Run("Unknown")) { Margin = new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
 
@@ -196,6 +197,7 @@ namespace GuiGenericBuilderDesktop
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32 (default)", Tag = "GUI_Generic_ESP32", IsSelected = true });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C3", Tag = "GUI_Generic_ESP32C3" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP8266", Tag = "GUI_Generic_ESP8266" });
+            boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C6", Tag = "GUI_Generic_ESP32C6" });
 
             var updateGGButton = new Button
             {
@@ -213,14 +215,39 @@ namespace GuiGenericBuilderDesktop
 
             var checkBtn = new Button { Content = "Check Device", Width = 120, Height = 28, Margin = new Thickness(8, 0, 0, 0) };
             checkBtn.Click += CheckConnectedDevice_Click;
-            devicePanel.Children.Add(portLabel);
-            devicePanel.Children.Add(devicePortText);
+
+            // COM port selector (COM1..COM10)
+            comPortSelector = new ComboBox { Width = 100, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
+            comPortSelector.Items.Add(new ComboBoxItem { Content = $"None", Tag = $"None", IsSelected = true });
+            for (int i = 1; i <= 10; i++)
+            {
+                var item = new ComboBoxItem { Content = $"COM{i}", Tag = $"COM{i}" };
+                comPortSelector.Items.Add(item);
+            }
+            comPortSelector.SelectionChanged += (s, e) =>
+            {
+                if (comPortSelector.SelectedItem is ComboBoxItem ci)
+                {
+                    _port = (ci.Tag as string) ?? (ci.Content as string) ?? string.Empty;
+                }
+            };
+
+            devicePanel.Children.Add(comPortSelector);
             devicePanel.Children.Add(boardSelector);
             devicePanel.Children.Add(modelLabel);
             devicePanel.Children.Add(deviceModelText);
             DockPanel.SetDock(checkBtn, Dock.Right);
             devicePanel.Children.Add(checkBtn);
 
+            // Flash size selector
+            flashSizeSelector = new ComboBox { Width = 120, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
+            flashSizeSelector.Items.Add(new ComboBoxItem { Content = "Auto", Tag = "AUTO", IsSelected = true });
+            flashSizeSelector.Items.Add(new ComboBoxItem { Content = "4MB", Tag = "4MB" });
+            flashSizeSelector.Items.Add(new ComboBoxItem { Content = "8MB", Tag = "8MB" });
+            flashSizeSelector.Items.Add(new ComboBoxItem { Content = "16MB", Tag = "16MB" });
+            flashSizeSelector.Items.Add(new ComboBoxItem { Content = "32MB", Tag = "32MB" });
+            flashSizeSelector.Items.Add(new ComboBoxItem { Content = "64MB", Tag = "64MB" });
+            devicePanel.Children.Add(flashSizeSelector);
 
             var compileButton = new Button
             {
@@ -347,11 +374,11 @@ namespace GuiGenericBuilderDesktop
 
         private void UpdateGG_Click(object sender, RoutedEventArgs e)
         {
-            _repositoryPath = _gitHubRepoDownloader.DownloadRepositoryAsync(owner: "rkalwak", 
-                repo: "GUI-Generic", 
-                destinationRoot: Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo"), 
-                destinationSubdir: "gg", 
-                branch: "master", 
+            _repositoryPath = _gitHubRepoDownloader.DownloadRepositoryAsync(owner: "rkalwak",
+                repo: "GUI-Generic",
+                destinationRoot: Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo"),
+                destinationSubdir: "gg",
+                branch: "master",
                 cancellationToken: CancellationToken.None).GetAwaiter().GetResult();
 
         }
@@ -382,7 +409,7 @@ namespace GuiGenericBuilderDesktop
 
         private async void CompileSelected_Click(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("Compilation started. This may take several minutes.", "Compiling", MessageBoxButton.OK, MessageBoxImage.Information);
+
             var selectedFlags = AllBuildFlags
                 .Where(f => f.IsEnabled)
                 .Select(f => f.Key)
@@ -395,17 +422,18 @@ namespace GuiGenericBuilderDesktop
                 return;
             }
 
-
+            MessageBox.Show("Compilation started. This may take several minutes.", "Compiling", MessageBoxButton.OK, MessageBoxImage.Information);
             try
             {
                 var ggRequest = new CompileRequest
                 {
                     BuildFlags = selectedFlags,
-                    Platform = (boardSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "GUI_Generic_ESP32",
-                    ProjectPath = Path.Combine(_repositoryPath,"src"),
+                    Platform = (boardSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
+                    ProjectPath = Path.Combine(_repositoryPath, "src"),
                     ProjectDirectory = _repositoryPath,
-                    LibrariesPath = Path.Combine(_repositoryPath,"lib"),
-                    PortCom = devicePortText.Text
+                    LibrariesPath = Path.Combine(_repositoryPath, "lib"),
+                    PortCom = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
+                    ShouldDeploy = false
                 };
                 var handler = new PlatformioCliHandler();
                 ICompileHandler compiler = new PlatformioCliHandler();
@@ -418,7 +446,7 @@ namespace GuiGenericBuilderDesktop
 
                 else
                 {
-                    MessageBox.Show($"Compilation finished with log\r\n {result.Logs}.", "Compilation Finished", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"Compilation finished with errors:\r\n {result.Logs}.", "Compilation Finished", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
@@ -430,7 +458,6 @@ namespace GuiGenericBuilderDesktop
 
         private async void CheckConnectedDevice_Click(object? sender, RoutedEventArgs e)
         {
-            if (devicePortText != null) devicePortText.Text = "Checking...";
             if (deviceModelText != null) deviceModelText.Text = string.Empty;
 
             await Task.Run(async () =>
@@ -438,24 +465,59 @@ namespace GuiGenericBuilderDesktop
                 try
                 {
 
-                    var deviceDetector = new DeviceDetector(new EsptoolWrapper());
-                    var port = deviceDetector.DetectCOMPort();
+                    var port = _deviceDetector.DetectCOMPort();
                     EspInfo deviceModel = null;
                     if (port != null)
                     {
-                        deviceModel = await deviceDetector.DetectEspModelAsync(port);
+                        deviceModel = await _deviceDetector.DetectEspModelAsync(port);
                     }
                     Dispatcher.Invoke(() =>
                     {
                         if (!string.IsNullOrWhiteSpace(port))
                         {
-                            devicePortText.Text = port.Length > 0 ? port.Trim() : "No device";
-                            deviceModelText.Text = deviceModel?.ChipType?.Trim();
-                        }
-                        else
-                        {
-                            devicePortText.Text = "No device detected";
-                            deviceModelText.Text = string.Empty;
+                            deviceModelText?.Text = deviceModel?.ChipType?.Trim();
+                            comPortSelector.SelectedItem = comPortSelector.Items.OfType<ComboBoxItem>().FirstOrDefault(ci => (ci.Tag as string) == port || (ci.Content as string) == port);
+
+                            // If we detected a device model, try to select matching board in the selector
+
+                            var chip = deviceModel?.ChipType ?? string.Empty;
+                            if (!string.IsNullOrWhiteSpace(chip) && boardSelector != null)
+                            {
+                                string chipLower = chip.ToLowerInvariant();
+                                string selectedTag = null;
+                                if (chipLower.Contains("c6") || chipLower.Contains("c-6"))
+                                    selectedTag = "GUI_Generic_ESP32C6";
+                                else if (chipLower.Contains("c3") || chipLower.Contains("c-3"))
+                                    selectedTag = "GUI_Generic_ESP32C3";
+                                else if (chipLower.Contains("8266") || chipLower.Contains("esp8266"))
+                                    selectedTag = "GUI_Generic_ESP8266";
+                                else if (chipLower.Contains("esp32") || chipLower.Contains("esp32"))
+                                    selectedTag = "GUI_Generic_ESP32";
+
+                                if (selectedTag != null)
+                                {
+                                    var match = boardSelector.Items.OfType<ComboBoxItem>().FirstOrDefault(ci => (ci.Tag as string) == selectedTag);
+                                    if (match != null)
+                                        boardSelector.SelectedItem = match;
+                                }
+
+                                // Set flash size selector if available
+
+                                var fs = deviceModel?.FlashSize ?? string.Empty;
+                                if (!string.IsNullOrWhiteSpace(fs) && flashSizeSelector != null)
+                                {
+                                    // Normalize like '16MB' or '16M'
+                                    var normalized = fs.Trim().ToUpperInvariant();
+                                    if (normalized.EndsWith("B")) ; // keep
+                                                                    // Try to match beginning of string
+                                    var fmatch = flashSizeSelector.Items.OfType<ComboBoxItem>().FirstOrDefault(ci => normalized.Contains((ci.Tag as string) ?? (ci.Content as string)));
+                                    if (fmatch != null)
+                                    {
+                                        flashSizeSelector.SelectedItem = fmatch;
+                                    }
+                                }
+
+                            }
                         }
                     });
 
@@ -465,73 +527,10 @@ namespace GuiGenericBuilderDesktop
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        devicePortText.Text = "Error";
-                        deviceModelText.Text = ex.Message;
+                        deviceModelText?.Text = ex.Message;
                     });
                 }
             });
         }
     }
-
-    public class BuildFlagItem : INotifyPropertyChanged
-    {
-        private bool _isEnabled;
-
-        public string Key { set; get; }
-        [JsonProperty("name")]
-        public string FlagName { get; set; }
-        [JsonProperty("desc")]
-        public string Description { get; set; }
-        public string Section { get; set; }
-        [JsonProperty("defOn")]
-        public bool IsEnabled
-        {
-            get => _isEnabled;
-            set
-            {
-                if (_isEnabled != value)
-                {
-                    _isEnabled = value;
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsEnabled)));
-                }
-            }
-        }
-        //"[opcja] tablica SUPLA_OPTION, których włączenie automatycznie włącza daną opcję"
-        [JsonProperty("depOn")]
-        public List<string>? DependenciesToEnable { get; set; }
-
-        //"[opcja] tablica SULPA_OPTION, które zostaną wyłączone po włączeniu danej opcji",
-        [JsonProperty("depRel")]
-        public List<string>? DepRel { get; set; }
-
-        // "[opcja] tablica SULPA_OPTION, które zostaną włączone po włączeniu danej opcji",
-        [JsonProperty("depOpt")]
-        public List<string>? DependenciesOptional { get; set; }
-
-        //"[opcja] tablica SUPLA_OPTION, których wyłączenie nie pozwala włączyć danej opcji",
-        [JsonProperty("depOff")]
-        public List<string>? DependenciesToDisable { get; set; }
-        public int SectionOrder { get; internal set; }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-    }
-    public class SectionInfo
-    {
-        public string Name { get; set; }
-
-        public int Order { get; set; }
-        [JsonProperty("Flags")]
-        public Dictionary<string, BuildFlagItem> Flags { get; set; } = new Dictionary<string, BuildFlagItem>();
-    }
-
-    public class BuilderConfig
-    {
-
-        [JsonProperty("Sections")]
-        public Dictionary<string, SectionInfo> Sections { get; set; } = new Dictionary<string, SectionInfo>();
-
-        [JsonProperty("version")]
-        public string Version { get; set; }
-    }
-
 }

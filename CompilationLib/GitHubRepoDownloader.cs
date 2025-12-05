@@ -62,13 +62,14 @@ namespace CompilationLib
                 Directory.CreateDirectory(destinationRoot);
                 ZipFile.ExtractToDirectory(tempZip, destinationRoot, overwriteFiles: true);
                 var childRepo = Directory.GetDirectories(destinationRoot);
+                var pathToProject = Path.Combine(destinationRoot, destinationSubdir);
                 if (childRepo.Length == 1)
                 {
-                    Directory.Move(childRepo[0], Path.Combine(destinationRoot, destinationSubdir));
-                    return childRepo[0];
+                    Directory.Move(childRepo[0], pathToProject);
+                    return pathToProject;
                 }
 
-                return Path.Combine(destinationRoot, destinationSubdir);
+                return pathToProject;
             }
             finally
             {

@@ -13,4 +13,5 @@ public class CompileRequest
     public string ProjectDirectory { get; set; }
     public string LibrariesPath { get; set; }
     public string PortCom { get;  set; }
+    public bool ShouldDeploy { get; set; }
 }

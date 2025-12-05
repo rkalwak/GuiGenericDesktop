@@ -5,6 +5,7 @@ public class PlatformioCliHandler : ICompileHandler
 {
     string errors = string.Empty;
     string logs = string.Empty;
+    string _platformioCliPath = string.Empty;
     List<string> _excludedBuildFlagsFromManipulation = new List<string>
                 {
                     "SUPLA_EXCLUDE_LITTLEFS_CONFIG",
@@ -14,7 +15,7 @@ public class PlatformioCliHandler : ICompileHandler
                 };
     public PlatformioCliHandler()
     {
-
+        _platformioCliPath = $"{Environment.ExpandEnvironmentVariables("%USERPROFILE%")}/.platformio/penv/Scripts/platformio.exe";
     }
 
     public async Task<CompileResponse> Handle(CompileRequest request, CancellationToken cancellationToken)
@@ -24,11 +25,11 @@ public class PlatformioCliHandler : ICompileHandler
 
         // PlatformIO uses 'run' command for compilation
         CommentUnlistedFlagsBetweenMarkers($"{request.ProjectDirectory}/platformio.ini", request.BuildFlags);
-        string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.Platform} --target upload --upload-port {request.PortCom}  --verbose";
+        string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.Platform} {(request.ShouldDeploy ? ("--target upload--upload-port " + request.PortCom): " ")}--verbose";
 
         var processStartInfo = new ProcessStartInfo
         {
-            FileName = $"{Environment.ExpandEnvironmentVariables("%USERPROFILE%")}/.platformio/penv/Scripts/platformio.exe",
+            FileName = _platformioCliPath,
             WorkingDirectory = request.ProjectDirectory,
             Arguments = arguments,
             RedirectStandardOutput = true,
@@ -69,7 +70,7 @@ public class PlatformioCliHandler : ICompileHandler
             compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
             compileResponse.OutputDirectory = $"{request.ProjectDirectory}/.pio/build/{request.Platform}";
             compileResponse.OutputFile = $"firmware.bin";
-            compileResponse.Logs = logs +"Logs: \r\nErrors:\r\n"+ errors;
+            compileResponse.Logs ="Errors:\r\n"+ errors;
         }
 
         return compileResponse;
@@ -108,7 +109,7 @@ public class PlatformioCliHandler : ICompileHandler
                 if (allowedFlags.Any(flag => lineContentWithoutComment.Contains(flag)))
                 {
                     // Uncomment the line
-                    lines[i] = lines[i].Replace(';',' '); 
+                    lines[i] = lines[i].Replace(';',' ');
                 }
             }
         }

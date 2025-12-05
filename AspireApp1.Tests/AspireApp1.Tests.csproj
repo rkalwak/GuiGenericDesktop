@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AspireApp1.AppHost\AspireApp1.AppHost.csproj" />
+    <ProjectReference Include="..\CompilationLib\CompilationLib.csproj" />
   </ItemGroup>
 
   <ItemGroup>

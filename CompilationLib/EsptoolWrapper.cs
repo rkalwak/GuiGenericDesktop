@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+﻿using System.Diagnostics;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CompilationLib
 {
-    public  class EsptoolWrapper
+    public  class EsptoolWrapper : IEsptoolWrapper
     {
         private string _esptoolPath = "esptool.exe";
 
