@@ -8,12 +8,12 @@ namespace ConsoleApp1
     {
         static void Main(string[] args)
         {
-            List<string> BuildFlagsGG = new List<string>() {
-                "SUPLA_EXCLUDE_LITTLEFS_CONFIG"
-                ,"SUPLA_ENABLE_GUI"
-                ,"SUPLA_HDC1080"
-                ,"SUPLA_AHTX0"
-            ,"SUPLA_DEBUG_MODE"
+            List<BuildFlagItem> BuildFlagsGG = new List<BuildFlagItem>() {
+                new BuildFlagItem { FlagName = "SUPLA_EXCLUDE_LITTLEFS_CONFIG" },
+                new BuildFlagItem { FlagName = "SUPLA_ENABLE_GUI" },
+                new BuildFlagItem { FlagName = "SUPLA_HDC1080" },
+                new BuildFlagItem { FlagName = "SUPLA_AHTX0" },
+                new BuildFlagItem { FlagName = "SUPLA_DEBUG_MODE" }
             /*
 ,"SUPLA_OTA"
 ,"SUPLA_MDNS"

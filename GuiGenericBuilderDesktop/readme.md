@@ -13,13 +13,6 @@ Install Vistual Studio Code and then install the Platform.io extension or just P
 
 ## To do
 
-- Fix compilation issues with flags in GG
-	- SUPLA_PCF8575
-	- SUPLA_PCF8574
-	- SUPLA_DIRECT_LINKS
-	- SUPLA_DEEP_SLEEP
-	- SUPLA_DIRECT_LINKS_SENSOR_THERMOMETR
-	- SUPLA_RF_BRIDGE
 - Parametrize GG to use parameters
 - Languages support
 - CI/CD integration

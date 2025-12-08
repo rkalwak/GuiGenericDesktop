@@ -1,5 +1,6 @@
 using CompilationLib;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -23,7 +24,7 @@ namespace CompilationLib.Tests
             try { if (Directory.Exists(tempRepo)) Directory.Delete(tempRepo, true); } catch { }
         }
 
-        protected async Task<CompileResponse> RunHandlerAsync(string platform, System.Collections.Generic.List<string> flags, string projectDir, string port = "COM3")
+        protected async Task<CompileResponse> RunHandlerAsync(string platform, List<BuildFlagItem> flags, string projectDir, string port = "COM3")
         {
             var request = new CompileRequest
             {

@@ -1,6 +1,5 @@
-{
+﻿{
   "version": "6.0.2",
-
   "Sections": {
     "BASIC": {
       "Order": 0,
@@ -38,7 +37,10 @@
               "desc": "Paramètres de l´appareil->Configuration. Il permet de configurer la LED d´état et le bouton pour faire basculer le module en mode configuration.",
               "alertOff": "La désactivation de cette option empêchera la configuration du bouton activant le mode de configuration du module (AP: 192.168.4.1) et donc le manque d´accès au module. La LED système ne sera pas non plus configurable."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_OTA": {
           "name": "Aktualizacja przez WWW",
@@ -66,7 +68,10 @@
               "desc": "Outils->Mettre à jour. Vous permet de télécharger un micrologiciel plus récent via le site Web du module.",
               "alertOff": "La désactivation de cette option empêchera la mise à jour du micrologiciel du module via le navigateur Web. Vous devrez mettre à niveau via le port série."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_ENABLE_GUI": {
           "name": "Dostępne GUI podczas pracy modułu",
@@ -94,7 +99,10 @@
               "desc": "Active l´interface graphique pendant le fonctionnement normal du module. Lorsqu´elle est désactivée, l´interface graphique n´est disponible qu´en mode CONFIG.",
               "alertOff": "La désactivation de cette option empêchera la configuration du module pendant le fonctionnement normal. L´interface graphique ne sera disponible qu´en mode CONFIG."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_ENABLE_SSL": {
           "name": "Szyfrowane połączenie z serwerem (SSL)",
@@ -122,7 +130,10 @@
               "desc": "Il force le module à se connecter au serveur en utilisant SSL (port 2016). Notez que cela augmente la consommation de mémoire du micrologiciel de 10 KB.",
               "alertOn": "L´activation de cette option augmentera la consommation de mémoire du module de 10 KB. L´activation de nombreuses autres options peut rendre le module instable en raison d´une mémoire insuffisante."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_DEEP_SLEEP": {
           "name": "Tryb głębokiego uśpienia (Deep Sleep)",
@@ -145,7 +156,10 @@
               "name": "Mode veille profonde (Deep Sleep)",
               "desc": "La veille prolongée permet une plus longue durée de vie de la batterie en réduisant la consommation d´énergie au détriment de la communication WiFi."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_MDNS": {
           "name": "Protokół mDNS",
@@ -168,7 +182,10 @@
               "name": "Protocole mDNS",
               "desc": "L'utilisation du protocole mDNS permet de se connecter au module sans connaître son adresse IP, il suffit de saisir l'adresse du module http://supla.local"
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_WAKE_ON_LAN": {
           "name": "Wake on LAN",
@@ -191,7 +208,10 @@
               "name": "Wake on LAN",
               "desc": "Allumer les ordinateurs via LAN."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_WT32_ETH01_LAN8720": {
           "name": "WT32-ETH01",
@@ -214,7 +234,10 @@
               "name": "WT32-ETH01",
               "desc": ""
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_ETH01_LAN8720": {
           "name": "LAN8720",
@@ -237,7 +260,10 @@
               "name": "LAN8720",
               "desc": ""
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         }
       }
     },
@@ -277,7 +303,10 @@
               "name": "Relais",
               "desc": "Paramètres de l´appareil->Relais. Il permet le fonctionnement des relais."
             }
-          }
+          },
+          "parameters": [
+
+          ]
         },
         "SUPLA_BUTTON": {
           "name": "Przyciski",
@@ -315,7 +344,10 @@
               "name": "Boutons",
               "desc": "Paramètres de l´appareil->Boutons. Il permet l´utilisation de boutons ainsi que d´autres fonctionnalités."
             }
-          }
+          },
+          "parameters": [
+
+          ]
         },
         "SUPLA_ACTION_TRIGGER": {
           "name": "Wyzwalacze akcji",
@@ -334,7 +366,10 @@
             "fr": {
               "name": "Action Trigger"
             }
-          }
+          },
+          "parameters": [
+
+          ]
         },
         "SUPLA_THERMOSTAT": {
           "name": "Termostat",
@@ -362,7 +397,10 @@
               "name": "Thermostat",
               "desc": ""
             }
-          }
+          },
+          "parameters": [
+
+          ]
         },
         "SUPLA_ROLLERSHUTTER": {
           "name": "Rolety",
@@ -385,7 +423,10 @@
               "name": "Volet roulant",
               "desc": "Paramètres de l´appareil->Volet roulant. Il vous permet de faire fonctionner les relais de volet roulant et les boutons activés."
             }
-          }
+          },
+          "parameters": [
+
+          ]
         },
         "SUPLA_LIMIT_SWITCH": {
           "name": "Krańcówki",
@@ -408,7 +449,10 @@
               "name": "Interrupteurs de fin de course",
               "desc": "Paramètres de l´appareil->Interrupteurs de fin de course. Permet le fonctionnement des interrupteurs de fin de course."
             }
-          }
+          },
+          "parameters": [
+
+          ]
         },
         "SUPLA_CONDITIONS": {
           "name": "Warunkowanie",
@@ -431,7 +475,10 @@
               "name": "Conditionnement",
               "desc": "Il permet de contrôler le relais en fonction de la valeur du capteur."
             }
-          }
+          },
+          "parameters": [
+
+          ]
         },
         "SUPLA_LED": {
           "name": "LED załączenia przekaźnika",
@@ -454,7 +501,10 @@
               "name": "LED pour allumer le relais",
               "desc": "Paramètres de l´appareil->LED. Il permet de changer le niveau du signal qui commande l´éclairage LED qui signale l´activation du relais."
             }
-          }
+          },
+          "parameters": [
+
+          ]
         },
         "SUPLA_PUSHOVER": {
           "name": "Pushover",
@@ -477,7 +527,10 @@
               "name": "Pushover",
               "desc": "Active la gestion des notifications pushover."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_DIRECT_LINKS": {
           "name": "Linki bezpośrednie",
@@ -500,7 +553,10 @@
               "name": "Liens directs",
               "desc": "Active la prise en charge des liens directs."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_RF_BRIDGE": {
           "name": "Bramka RF 315/433MHz",
@@ -523,7 +579,10 @@
               "name": "Liens directs",
               "desc": ""
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         }
       }
     },
@@ -558,7 +617,10 @@
               "name": "MCP23017",
               "desc": "Paramètres de l´appareil->I2C. Prend en charge l´extension de port MCP2317 x16."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_PCF8575": {
           "name": "PCF8575",
@@ -581,7 +643,10 @@
               "name": "PCF8575",
               "desc": "Paramètres de l´appareil->I2C. Prend en charge l´extension de port PCF8575 x16."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_PCF8574": {
           "name": "PCF8574/A",
@@ -604,7 +669,10 @@
               "name": "PCF8574/A",
               "desc": "Paramètres de l´appareil->I2C. Prend en charge l´extension de port PCF8574/A x8."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         }
       }
     },
@@ -639,7 +707,10 @@
               "name": "Capteur DS18B20",
               "desc": "Paramètres de l´appareil->1Wire. Il permet la prise en charge des capteurs DS18B20."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_DHT11": {
           "name": "Sensor DHT11",
@@ -662,7 +733,10 @@
               "name": "Capteur DHT11",
               "desc": "Paramètres de l´appareil->1Wire. Il permet le fonctionnement des capteurs DHT11."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_DHT22": {
           "name": "Sensor DHT22",
@@ -685,7 +759,10 @@
               "name": "Capteur DHT22",
               "desc": "Paramètres de l´appareil->1Wire. Il permet le fonctionnement des capteurs DHT22."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_SI7021_SONOFF": {
           "name": "Sensor Si7021 Sonoff",
@@ -708,7 +785,10 @@
               "name": "Capteur Sonoff Si7021",
               "desc": "Paramètres de l´appareil->1Wire. Vous permet de prendre en charge les capteurs Si7021 sur les cartes SonOff."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         }
       }
     },
@@ -743,7 +823,10 @@
               "name": "Capteur BME280",
               "desc": "Paramètres de l´appareil->I2C. Il permet la prise en charge des capteurs BME280."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_BMP280": {
           "name": "Sensor BMP280",
@@ -766,7 +849,10 @@
               "name": "Capteur BMP280",
               "desc": "Paramètres de l´appareil->I2C. Il permet la prise en charge des capteurs BMP280."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_SHT3x": {
           "name": "Sensor SHT3x",
@@ -789,7 +875,10 @@
               "name": "Capteur SHT3x",
               "desc": "Paramètres de l´appareil->I2C. Prend en charge les capteurs de la série SHT3x."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_SHT_AUTODETECT": {
           "name": "Sensor SHTxx",
@@ -812,7 +901,10 @@
               "name": "Capteur SHTxx",
               "desc": "Paramètres de l´appareil->I2C. Prend en charge les capteurs de la série SHTxx."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_SI7021": {
           "name": "Sensor Si7021",
@@ -835,7 +927,10 @@
               "name": "Capteur Si7021",
               "desc": "Paramètres de l´appareil->I2C. Prend en charge les capteurs Si7021."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_VL53L0X": {
           "name": "Sensor VL53L0X",
@@ -858,7 +953,10 @@
               "name": "Capteur VL53L0X",
               "desc": "Paramètres de l´appareil->I2C. Prend en charge les capteurs VL53L0X."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_HDC1080": {
           "name": "Sensor HDC1080",
@@ -881,7 +979,10 @@
               "name": "Capteur HDC1080",
               "desc": "Paramètres de l´appareil->I2C. Prend en charge les capteurs HDC1080."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_OLED": {
           "name": "Wyświetlacz OLED SSD1306, SH1106",
@@ -904,7 +1005,10 @@
               "name": "Écran OLED SSD1306, SH1106",
               "desc": "Paramètres de l´appareil->I2C. Il permet le fonctionnement d´un écran OLED SSD1306, SH1106."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_LCD_HD44780": {
           "name": "Wyświetlacz LCD HD44780",
@@ -927,7 +1031,10 @@
               "name": "Écran LCD HD44780",
               "desc": "Paramètres de l´appareil->I2C. Il permet le fonctionnement d´un écran LCD HD44780."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_BH1750_KPOP": {
           "name": "Sensor BH1750",
@@ -950,7 +1057,10 @@
               "name": "Capteur BH1750",
               "desc": "Paramètres de l´appareil->I2C. Capteur d'intensité lumineuse BH1750."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_MS5611": {
           "name": "Sensor MS5611",
@@ -973,7 +1083,13 @@
               "name": "Capteur MS5611",
               "desc": "Paramètres de l´appareil->I2C. Barometer MS5611."
             }
-          }
+          },
+          "Parameters": [
+            {
+              "Name": "Altitude",
+              "Type": "number"
+            }
+          ]
         },
         "SUPLA_MAX44009_KPOP": {
           "name": "Sensor MAX44009",
@@ -996,7 +1112,10 @@
               "name": "Capteur MAX44009",
               "desc": "Paramètres de l´appareil->I2C. Capteur d'intensité lumineuse MAX44009."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_AHTX0": {
           "name": "Sensor AHT XX",
@@ -1019,7 +1138,10 @@
               "name": "Capteur AHT XX",
               "desc": "Paramètres de l´appareil->I2C. Il permet la prise en charge des capteurs AHT XX."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_SPS30_KPOP": {
           "name": "Sensor SPS30",
@@ -1042,7 +1164,10 @@
               "name": "Capteur SPS30",
               "desc": "Paramètres de l´appareil->I2C. Il permet la prise en charge des capteurs SPS30."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         }
       }
     },
@@ -1077,7 +1202,10 @@
               "name": "Thermocouple MAX6675",
               "desc": "Paramètres de l´appareil->SPI. Prend en charge le thermocouple MAX6675."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_MAX31855": {
           "name": "Termopara MAX31855",
@@ -1100,7 +1228,10 @@
               "name": "Thermocouple MAX31855",
               "desc": "Paramètres de l´appareil->SPI. Prend en charge le thermocouple MAX31855."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         }
       }
     },
@@ -1135,7 +1266,10 @@
               "name": "Mesure analogique (Broche ADC)",
               "desc": "Paramètres de l'appareil->Analogique. Prend en charge la mesure de tension à l'entrée ADC Pin."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_NTC_10K": {
           "name": "Termistor NTC 10K",
@@ -1161,7 +1295,10 @@
               "name": "Thermistance NTC 10K",
               "desc": "Paramètres de l´appareil->Analogique. Prend en charge la thermistance NTC 10K."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_MPX_5XXX": {
           "name": "Czujnik ciśnienia MPX5xxx",
@@ -1187,7 +1324,10 @@
               "name": "capteur de pression MPX5xxx",
               "desc": "Paramètres de l'appareil->Analogique. Permet le fonctionnement du capteur de pression série MPX5xxx."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         }
       }
     },
@@ -1222,7 +1362,10 @@
               "name": "Compteur d´énergie HLW8012, BL0937",
               "desc": "Paramètres de l´appareil->Autre. Il permet le fonctionnement du compteur d´énergie HLW8012, BL0937."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_PZEM_V_3": {
           "name": "Licznik energii PZEM V3",
@@ -1245,7 +1388,10 @@
               "name": "Compteur d´énergie PZEM V3",
               "desc": "Paramètres de l´appareil->Autre. Il permet le fonctionnement du compteur d´énergie PZEM V3."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_CSE7766": {
           "name": "Licznik energii CSE7766",
@@ -1268,7 +1414,10 @@
               "name": "Compteur d´énergie CSE7766",
               "desc": "Paramètres de l´appareil->Autre. Il permet le fonctionnement du compteur d´énergie CSE7766."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_ADE7953": {
           "name": "Licznik energii ADE7953",
@@ -1291,7 +1440,10 @@
               "name": "Compteur d´énergie ADE7953",
               "desc": "Paramètres de l´appareil->I2C. Il permet le fonctionnement du compteur d´énergie ADE7953."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_MODBUS_SDM_ONE_PHASE": {
           "name": "Licznik energii SDM Modbus 1F",
@@ -1314,7 +1466,10 @@
               "name": "Compteur d´énergie SDM Modbus 1F",
               "desc": "Il permet le fonctionnement du compteur d´énergie SDM Modbus 1F."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_MODBUS_SDM": {
           "name": "Licznik energii SDM Modbus 3F",
@@ -1337,7 +1492,10 @@
               "name": "Compteur d´énergie SDM Modbus 3F",
               "desc": "Il permet le fonctionnement du compteur d´énergie SDM Modbus 3F."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         }
       }
     },
@@ -1373,7 +1531,10 @@
               "name": "RGBW, RGB, Gradateur",
               "desc": "Paramètres de l´appareil->Autre. Active la prise en charge des périphériques RGBW, RGB et des gradateurs."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_HC_SR04": {
           "name": "Czujnik odległości HC-SR04",
@@ -1396,7 +1557,10 @@
               "name": "Capteur de distance HC-SR04",
               "desc": "Paramètres de l´appareil->Autre. Permet le fonctionnement du capteur de distance HC-SR04."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_IMPULSE_COUNTER": {
           "name": "Licznik impulsów",
@@ -1419,7 +1583,10 @@
               "name": "Compteur d´impulsions",
               "desc": "Paramètres de l´appareil->Autre. Il permet le fonctionnement du compteur d´impulsions."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_DIRECT_LINKS_SENSOR_THERMOMETR": {
           "name": "Linki bezpośrednie - odczyt temperatury (stare) ",
@@ -1445,7 +1612,10 @@
               "name": "Liens directs - relevé de température",
               "desc": "Il vous permet de lire la température à l'aide de liens directs."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_DIRECT_LINKS_MULTI_SENSOR": {
           "name": "Linki bezpośrednie - odczyt wartości kanału",
@@ -1471,7 +1641,10 @@
               "name": "Liens directs - lecture de la valeur du canal",
               "desc": "Il vous permet de lire la température à l'aide de liens directs."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         }
       }
     },
@@ -1506,7 +1679,10 @@
               "name": "IKEA VINDRIKTNING",
               "desc": "Paramètres de l´appareil->Autre. Capteur de particules avec PM1006 à l'intérieur"
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         },
         "SUPLA_PMSX003_KPOP": {
           "name": "PMSx003",
@@ -1529,7 +1705,10 @@
               "name": "PMSx003",
               "desc": "Paramètres de l´appareil->Autre. Capteur de particules : PM1.0, PM2.5, PM10. Capteurs pris en charge PMS1003, PMS3003, PMS5003, PMS5003S, PMS5003T, PMS5003ST, PMS7003, PMSA003."
             }
-          }
+          },
+          "Parameters": [
+
+          ]
         }
       }
     },
@@ -1565,7 +1744,10 @@
             "name": "boneIO 32x10A",
             "desc": ""
           }
-        }
+        },
+        "Parameters": [
+
+        ]
       },
       "SUPLA_BONEIO_24x16A": {
         "name": "boneIO 24x16A",
@@ -1588,100 +1770,112 @@
             "name": "boneIO 24x16A",
             "desc": ""
           }
-        }
+        },
+        "Parameters": [
+
+        ]
       }
-    }
-  },
-  "DEBUG": {
-    "Order": 11,
-    "Translations": {
-      "pl": "Debug",
-      "en": "Debug",
-      "es": "Depurar",
-      "de": "Debuggen",
-      "fr": "Déboguer"
     },
-    "Flags": {
-      "SUPLA_EXCLUDE_LITTLEFS_CONFIG": {
-        "name": "Wyłączenie LittleFS",
-        "desc": "Wyklucza dodanie includa LITTLEFS, dzięki czemu kompilacja oszczędza prawie 100KB binarki.",
-        "alertOff": "Wyłączenie tej opcji zwiększy o 100KB binarkę, zmniejszając ilość dostępnego miejsca np. dla OTA.",
-        "defOn": true,
-        "translations": {
-          "en": {
-            "name": "Disabling LittleFS",
-            "desc": "It excludes the addition of the LITTLEFS includa, which saves the compilation almost 100KB.",
-            "alertOff": "Disabling this option will increase the compilation by almost 100KB, reducing the amount of space available, e.g. for OTA."
-          },
-          "es": {
-            "name": "Deshabilitar LittleFS",
-            "desc": "Excluye la adición de LITTLEFS includa, lo que ahorra la compilación casi 100 KB.",
-            "alertOff": "Deshabilitar esta opción aumentará la compilación en casi 100 KB, reduciendo la cantidad de espacio disponible, por ejemplo, para OTA."
-          },
-          "de": {
-            "name": "LittleFS deaktivieren",
-            "desc": "Es schließt das Hinzufügen der LITTLEFS-Includa aus, wodurch die Kompilierung fast 100 KB einspart.",
-            "alertOff": "Durch Deaktivieren dieser Option wird die Kompilierung um fast 100 KB erhöht, wodurch der verfügbare Speicherplatz, z. B. für OTA, verringert wird."
-          },
-          "fr": {
-            "name": "Désactivation de LittleFS",
-            "desc": "Il exclut l´ajout du LITTLEFS includa, qui permet d´économiser près de 100 Ko sur la compilation.",
-            "alertOff": "La désactivation de cette option augmentera la compilation de près de 100 Ko, réduisant ainsi la quantité d'espace disponible, par exemple pour l'OTA."
-          }
-        }
+    "DEBUG": {
+      "Order": 11,
+      "Translations": {
+        "pl": "Debug",
+        "en": "Debug",
+        "es": "Depurar",
+        "de": "Debuggen",
+        "fr": "Déboguer"
       },
-      "SUPLA_DISABLE_LOGS": {
-        "name": "Wyłączenie wszystkich logów",
-        "desc": "Opcja pozwala na wyłączenie wszystkich komunikatów logowania wyświetlanych na interfejsie UART. Wyłączenie tej funkcji skutkuje mniejszym rozmiarem binarki. (SUPLA_DISABLE_LOGS)",
-        "defOn": true,
-        "depRel": [
-          "SUPLA_COMM_DEBUG"
-        ],
-        "translations": {
-          "en": {
-            "name": "Disable All Logs",
-            "desc": "This option allows for the disabling of all logging messages displayed on the UART interface. Disabling this feature results in a smaller binary size. (SUPLA_DISABLE_LOGS)"
+      "Flags": {
+        "SUPLA_EXCLUDE_LITTLEFS_CONFIG": {
+          "name": "Wyłączenie LittleFS",
+          "desc": "Wyklucza dodanie includa LITTLEFS, dzięki czemu kompilacja oszczędza prawie 100KB binarki.",
+          "alertOff": "Wyłączenie tej opcji zwiększy o 100KB binarkę, zmniejszając ilość dostępnego miejsca np. dla OTA.",
+          "defOn": true,
+          "translations": {
+            "en": {
+              "name": "Disabling LittleFS",
+              "desc": "It excludes the addition of the LITTLEFS includa, which saves the compilation almost 100KB.",
+              "alertOff": "Disabling this option will increase the compilation by almost 100KB, reducing the amount of space available, e.g. for OTA."
+            },
+            "es": {
+              "name": "Deshabilitar LittleFS",
+              "desc": "Excluye la adición de LITTLEFS includa, lo que ahorra la compilación casi 100 KB.",
+              "alertOff": "Deshabilitar esta opción aumentará la compilación en casi 100 KB, reduciendo la cantidad de espacio disponible, por ejemplo, para OTA."
+            },
+            "de": {
+              "name": "LittleFS deaktivieren",
+              "desc": "Es schließt das Hinzufügen der LITTLEFS-Includa aus, wodurch die Kompilierung fast 100 KB einspart.",
+              "alertOff": "Durch Deaktivieren dieser Option wird die Kompilierung um fast 100 KB erhöht, wodurch der verfügbare Speicherplatz, z. B. für OTA, verringert wird."
+            },
+            "fr": {
+              "name": "Désactivation de LittleFS",
+              "desc": "Il exclut l´ajout du LITTLEFS includa, qui permet d´économiser près de 100 Ko sur la compilation.",
+              "alertOff": "La désactivation de cette option augmentera la compilation de près de 100 Ko, réduisant ainsi la quantité d'espace disponible, par exemple pour l'OTA."
+            }
           },
-          "es": {
-            "name": "Desactivar todos los registros",
-            "desc": "Esta opción permite desactivar todos los mensajes de registro que se muestran en la interfaz UART. Desactivar esta función resulta en un tamaño binario más pequeño. (SUPLA_DISABLE_LOGS)"
+          "Parameters": [
+
+          ]
+        },
+        "SUPLA_DISABLE_LOGS": {
+          "name": "Wyłączenie wszystkich logów",
+          "desc": "Opcja pozwala na wyłączenie wszystkich komunikatów logowania wyświetlanych na interfejsie UART. Wyłączenie tej funkcji skutkuje mniejszym rozmiarem binarki. (SUPLA_DISABLE_LOGS)",
+          "defOn": true,
+          "depRel": [
+            "SUPLA_COMM_DEBUG"
+          ],
+          "translations": {
+            "en": {
+              "name": "Disable All Logs",
+              "desc": "This option allows for the disabling of all logging messages displayed on the UART interface. Disabling this feature results in a smaller binary size. (SUPLA_DISABLE_LOGS)"
+            },
+            "es": {
+              "name": "Desactivar todos los registros",
+              "desc": "Esta opción permite desactivar todos los mensajes de registro que se muestran en la interfaz UART. Desactivar esta función resulta en un tamaño binario más pequeño. (SUPLA_DISABLE_LOGS)"
+            },
+            "de": {
+              "name": "Alle Protokolle deaktivieren",
+              "desc": "Diese Option ermöglicht das Deaktivieren aller Protokollnachrichten, die auf der UART-Schnittstelle angezeigt werden. Das Deaktivieren dieser Funktion führt zu einer kleineren Binärgröße. (SUPLA_DISABLE_LOGS)"
+            },
+            "fr": {
+              "name": "Désactiver tous les journaux",
+              "desc": "Cette option permet de désactiver tous les messages de journalisation affichés sur l'interface UART. La désactivation de cette fonction entraîne une taille binaire plus petite. (SUPLA_DISABLE_LOGS)"
+            }
           },
-          "de": {
-            "name": "Alle Protokolle deaktivieren",
-            "desc": "Diese Option ermöglicht das Deaktivieren aller Protokollnachrichten, die auf der UART-Schnittstelle angezeigt werden. Das Deaktivieren dieser Funktion führt zu einer kleineren Binärgröße. (SUPLA_DISABLE_LOGS)"
+          "Parameters": [
+
+          ]
+        },
+        "SUPLA_DEBUG_MODE": {
+          "name": "DEBUG",
+          "desc": "Rejestruje dodatkowe informacje diagnostyczne związane z komunikacją (SUPLA_DEBUG_MODE).",
+          "defOn": false,
+          "depRel": [
+            "SUPLA_DISABLE_LOGS"
+          ],
+          "translations": {
+            "en": {
+              "name": "DEBUG",
+              "desc": "Logs additional diagnostic information related to communication (SUPLA_DEBUG_MODE)."
+            },
+            "es": {
+              "name": "DEBUG",
+              "desc": "Registra información diagnóstica adicional relacionada con la comunicación (SUPLA_DEBUG_MODE)."
+            },
+            "de": {
+              "name": "DEBUG",
+              "desc": "Zeichnet zusätzliche diagnostische Informationen zur Kommunikation auf (SUPLA_DEBUG_MODE)."
+            },
+            "fr": {
+              "name": "DEBUG",
+              "desc": "Enregistre des informations de diagnostic supplémentaires liées à la communication (SUPLA_DEBUG_MODE)."
+            }
           },
-          "fr": {
-            "name": "Désactiver tous les journaux",
-            "desc": "Cette option permet de désactiver tous les messages de journalisation affichés sur l'interface UART. La désactivation de cette fonction entraîne une taille binaire plus petite. (SUPLA_DISABLE_LOGS)"
-          }
-        }
-      },
-      "SUPLA_DEBUG_MODE": {
-        "name": "DEBUG",
-        "desc": "Rejestruje dodatkowe informacje diagnostyczne związane z komunikacją (SUPLA_DEBUG_MODE).",
-        "defOn": false,
-        "depRel": [
-          "SUPLA_DISABLE_LOGS"
-        ],
-        "translations": {
-          "en": {
-            "name": "DEBUG",
-            "desc": "Logs additional diagnostic information related to communication (SUPLA_DEBUG_MODE)."
-          },
-          "es": {
-            "name": "DEBUG",
-            "desc": "Registra información diagnóstica adicional relacionada con la comunicación (SUPLA_DEBUG_MODE)."
-          },
-          "de": {
-            "name": "DEBUG",
-            "desc": "Zeichnet zusätzliche diagnostische Informationen zur Kommunikation auf (SUPLA_DEBUG_MODE)."
-          },
-          "fr": {
-            "name": "DEBUG",
-            "desc": "Enregistre des informations de diagnostic supplémentaires liées à la communication (SUPLA_DEBUG_MODE)."
-          }
+          "Parameters": [
+
+          ]
         }
       }
     }
   }
-} 
+}

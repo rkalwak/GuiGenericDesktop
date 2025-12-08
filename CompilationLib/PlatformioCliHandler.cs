@@ -21,11 +21,10 @@ public class PlatformioCliHandler : ICompileHandler
     public async Task<CompileResponse> Handle(CompileRequest request, CancellationToken cancellationToken)
     {
         var compileResponse = new CompileResponse();
-        string buildFlagsString = FormatBuildFlags(request.BuildFlags);
 
         // PlatformIO uses 'run' command for compilation
         CommentUnlistedFlagsBetweenMarkers($"{request.ProjectDirectory}/platformio.ini", request.BuildFlags);
-        string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.Platform} {(request.ShouldDeploy ? ("--target upload--upload-port " + request.PortCom): " ")}--verbose";
+        string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.Platform} {(request.ShouldDeploy ? ("--target upload --upload-port " + request.PortCom) : "")}--verbose";
 
         var processStartInfo = new ProcessStartInfo
         {
@@ -38,13 +37,6 @@ public class PlatformioCliHandler : ICompileHandler
             CreateNoWindow = true,
         };
         Console.WriteLine($"Compiling: {processStartInfo.FileName} {arguments}");
-
-        /*
-        if (Directory.Exists($"{request.ProjectDirectory}/.pio/build"))
-        {
-            Directory.Delete($"{request.ProjectDirectory}/.pio/build", recursive: true);
-        }
-        */
 
         using (var process = new Process { StartInfo = processStartInfo })
         {
@@ -66,11 +58,11 @@ public class PlatformioCliHandler : ICompileHandler
             process.WaitForExit();
             stopwatch.Stop();
 
-            compileResponse.IsSuccessful = process.ExitCode==0;
+            compileResponse.IsSuccessful = process.ExitCode == 0;
             compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
             compileResponse.OutputDirectory = $"{request.ProjectDirectory}/.pio/build/{request.Platform}";
             compileResponse.OutputFile = $"firmware.bin";
-            compileResponse.Logs ="Errors:\r\n"+ errors;
+            compileResponse.Logs = "Errors:\r\n" + errors;
         }
 
         return compileResponse;
@@ -83,11 +75,12 @@ public class PlatformioCliHandler : ICompileHandler
     /// </summary>
     /// <param name="iniPath">Path to platformio.ini file.</param>
     /// <param name="allowedFlags">List of allowed build flag strings (e.g., "-D SUPLA_AHTX0").</param>
-    public void CommentUnlistedFlagsBetweenMarkers(string iniPath, List<string> allowedFlags)
+    public void CommentUnlistedFlagsBetweenMarkers(string iniPath, List<BuildFlagItem> allowedFlags)
     {
         var lines = File.ReadAllLines(iniPath).ToList();
         var startIndex = lines.FindIndex(line => line.Trim().Equals(";flagsstart", StringComparison.OrdinalIgnoreCase));
         var endIndex = lines.FindIndex(line => line.Trim().Equals(";flagsend", StringComparison.OrdinalIgnoreCase));
+
         for (int i = startIndex + 1; i < endIndex; i++)
         {
             string lineContent = lines[i];
@@ -97,7 +90,7 @@ public class PlatformioCliHandler : ICompileHandler
             if (!string.IsNullOrWhiteSpace(lineContent) && isFlagEnabled)
             {
                 // lineContent has format -D but collection doesn't
-                if (!allowedFlags.Any(flag => lineContentWithoutComment.Contains(flag)) && !_excludedBuildFlagsFromManipulation.Any(x=> lineContentWithoutComment.Contains(x)))
+                if (!allowedFlags.Any(flag => !string.IsNullOrEmpty(flag?.Key) && lineContentWithoutComment.Contains(flag.Key)) && !_excludedBuildFlagsFromManipulation.Any(x => lineContentWithoutComment.Contains(x)))
                 {
                     //comment out the line - remove one space
                     lines[i] = ";" + lines[i].Substring(1);
@@ -106,10 +99,49 @@ public class PlatformioCliHandler : ICompileHandler
             // flag is commented out, check if it should be enabled
             else
             {
-                if (allowedFlags.Any(flag => lineContentWithoutComment.Contains(flag)))
+                if (allowedFlags.Any(flag => !string.IsNullOrEmpty(flag?.Key) && lineContentWithoutComment.Contains(flag.Key)))
                 {
-                    // Uncomment the line
-                    lines[i] = lines[i].Replace(';',' ');
+                    // Uncomment the line: replace first ';' with ' ' to preserve spacing
+                    lines[i] = lines[i].Replace(';', ' ');
+                }
+            }
+        }
+        foreach (var flag in allowedFlags)
+        {
+            if (flag.Parameters is null || flag.Parameters.Count == 0)
+            {
+                continue;
+            }
+
+            foreach (var p in flag.Parameters)
+            {
+                if (p == null)
+                    continue;
+
+                var name = (p.Name ?? string.Empty).Trim();
+                if (string.IsNullOrEmpty(name))
+                    continue;
+
+                // Convert value to string safely
+                var raw = (p.Value ?? string.Empty).Trim();
+
+                // Format based on declared type: numbers as-is, strings quoted
+                string value;
+                if (string.Equals(p.Type, "number", StringComparison.OrdinalIgnoreCase))
+                    value = string.IsNullOrEmpty(raw) ? "0" : raw;
+                else // treat everything else as string
+                    value = $"'\"{raw}\"'";
+
+                // define is FLAGNAME_ParamName=Value
+                var define = $" -D {flag.Key}_{p.Name}={value}";
+                var indexOfNewParameter=lines.FindIndex(line => line.Contains($"{flag.Key}_{p.Name}"));
+                if (indexOfNewParameter!= -1)
+                {
+                    lines[indexOfNewParameter]= define;
+                }
+                else
+                {
+                    lines.Insert(endIndex, define);
                 }
             }
         }
@@ -117,30 +149,17 @@ public class PlatformioCliHandler : ICompileHandler
         File.WriteAllText(iniPath, string.Join("\n", lines) + "\n");
     }
 
-
-    private static string FormatBuildFlags(IEnumerable<string> flags)
-    {
-        if (flags == null)
-            return string.Empty;
-
-        var parts = flags
-            .Where(f => !string.IsNullOrWhiteSpace(f))
-            .Select(f => $"-D {f.Trim()}");
-
-        return string.Join(" ", parts);
-    }
-
     private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
     {
         Console.WriteLine(e.Data); // Log the output to the console
         Debug.WriteLine(e.Data);
-        errors += e.Data;
+        errors += e.Data ?? string.Empty;
     }
 
     private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
     {
         Console.WriteLine(e.Data); // Log the output to the console
         Debug.WriteLine(e.Data);
-        logs += e.Data;
+        logs += e.Data ?? string.Empty;
     }
 }

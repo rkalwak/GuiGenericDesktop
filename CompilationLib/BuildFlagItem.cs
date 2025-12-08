@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using Newtonsoft.Json;
 
-namespace GuiGenericBuilderDesktop
+namespace CompilationLib
 {
     public class BuildFlagItem : INotifyPropertyChanged
     {
@@ -43,7 +43,9 @@ namespace GuiGenericBuilderDesktop
         public List<string>? DependenciesToDisable { get; set; }
         public int SectionOrder { get; internal set; }
 
+        [JsonProperty("parameters")]
+        public List<Parameter> Parameters { get; set; } = new List<Parameter>();
+
         public event PropertyChangedEventHandler? PropertyChanged;
     }
-
 }

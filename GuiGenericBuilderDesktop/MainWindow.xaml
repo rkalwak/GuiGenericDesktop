@@ -41,6 +41,8 @@
                         <DataGridTextColumn Header="Flag Name" Binding="{Binding FlagName}" Width="50" IsReadOnly="True" />
                         <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding IsEnabled}" Width="50" />
                         <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" IsReadOnly="True" />
+
+                        <!-- Parameters column will be added dynamically in code-behind -->
                     </DataGrid.Columns>
                 </DataGrid>
             </BlockUIContainer>

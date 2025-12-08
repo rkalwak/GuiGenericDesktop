@@ -31,9 +31,41 @@ namespace GuiGenericBuilderDesktop
             AllBuildFlags = new List<BuildFlagItem>();
 
             InitializeBuildFlags();
+
+            // Add the Parameters column dynamically so it's visible in the grid
+            AddParametersColumnDynamically();
+
             FlagsDataGrid.ItemsSource = AllBuildFlags;
             _repositoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo", "gg");
-            _repositoryPath = @"c:\repozytoria\platformio\GUI-Generic\";
+            _repositoryPath = @"c:\repozytoria\platformio\GUI-Generic";
+        }
+
+        private void AddParametersColumnDynamically()
+        {
+            // Prevent adding twice
+            if (FlagsDataGrid.Columns.Any(c => string.Equals(c.Header?.ToString(), "Parameters", StringComparison.OrdinalIgnoreCase)))
+                return;
+
+            var templateCol = new DataGridTemplateColumn { Header = "Parameters", Width = new DataGridLength(120) };
+
+            // Create DataTemplate in code
+            var buttonFactory = new FrameworkElementFactory(typeof(Button));
+            buttonFactory.SetValue(Button.ContentProperty, "Params...");
+            buttonFactory.SetValue(Button.PaddingProperty, new Thickness(6, 2, 6, 2));
+            buttonFactory.SetValue(Button.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+
+            // Bind Tag to entire row (the BuildFlagItem)
+            var tagBinding = new Binding(); // binds to DataContext (row item)
+            buttonFactory.SetBinding(Button.TagProperty, tagBinding);
+            // Register Click handler
+            buttonFactory.AddHandler(Button.ClickEvent, new RoutedEventHandler(EditParameters_Click));
+
+            var dataTemplate = new DataTemplate { VisualTree = buttonFactory };
+            templateCol.CellTemplate = dataTemplate;
+
+            // Insert before Description column if possible, otherwise add to end
+            int insertIndex = Math.Max(0, FlagsDataGrid.Columns.Count - 1);
+            FlagsDataGrid.Columns.Insert(insertIndex, templateCol);
         }
 
         private void InitializeBuildFlags()
@@ -52,7 +84,7 @@ namespace GuiGenericBuilderDesktop
 
                 // Use Newtonsoft.Json for deserialization
                 var deserialized = JsonConvert.DeserializeObject<BuilderConfig>(jsonContent);
-                var button = deserialized.Sections["CONTROL"].Flags["SUPLA_BUTTON"];
+
                 if (deserialized?.Sections == null)
                 {
                     MessageBox.Show($"builder.json does not contain valid Sections", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -67,7 +99,8 @@ namespace GuiGenericBuilderDesktop
                     {
                         flagItem.Value.Section = sectionItem.Key;
                         flagItem.Value.Key = flagItem.Key;
-                        flagItem.Value.SectionOrder = sectionItem.Value.Order;
+                        // SectionOrder has an internal setter in BuildFlagItem; cannot assign from this assembly.
+                        // Preserve existing SectionOrder value from deserialization instead of assigning here.
                         AllBuildFlags.Add(flagItem.Value);
                     }
                 }
@@ -310,6 +343,7 @@ namespace GuiGenericBuilderDesktop
                 table.Columns.Add(new TableColumn { Width = new GridLength(300) });  // Key
                 table.Columns.Add(new TableColumn { Width = new GridLength(300) });  // Name
                 table.Columns.Add(new TableColumn { Width = new GridLength(800) }); // Description
+                table.Columns.Add(new TableColumn { Width = new GridLength(120) }); // Parameters (button)
 
                 var trg = new TableRowGroup();
                 table.RowGroups.Add(trg);
@@ -320,6 +354,7 @@ namespace GuiGenericBuilderDesktop
                 headerRow.Cells.Add(new TableCell(new Paragraph(new Run("Key")) { FontWeight = FontWeights.SemiBold }));
                 headerRow.Cells.Add(new TableCell(new Paragraph(new Run("Name")) { FontWeight = FontWeights.SemiBold }));
                 headerRow.Cells.Add(new TableCell(new Paragraph(new Run("Description")) { FontWeight = FontWeights.SemiBold }));
+                headerRow.Cells.Add(new TableCell(new Paragraph(new Run("Parameters")) { FontWeight = FontWeights.SemiBold }));
                 trg.Rows.Add(headerRow);
 
                 foreach (var item in group.OrderBy(i => i.SectionOrder).ThenBy(x => x.Key))
@@ -359,6 +394,26 @@ namespace GuiGenericBuilderDesktop
                     // Description
                     row.Cells.Add(new TableCell(new Paragraph(new Run(item.Description ?? string.Empty))));
 
+                    // Parameters button in the row
+                    var paramsBtn = new Button { Content = "Params...", Padding = new Thickness(6, 2, 6, 2), Margin = new Thickness(2) };
+                    paramsBtn.Tag = item;
+                    paramsBtn.Click += (s, e) =>
+                    {
+                        if ((s as Button)?.Tag is BuildFlagItem bf)
+                        {
+                            if (bf.Parameters == null || !bf.Parameters.Any())
+                            {
+                                // Do not display editor when there are no parameters
+                                return;
+                            }
+
+                            var editor = new ParametersEditorWindow(bf.Parameters, bf.FlagName ?? bf.Key);
+                            editor.ShowDialog();
+                        }
+                    };
+                    var paramsCell = new TableCell(new BlockUIContainer(paramsBtn));
+                    row.Cells.Add(paramsCell);
+
                     trg.Rows.Add(row);
                 }
 
@@ -370,6 +425,29 @@ namespace GuiGenericBuilderDesktop
 
 
             docView.Document = doc;
+        }
+
+        private void EditSelectedParameters_Click(object sender, RoutedEventArgs e)
+        {
+            if (FlagsDataGrid.SelectedItem is BuildFlagItem item)
+            {
+                if (item.Parameters == null || !item.Parameters.Any())
+                {
+                    MessageBox.Show("Selected flag has no parameters.", "No Parameters", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var editor = new ParametersEditorWindow(item.Parameters, item.FlagName ?? item.Key);
+                var res = editor.ShowDialog();
+                if (res == true)
+                {
+                    // parameters edited in-place
+                }
+            }
+            else
+            {
+                MessageBox.Show("No flag selected. Select a flag in the grid and try again.", "No Selection", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
         private void UpdateGG_Click(object sender, RoutedEventArgs e)
@@ -407,14 +485,12 @@ namespace GuiGenericBuilderDesktop
                 checkBox.IsChecked = null; // Indeterminate
         }
 
+       
+
         private async void CompileSelected_Click(object sender, RoutedEventArgs e)
         {
 
-            var selectedFlags = AllBuildFlags
-                .Where(f => f.IsEnabled)
-                .Select(f => f.Key)
-                .Where(k => !string.IsNullOrEmpty(k))
-                .ToList();
+            List<BuildFlagItem> selectedFlags = AllBuildFlags.Where(f => f.IsEnabled).ToList();
 
             if (!selectedFlags.Any())
             {
@@ -531,6 +607,25 @@ namespace GuiGenericBuilderDesktop
                     });
                 }
             });
+        }
+
+        private void EditParameters_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.Tag is BuildFlagItem item)
+            {
+                if (item.Parameters == null || !item.Parameters.Any())
+                {
+                    MessageBox.Show("This flag has no parameters.", "No Parameters", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                var editor = new ParametersEditorWindow(item.Parameters, item.FlagName ?? item.Key);
+                var res = editor.ShowDialog();
+                if (res == true)
+                {
+                    // Parameters modified in-place; nothing else required.
+                }
+            }
         }
     }
 }
