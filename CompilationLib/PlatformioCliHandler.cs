@@ -1,5 +1,6 @@
 using CompilationLib;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 public class PlatformioCliHandler : ICompileHandler
 {
@@ -13,6 +14,10 @@ public class PlatformioCliHandler : ICompileHandler
                     "OPTIONS_HASH",
                     "BUILD_VERSION",
                 };
+
+    public event EventHandler<string>? OutputLine;
+    public event EventHandler<string>? ErrorLine;
+
     public PlatformioCliHandler()
     {
         _platformioCliPath = $"{Environment.ExpandEnvironmentVariables("%USERPROFILE%")}/.platformio/penv/Scripts/platformio.exe";
@@ -24,7 +29,7 @@ public class PlatformioCliHandler : ICompileHandler
 
         // PlatformIO uses 'run' command for compilation
         CommentUnlistedFlagsBetweenMarkers($"{request.ProjectDirectory}/platformio.ini", request.BuildFlags);
-        string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.Platform} {(request.ShouldDeploy ? ("--target upload --upload-port " + request.PortCom) : "")}--verbose";
+        string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.Platform} {(request.ShouldDeploy ? ("--target upload --upload-port " + request.PortCom+ " ") : "")}--verbose";
 
         var processStartInfo = new ProcessStartInfo
         {
@@ -55,7 +60,7 @@ public class PlatformioCliHandler : ICompileHandler
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
-            process.WaitForExit();
+            await process.WaitForExitAsync();
             stopwatch.Stop();
 
             compileResponse.IsSuccessful = process.ExitCode == 0;
@@ -134,10 +139,10 @@ public class PlatformioCliHandler : ICompileHandler
 
                 // define is FLAGNAME_ParamName=Value
                 var define = $" -D {flag.Key}_{p.Name}={value}";
-                var indexOfNewParameter=lines.FindIndex(line => line.Contains($"{flag.Key}_{p.Name}"));
-                if (indexOfNewParameter!= -1)
+                var indexOfNewParameter = lines.FindIndex(line => line.Contains($"{flag.Key}_{p.Name}"));
+                if (indexOfNewParameter != -1)
                 {
-                    lines[indexOfNewParameter]= define;
+                    lines[indexOfNewParameter] = define;
                 }
                 else
                 {
@@ -153,13 +158,17 @@ public class PlatformioCliHandler : ICompileHandler
     {
         Console.WriteLine(e.Data); // Log the output to the console
         Debug.WriteLine(e.Data);
-        errors += e.Data ?? string.Empty;
+        var line = e.Data ?? string.Empty;
+        errors += line + "\r\n";
+        ErrorLine?.Invoke(this, line);
     }
 
     private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
     {
         Console.WriteLine(e.Data); // Log the output to the console
         Debug.WriteLine(e.Data);
-        logs += e.Data ?? string.Empty;
+        var line = e.Data ?? string.Empty;
+        logs += line+ "\r\n";
+        OutputLine?.Invoke(this, line);
     }
 }

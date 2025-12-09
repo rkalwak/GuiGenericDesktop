@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GuiGenericBuilderDesktop"
         mc:Ignorable="d"
-        Title="Build Flags Generator" Height="900" Width="1600">
+        Title="Build Flags Generator" WindowState="Maximized" Height="1200" Width="1700" Background="#00d151">
 
     <!-- Replaced Grid with FlowDocumentScrollViewer containing a FlowDocument. -->
     <FlowDocumentScrollViewer x:Name="docView" Margin="0" VerticalScrollBarVisibility="Auto" IsToolBarVisible="False">

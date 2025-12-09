@@ -30,20 +30,13 @@
             </DataGrid.Resources>
 
             <DataGrid.Columns>
-                <!-- Name column: editable ComboBox providing suggestions -->
-                <DataGridTemplateColumn Header="Name" Width="2*">
+                <!-- Name column: read-only display -->
+                <DataGridTemplateColumn Header="Name" Width="2*" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
-                    <DataGridTemplateColumn.CellEditingTemplate>
-                        <DataTemplate>
-                            <ComboBox IsEditable="True" IsTextSearchEnabled="True" 
-                                      ItemsSource="{DynamicResource NameSuggestions}"
-                                      Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellEditingTemplate>
                 </DataGridTemplateColumn>
 
                 <!-- Value column: editing control type depends on Type -->

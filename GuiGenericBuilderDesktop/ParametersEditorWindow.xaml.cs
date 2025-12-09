@@ -1,6 +1,4 @@
 using CompilationLib;
-using System.Collections.Generic;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -22,22 +20,6 @@ namespace GuiGenericBuilderDesktop
 
             ParamsGrid.ItemsSource = parameters;
             _parameters = parameters;
-
-            // simple list of types
-            this.Tag = new List<string> { "string", "number", "boolean" };
-
-            // Provide suggestions for parameter names as a resource
-            var nameSuggestions = new List<string>
-            {
-                "Altitude",
-                "Interval",
-                "Threshold",
-                "Enabled",
-                "Pin",
-                "Address",
-                "BaudRate"
-            };
-            this.Resources["NameSuggestions"] = nameSuggestions;
 
             // Safely retrieve templates from the DataGrid scope (avoid exceptions if missing)
             var textTemplate = ParamsGrid.TryFindResource("TextTemplate") as DataTemplate;
@@ -75,22 +57,9 @@ namespace GuiGenericBuilderDesktop
 
         private bool ValidateParameters()
         {
-            // Check for empty names
-            var empty = _parameters.FirstOrDefault(p => string.IsNullOrWhiteSpace(p.Name));
-            if (empty != null)
-            {
-                MessageBox.Show("Parameter name cannot be empty.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return false;
-            }
-
-            // Check for duplicates (case-insensitive)
-            var dup = _parameters.GroupBy(p => p.Name?.Trim().ToLowerInvariant()).FirstOrDefault(g => g.Count() > 1 && !string.IsNullOrEmpty(g.Key));
-            if (dup != null)
-            {
-                MessageBox.Show($"Duplicate parameter name found: '{dup.Key}'. Each parameter name must be unique.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return false;
-            }
-
+            // Parameter names are now fixed, no need to validate them
+            // Could add value validation here if needed in the future
+            
             return true;
         }
 

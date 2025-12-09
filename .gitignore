@@ -3,3 +3,6 @@
 .vs/GuiGenericV2/CopilotIndices
 .vs/GuiGenericBuilderDesktop/copilot-chat
 .vs
+GuiGenericBuilderDesktop/GuiGenericBuilder.pfx
+GuiGenericBuilderDesktop/GuiGenericBuilder.snk
+GuiGenericBuilderDesktop/sign.ps1
