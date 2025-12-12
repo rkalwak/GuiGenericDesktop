@@ -1,6 +1,8 @@
 using CompilationLib;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using System.Security.Cryptography;
+using System.Text;
 
 public class PlatformioCliHandler : ICompileHandler
 {
@@ -62,7 +64,7 @@ public class PlatformioCliHandler : ICompileHandler
 
             await process.WaitForExitAsync();
             stopwatch.Stop();
-
+            compileResponse.HashOfOptions = BuildConfigurationHasher.CalculateHash(request.BuildFlags);
             compileResponse.IsSuccessful = process.ExitCode == 0;
             compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
             compileResponse.OutputDirectory = $"{request.ProjectDirectory}/.pio/build/{request.Platform}";

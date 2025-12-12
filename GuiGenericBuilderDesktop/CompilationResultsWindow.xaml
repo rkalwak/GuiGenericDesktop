@@ -1,0 +1,120 @@
+<Window x:Class="GuiGenericBuilderDesktop.CompilationResultsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Compilation Results" 
+        Height="600" 
+        Width="900"
+        WindowStartupLocation="CenterOwner"
+        Background="#F5F5F5">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock x:Name="TitleText"
+                   Grid.Row="0" 
+                   Text="Compilation Results" 
+                   FontSize="16" 
+                   FontWeight="Bold" 
+                   Margin="0,0,0,12"/>
+
+        <!-- Hash Section (for successful compilation) -->
+        <StackPanel x:Name="HashSection" 
+                    Grid.Row="1" 
+                    Visibility="Collapsed"
+                    Margin="0,0,0,12">
+            <TextBlock Text="Build Configuration Hash:" 
+                       FontWeight="SemiBold" 
+                       Margin="0,0,0,4"/>
+            <Border BorderBrush="#CCCCCC" 
+                    BorderThickness="1" 
+                    CornerRadius="4"
+                    Background="White"
+                    Padding="8">
+                <TextBox x:Name="HashTextBox"
+                         IsReadOnly="True"
+                         FontFamily="Consolas"
+                         FontSize="12"
+                         Background="White"
+                         BorderThickness="0"
+                         TextWrapping="Wrap"/>
+            </Border>
+            <TextBlock Text="This SHA256 hash uniquely identifies your build configuration." 
+                       FontSize="10"
+                       Foreground="#666666"
+                       Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <!-- Log Display -->
+        <Border x:Name="LogSection"
+                Grid.Row="2" 
+                BorderBrush="#CCCCCC" 
+                BorderThickness="1" 
+                CornerRadius="4"
+                Background="White">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                
+                <TextBlock x:Name="LogSectionTitle"
+                           Grid.Row="0"
+                           Text="Error Logs:"
+                           FontWeight="SemiBold"
+                           Margin="8,8,8,4"
+                           Visibility="Collapsed"/>
+                
+                <TextBox x:Name="LogTextBox"
+                         Grid.Row="1"
+                         IsReadOnly="True"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto"
+                         FontFamily="Consolas"
+                         FontSize="11"
+                         Padding="8"
+                         Background="White"
+                         AcceptsReturn="True"/>
+            </Grid>
+        </Border>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="3" 
+                    Orientation="Horizontal" 
+                    HorizontalAlignment="Right" 
+                    Margin="0,12,0,0">
+            <Button x:Name="CopyHashButton"
+                    Content="Copy Hash"
+                    Width="100"
+                    Height="32"
+                    Margin="0,0,8,0"
+                    Visibility="Collapsed"
+                    Click="CopyHashButton_Click"/>
+            <Button x:Name="CopyLogsButton"
+                    Content="Copy Logs"
+                    Width="100"
+                    Height="32"
+                    Margin="0,0,8,0"
+                    Visibility="Collapsed"
+                    Click="CopyLogsButton_Click"/>
+            <Button x:Name="SaveButton"
+                    Content="Save to File..."
+                    Width="120"
+                    Height="32"
+                    Margin="0,0,8,0"
+                    Visibility="Collapsed"
+                    Click="SaveButton_Click"/>
+            <Button x:Name="CloseButton"
+                    Content="Close"
+                    Width="80"
+                    Height="32"
+                    IsDefault="True"
+                    Click="CloseButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

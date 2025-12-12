@@ -18,9 +18,7 @@ namespace GuiGenericBuilderDesktop
         DeviceDetector _deviceDetector = new(new EsptoolWrapper());
         string _repositoryPath = string.Empty;
         string _port = string.Empty;
-
-        // UI fields inside FlowDocument to show detected device
-        private TextBlock? deviceModelText;
+        BuildConfigurationManager _configManager;
         private ComboBox? boardSelector;
         private ComboBox? comPortSelector;
         private ComboBox? flashSizeSelector;
@@ -32,6 +30,10 @@ namespace GuiGenericBuilderDesktop
         {
             InitializeComponent();
             AllBuildFlags = new List<BuildFlagItem>();
+
+            // Initialize configuration manager
+            var configDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "configurations");
+            _configManager = new BuildConfigurationManager(configDir);
 
             InitializeBuildFlags();
 
@@ -128,16 +130,35 @@ namespace GuiGenericBuilderDesktop
             // Add Device detection panel
             // Device detection panel
             var devicePanel = new DockPanel { LastChildFill = false, Margin = new Thickness(12, 8, 12, 6) };
-            var modelLabel = new TextBlock(new Run("Model:")) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
-            deviceModelText = new TextBlock(new Run("Unknown")) { Margin = new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
 
             // Board selector ComboBox
             var boardLabel = new TextBlock(new Run("Board:")) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
             boardSelector = new ComboBox { Width = 220, Margin = new Thickness(12, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
-            boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32 (default)", Tag = "GUI_Generic_ESP32", IsSelected = true });
+            boardSelector.Items.Add(new ComboBoxItem { Content = "None", Tag = "None", IsSelected = true });
+            boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32 (default)", Tag = "GUI_Generic_ESP32" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C3", Tag = "GUI_Generic_ESP32C3" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP8266", Tag = "GUI_Generic_ESP8266" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C6", Tag = "GUI_Generic_ESP32C6" });
+            var loadConfigButton = new Button
+            {
+                Content = "Load Config...",
+                Width = 120,
+                Height = 28,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(4)
+            };
+            loadConfigButton.Click += LoadConfig_Click;
+
+            var saveConfigButton = new Button
+            {
+                Content = "Save Config...",
+                Width = 120,
+                Height = 28,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(4)
+            };
+            saveConfigButton.Click += SaveConfig_Click;
+           
 
             var updateGGButton = new Button
             {
@@ -149,6 +170,9 @@ namespace GuiGenericBuilderDesktop
             };
             updateGGButton.Click += UpdateGG_Click;
          
+
+            // Load Configuration button
+           
 
 
             var checkBtn = new Button { Content = "2. Check Device", Width = 120, Height = 28, Margin = new Thickness(8, 0, 0, 0) };
@@ -206,10 +230,9 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(comPortSelector);
             devicePanel.Children.Add(boardLabel);
             devicePanel.Children.Add(boardSelector);
-            devicePanel.Children.Add(modelLabel);
-            devicePanel.Children.Add(deviceModelText);
             DockPanel.SetDock(checkBtn, Dock.Right);
             DockPanel.SetDock(compileButton, Dock.Right);
+            DockPanel.SetDock(loadConfigButton, Dock.Right);
             // Flash size selector
             var flashSizeLabel = new TextBlock(new Run("Flash:")) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
             flashSizeSelector = new ComboBox { Width = 120, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
@@ -224,7 +247,12 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(compileCountdownText);
             devicePanel.Children.Add(compileProgressBar);
             devicePanel.Children.Add(compileButton);
+            devicePanel.Children.Add(loadConfigButton);
+            devicePanel.Children.Add(saveConfigButton);
             devicePanel.Children.Add(checkBtn);
+            // right-align the load config button
+           
+          
             // right-align the button inside the DockPanel
             DockPanel.SetDock(updateGGButton, Dock.Right);
             devicePanel.Children.Add(updateGGButton);
@@ -442,19 +470,32 @@ namespace GuiGenericBuilderDesktop
         {
 
             List<BuildFlagItem> selectedFlags = AllBuildFlags.Where(f => f.IsEnabled).ToList();
-
             if (!selectedFlags.Any())
             {
                 MessageBox.Show("No flags selected. Enable some flags before compiling.", "No Flags", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
+            // Validate COM port selection
+            var selectedComPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+            if (string.IsNullOrEmpty(selectedComPort) || selectedComPort.Equals("None", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show(
+                    "Please select a COM port before compiling.\n\n" +
+                    "The firmware needs to be uploaded to a device connected via COM port.\n" +
+                    "Use '2. Check Device' to auto-detect, or manually select a COM port.",
+                    "COM Port Required",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+            
             // Show and initialize progress UI
             if (compileProgressBar != null && compileCountdownText != null)
             {
-                compileProgressBar.Value = 60;
+                compileProgressBar.Value = 90;
                 compileProgressBar.Visibility = Visibility.Visible;
-                compileCountdownText.Text = "01:00";
+                compileCountdownText.Text = "01:30";
                 compileCountdownText.Visibility = Visibility.Visible;
             }
             
@@ -466,7 +507,7 @@ namespace GuiGenericBuilderDesktop
             // Start 60-second countdown task
             var countdownTask = Task.Run(async () =>
             {
-                int remaining = 60;
+                int remaining = 90;
                 try
                 {
                     while (remaining > 0 && !countdownToken.IsCancellationRequested)
@@ -515,21 +556,43 @@ namespace GuiGenericBuilderDesktop
                 if (compileProgressBar != null && compileCountdownText != null)
                 {
                     compileCountdownText.Visibility = Visibility.Collapsed;
+                    compileProgressBar.Visibility = Visibility.Collapsed;
                 }
 
                 if (result.IsSuccessful)
                 {
-                    MessageBox.Show($"Compilation finished. {(ggRequest.ShouldDeploy?" Software deployed.":"")})", "Compilation Finished", MessageBoxButton.OK, MessageBoxImage.Information);
+                    // Save configuration with hash
+                    try
+                    {
+                        var platform = (boardSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+                        var comPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+                        _configManager.SaveConfiguration(
+                            result.HashOfOptions ?? string.Empty,
+                            selectedFlags,
+                            configName: null,
+                            platform: platform,
+                            comPort: comPort);
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Failed to save configuration: {ex.Message}");
+                    }
+                    // Show success results with hash
+                    var resultsWindow = new CompilationResultsWindow(result.HashOfOptions ?? string.Empty, true)
+                    {
+                        Owner = this
+                    };
+                    resultsWindow.ShowDialog();
                 }
 
                 else
                 {
                     // Show detailed logs in modal window
-                    var logWindow = new CompilationLogWindow(result.Logs)
+                    var resultsWindow = new CompilationResultsWindow(result.Logs)
                     {
                         Owner = this
                     };
-                    logWindow.ShowDialog();
+                    resultsWindow.ShowDialog();
                 }
             }
             catch (Exception ex)
@@ -551,7 +614,6 @@ namespace GuiGenericBuilderDesktop
 
         private async void CheckConnectedDevice_Click(object? sender, RoutedEventArgs e)
         {
-            if (deviceModelText != null) deviceModelText.Text = string.Empty;
 
             await Task.Run(async () =>
             {
@@ -568,7 +630,6 @@ namespace GuiGenericBuilderDesktop
                     {
                         if (!string.IsNullOrWhiteSpace(port))
                         {
-                            deviceModelText?.Text = deviceModel?.ChipType?.Trim();
                             comPortSelector.SelectedItem = comPortSelector.Items.OfType<ComboBoxItem>().FirstOrDefault(ci => (ci.Tag as string) == port || (ci.Content as string) == port);
 
                             // If we detected a device model, try to select matching board in the selector
@@ -619,7 +680,8 @@ namespace GuiGenericBuilderDesktop
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        deviceModelText?.Text = ex.Message;
+                        // Error during device detection - could log or show message
+                        System.Diagnostics.Debug.WriteLine($"Device detection error: {ex.Message}");
                     });
                 }
             });
@@ -641,6 +703,219 @@ namespace GuiGenericBuilderDesktop
                 {
                     // Parameters modified in-place; nothing else required.
                 }
+            }
+        }
+
+        private void LoadConfig_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Get all saved configurations
+                var configs = _configManager.GetAllConfigurations();
+
+                if (!configs.Any())
+                {
+                    MessageBox.Show("No saved configurations found.", "Load Configuration", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Show configuration selection window
+                var selectionWindow = new ConfigurationSelectionWindow(configs)
+                {
+                    Owner = this
+                };
+
+                if (selectionWindow.ShowDialog() == true && selectionWindow.SelectedConfiguration != null)
+                {
+                    LoadConfiguration(selectionWindow.SelectedConfiguration);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading configurations: {ex.Message}", "Load Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void SaveConfig_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Check if there are any enabled flags
+                var selectedFlags = AllBuildFlags.Where(f => f.IsEnabled).ToList();
+                if (!selectedFlags.Any())
+                {
+                    MessageBox.Show(
+                        "No flags selected. Please enable some flags before saving the configuration.",
+                        "No Flags Selected",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Prompt for configuration name
+                var inputDialog = new ConfigurationNameInputWindow()
+                {
+                    Owner = this
+                };
+
+                if (inputDialog.ShowDialog() == true)
+                {
+                    var configName = inputDialog.ConfigurationName;
+                    
+                    if (string.IsNullOrWhiteSpace(configName))
+                    {
+                        MessageBox.Show(
+                            "Configuration name cannot be empty.",
+                            "Invalid Name",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                        return;
+                    }
+;
+                    // Calculate hash for the current configuration
+                    var hash = BuildConfigurationHasher.CalculateHash(selectedFlags);
+                    var platform = (boardSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+                    var comPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+
+                    // Save the configuration
+                    _configManager.SaveConfiguration(
+                        hash,
+                        selectedFlags,
+                        configName,
+                        platform,
+                        comPort);
+
+                    MessageBox.Show(
+                        $"Configuration '{configName}' saved successfully!\n\n" +
+                        $"Hash: {hash}\n" +
+                        $"Platform: {platform}\n" +
+                        $"COM Port: {comPort}\n" +
+                        $"Enabled flags: {selectedFlags.Count}",
+                        "Configuration Saved",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Error saving configuration: {ex.Message}",
+                    "Save Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private void LoadConfiguration(SavedBuildConfiguration config)
+        {
+            // Check if this is a placeholder configuration (no flags)
+            if (config.EnabledFlagKeys == null || !config.EnabledFlagKeys.Any())
+            {
+                MessageBox.Show(
+                    $"The configuration '{config.ConfigurationName}' has no saved flags.\n\n" +
+                    $"Target Hash: {config.Hash}\n\n" +
+                    "Please manually select the build flags that match this hash.\n" +
+                    "After compilation, verify that the generated hash matches the target.",
+                    "Manual Configuration Required",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+
+            // Disable all flags first
+            foreach (var flag in AllBuildFlags)
+            {
+                flag.IsEnabled = false;
+            }
+
+            // Enable flags from the configuration
+            foreach (var flagKey in config.EnabledFlagKeys)
+            {
+                var flag = AllBuildFlags.FirstOrDefault(f => 
+                    string.Equals(f.Key, flagKey, StringComparison.OrdinalIgnoreCase));
+                
+                if (flag != null)
+                {
+                    flag.IsEnabled = true;
+                }
+            }
+
+            // Restore parameter values if available
+            if (config.BuildFlagsParameters != null && config.BuildFlagsParameters.Any())
+            {
+                foreach (var flagParams in config.BuildFlagsParameters)
+                {
+                    var flag = AllBuildFlags.FirstOrDefault(f => 
+                        string.Equals(f.Key, flagParams.Key, StringComparison.OrdinalIgnoreCase));
+                    
+                    if (flag != null && flag.Parameters != null)
+                    {
+                        foreach (var paramValue in flagParams.Value)
+                        {
+                            var parameter = flag.Parameters.FirstOrDefault(p => 
+                                string.Equals(p.Name, paramValue.Key, StringComparison.OrdinalIgnoreCase));
+                            
+                            if (parameter != null)
+                            {
+                                parameter.Value = paramValue.Value;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Restore platform selection if available
+            if (!string.IsNullOrEmpty(config.Platform) && boardSelector != null)
+            {
+                var platformItem = boardSelector.Items.OfType<ComboBoxItem>()
+                    .FirstOrDefault(item => string.Equals(item.Tag?.ToString(), config.Platform, StringComparison.OrdinalIgnoreCase));
+                
+                if (platformItem != null)
+                {
+                    boardSelector.SelectedItem = platformItem;
+                }
+            }
+            
+            // Restore COM port selection if available
+            if (!string.IsNullOrEmpty(config.ComPort) && comPortSelector != null)
+            {
+                var comPortItem = comPortSelector.Items.OfType<ComboBoxItem>()
+                    .FirstOrDefault(item => string.Equals(item.Tag?.ToString(), config.ComPort, StringComparison.OrdinalIgnoreCase));
+                
+                if (comPortItem != null)
+                {
+                    comPortSelector.SelectedItem = comPortItem;
+                }
+            }
+            
+            // Verify the loaded configuration
+            var currentHash = BuildConfigurationHasher.CalculateHash(
+                AllBuildFlags.Where(f => f.IsEnabled));
+            
+            if (currentHash == config.Hash)
+            {
+                MessageBox.Show(
+                    $"Configuration '{config.ConfigurationName}' loaded successfully!\n\n" +
+                    $"Platform: {config.Platform}\n" +
+                    $"COM Port: {config.ComPort}\n" +
+                    $"Hash: {config.Hash}\n" +
+                    $"Enabled flags: {config.EnabledFlagKeys.Count}",
+                    "Configuration Loaded",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            else
+            {
+                MessageBox.Show(
+                    $"Warning: Configuration loaded but hash mismatch detected.\n\n" +
+                    $"Platform: {config.Platform}\n" +
+                    $"COM Port: {config.ComPort}\n" +
+                    $"Expected: {config.Hash}\n" +
+                    $"Actual: {currentHash}\n\n" +
+                    $"Some flags may have changed or be unavailable.",
+                    "Hash Mismatch",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
             }
         }
     }
