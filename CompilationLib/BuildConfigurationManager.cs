@@ -23,7 +23,7 @@ namespace CompilationLib
         /// <summary>
         /// Saves a build configuration with its hash
         /// </summary>
-        public void SaveConfiguration(string hash, IEnumerable<BuildFlagItem> enabledFlags, string? configName = null, string? platform = null, string? comPort = null)
+        public void SaveConfiguration(string hash, IEnumerable<BuildFlagItem> enabledFlags, string configName = null, string platform = null, string comPort = null)
         {
             if (string.IsNullOrEmpty(hash) || enabledFlags == null)
                 return;
@@ -84,7 +84,7 @@ namespace CompilationLib
         /// <summary>
         /// Loads a build configuration by its hash
         /// </summary>
-        public SavedBuildConfiguration? LoadConfiguration(string hash)
+        public SavedBuildConfiguration LoadConfiguration(string hash)
         {
             if (string.IsNullOrEmpty(hash))
                 return null;

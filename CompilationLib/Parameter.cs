@@ -11,6 +11,6 @@ namespace CompilationLib
 
         // Optional sample/default value (not serialized in existing files unless written back)
         [JsonProperty("value")]
-        public string? Value { get; set; }
+        public string Value { get; set; }
     }
 }

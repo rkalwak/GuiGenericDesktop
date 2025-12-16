@@ -8,7 +8,7 @@ namespace CompilationLib
         /// <summary>
         /// Looks for an arduino-cli executable in PATH. Returns the full path if found, otherwise null.
         /// </summary>
-        public string? FindArduinoCliInPath()
+        public string FindArduinoCliInPath()
         {
             var exeNames = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? new[] { "arduino-cli.exe", "arduino-cli" }
@@ -42,7 +42,7 @@ namespace CompilationLib
         /// Attempts to detect arduino-cli and query its version.
         /// Returns a tuple: (Found, ResolvedPathOrCommand, VersionText, ErrorText).
         /// </summary>
-        public  async Task<(bool Found, string? PathOrCommand, string? Version, string? Error)> TryGetArduinoCliAsync(CancellationToken cancellation = default)
+        public  async Task<(bool Found, string PathOrCommand, string Version, string Error)> TryGetArduinoCliAsync(CancellationToken cancellation = default)
         {
             // Prefer exact path from PATH
             var path = FindArduinoCliInPath() ?? (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "arduino-cli.exe" : "arduino-cli");

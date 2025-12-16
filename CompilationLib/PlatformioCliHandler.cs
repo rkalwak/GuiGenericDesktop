@@ -1,8 +1,5 @@
 using CompilationLib;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
-using System.Security.Cryptography;
-using System.Text;
 
 public class PlatformioCliHandler : ICompileHandler
 {
@@ -17,8 +14,8 @@ public class PlatformioCliHandler : ICompileHandler
                     "BUILD_VERSION",
                 };
 
-    public event EventHandler<string>? OutputLine;
-    public event EventHandler<string>? ErrorLine;
+    public event EventHandler<string> OutputLine;
+    public event EventHandler<string> ErrorLine;
 
     public PlatformioCliHandler()
     {

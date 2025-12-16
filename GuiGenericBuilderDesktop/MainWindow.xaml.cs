@@ -5,6 +5,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using Newtonsoft.Json;
 using CompilationLib;
+using Serilog;
 
 namespace GuiGenericBuilderDesktop
 {
@@ -19,16 +20,21 @@ namespace GuiGenericBuilderDesktop
         string _repositoryPath = string.Empty;
         string _port = string.Empty;
         BuildConfigurationManager _configManager;
-        private ComboBox? boardSelector;
-        private ComboBox? comPortSelector;
-        private ComboBox? flashSizeSelector;
-        private ProgressBar? compileProgressBar;
-        private TextBlock? compileCountdownText;
-        private CancellationTokenSource? _compileCountdownCts;
+        private ComboBox boardSelector;
+        private ComboBox comPortSelector;
+        private ComboBox flashSizeSelector;
+        private ProgressBar compileProgressBar;
+        private TextBlock compileCountdownText;
+        private CheckBox deployCheckBox;
+        private CancellationTokenSource _compileCountdownCts;
+        private readonly ILogger _logger;
 
         public MainWindow()
         {
             InitializeComponent();
+            _logger = Log.ForContext<MainWindow>();
+            _logger.Information("MainWindow initializing");
+            
             AllBuildFlags = new List<BuildFlagItem>();
 
             // Initialize configuration manager
@@ -43,6 +49,8 @@ namespace GuiGenericBuilderDesktop
             FlagsDataGrid.ItemsSource = AllBuildFlags;
             _repositoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo", "gg");
             //_repositoryPath = @"c:\repozytoria\platformio\GUI-Generic";
+            
+            _logger.Information("MainWindow initialized successfully");
         }
 
         private void AddParametersColumnDynamically()
@@ -139,6 +147,7 @@ namespace GuiGenericBuilderDesktop
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C3", Tag = "GUI_Generic_ESP32C3" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP8266", Tag = "GUI_Generic_ESP8266" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C6", Tag = "GUI_Generic_ESP32C6" });
+            boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-S3", Tag = "GUI_Generic_ESP32S3" });
             var loadConfigButton = new Button
             {
                 Content = "Load Config...",
@@ -213,7 +222,7 @@ namespace GuiGenericBuilderDesktop
             var portLabel = new TextBlock(new Run("Port:")) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
             comPortSelector = new ComboBox { Width = 100, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
             comPortSelector.Items.Add(new ComboBoxItem { Content = $"None", Tag = $"None", IsSelected = true });
-            for (int i = 1; i <= 10; i++)
+            for (int i = 1; i <= 100; i++)
             {
                 var item = new ComboBoxItem { Content = $"COM{i}", Tag = $"COM{i}" };
                 comPortSelector.Items.Add(item);
@@ -230,9 +239,7 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(comPortSelector);
             devicePanel.Children.Add(boardLabel);
             devicePanel.Children.Add(boardSelector);
-            DockPanel.SetDock(checkBtn, Dock.Right);
-            DockPanel.SetDock(compileButton, Dock.Right);
-            DockPanel.SetDock(loadConfigButton, Dock.Right);
+            
             // Flash size selector
             var flashSizeLabel = new TextBlock(new Run("Flash:")) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
             flashSizeSelector = new ComboBox { Width = 120, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
@@ -244,22 +251,42 @@ namespace GuiGenericBuilderDesktop
             flashSizeSelector.Items.Add(new ComboBoxItem { Content = "64MB", Tag = "64MB" });
             devicePanel.Children.Add(flashSizeLabel);
             devicePanel.Children.Add(flashSizeSelector);
+            
+            // Progress bar and countdown (these will be hidden initially)
             devicePanel.Children.Add(compileCountdownText);
             devicePanel.Children.Add(compileProgressBar);
+            
+            // Deploy checkbox - positioned right before compile button
+            deployCheckBox = new CheckBox 
+            { 
+                Content = "Deploy",
+                IsChecked = true,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(12, 0, 4, 0),
+                FontWeight = FontWeights.SemiBold
+            };
+
+
+            DockPanel.SetDock(compileButton, Dock.Right);
             devicePanel.Children.Add(compileButton);
-            devicePanel.Children.Add(loadConfigButton);
-            devicePanel.Children.Add(saveConfigButton);
+            DockPanel.SetDock(deployCheckBox, Dock.Right);
+            devicePanel.Children.Add(deployCheckBox);
+            
+            
+            DockPanel.SetDock(checkBtn, Dock.Right);
             devicePanel.Children.Add(checkBtn);
-            // right-align the load config button
-           
-          
-            // right-align the button inside the DockPanel
             DockPanel.SetDock(updateGGButton, Dock.Right);
             devicePanel.Children.Add(updateGGButton);
-
+            DockPanel.SetDock(saveConfigButton, Dock.Right);
+            devicePanel.Children.Add(saveConfigButton);
             
+            DockPanel.SetDock(loadConfigButton, Dock.Right);
+            devicePanel.Children.Add(loadConfigButton);
+          
+          
+            // right-align the button inside the DockPanel
 
-           
+
             doc.Blocks.Add(new BlockUIContainer(devicePanel));
 
             var grouped = AllBuildFlags.GroupBy(f => f.Section).ToList();
@@ -339,15 +366,24 @@ namespace GuiGenericBuilderDesktop
 
                     var chk = new CheckBox { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(2) };
                     chk.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(BuildFlagItem.IsEnabled)) { Source = item, Mode = BindingMode.TwoWay });
+                    
                     chk.Checked += (s, e) =>
                     {
-                        var deps = DependencyResolver.FindOnDependencies(item, AllBuildFlags);
-                        foreach (var d in deps) d.IsEnabled = true;
+                        var errorMessage = DependencyResolver.ProcessFlagEnabled(item, AllBuildFlags);
+                        // Only show error if the flag is NOT enabled (meaning ProcessFlagEnabled failed)
+                        // If the flag IS enabled, it was successfully auto-enabled, so no error
+                        if (errorMessage != null && !item.IsEnabled)
+                        {
+                            MessageBox.Show(
+                                errorMessage,
+                                "Blocking Dependencies",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                        }
                     };
                     chk.Unchecked += (s, e) =>
                     {
-                        var deps = DependencyResolver.FindOffDependencies(item, AllBuildFlags);
-                        foreach (var d in deps) d.IsEnabled = false;
+                        DependencyResolver.ProcessFlagDisabled(item, AllBuildFlags);
                     };
                     Grid.SetRow(chk, r); Grid.SetColumn(chk, 0); grid.Children.Add(chk);
 
@@ -476,18 +512,25 @@ namespace GuiGenericBuilderDesktop
                 return;
             }
 
-            // Validate COM port selection
-            var selectedComPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
-            if (string.IsNullOrEmpty(selectedComPort) || selectedComPort.Equals("None", StringComparison.OrdinalIgnoreCase))
+            // Get deploy checkbox state
+            bool shouldDeploy = deployCheckBox?.IsChecked ?? true;
+
+            // Validate COM port selection only if deploying
+            if (shouldDeploy)
             {
-                MessageBox.Show(
-                    "Please select a COM port before compiling.\n\n" +
-                    "The firmware needs to be uploaded to a device connected via COM port.\n" +
-                    "Use '2. Check Device' to auto-detect, or manually select a COM port.",
-                    "COM Port Required",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-                return;
+                var selectedComPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+                if (string.IsNullOrEmpty(selectedComPort) || selectedComPort.Equals("None", StringComparison.OrdinalIgnoreCase))
+                {
+                    MessageBox.Show(
+                        "Please select a COM port before compiling with deployment.\n\n" +
+                        "The firmware needs to be uploaded to a device connected via COM port.\n" +
+                        "Use '2. Check Device' to auto-detect, or manually select a COM port.\n\n" +
+                        "Alternatively, uncheck 'Deploy to device' to compile only without uploading.",
+                        "COM Port Required",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
             }
             
             // Show and initialize progress UI
@@ -538,7 +581,7 @@ namespace GuiGenericBuilderDesktop
                         ProjectDirectory = _repositoryPath,
                         LibrariesPath = Path.Combine(_repositoryPath, "lib"),
                         PortCom = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
-                        ShouldDeploy = true
+                        ShouldDeploy = shouldDeploy
                     };
                     var handler = new PlatformioCliHandler();
                     ICompileHandler compiler = new PlatformioCliHandler();
@@ -612,25 +655,45 @@ namespace GuiGenericBuilderDesktop
 
         }
 
-        private async void CheckConnectedDevice_Click(object? sender, RoutedEventArgs e)
+        private async void CheckConnectedDevice_Click(object sender, RoutedEventArgs e)
         {
-
+            _logger.Information("=== Device Detection Started ===");
+            
             await Task.Run(async () =>
             {
                 try
                 {
-
+                    _logger.Debug("Detecting COM port...");
                     var port = _deviceDetector.DetectCOMPort();
+                    
+                    if (port != null)
+                    {
+                        _logger.Information("COM port detected: {Port}", port);
+                    }
+                    else
+                    {
+                        _logger.Warning("No COM port detected");
+                    }
+                    
                     EspInfo deviceModel = null;
                     if (port != null)
                     {
+                        _logger.Debug("Detecting ESP model on port {Port}...", port);
                         deviceModel = await _deviceDetector.DetectEspModelAsync(port);
+                        
+                        if (deviceModel != null)
+                        {
+                            _logger.Information("Device detected: ChipType={ChipType}, Model={Model}, FlashSize={FlashSize}, MAC={Mac}", 
+                                deviceModel.ChipType, deviceModel.Model, deviceModel.FlashSize, deviceModel.Mac);
+                        }
                     }
+                    
                     Dispatcher.Invoke(() =>
                     {
                         if (!string.IsNullOrWhiteSpace(port))
                         {
                             comPortSelector.SelectedItem = comPortSelector.Items.OfType<ComboBoxItem>().FirstOrDefault(ci => (ci.Tag as string) == port || (ci.Content as string) == port);
+                            _logger.Debug("COM port selector updated to: {Port}", port);
 
                             // If we detected a device model, try to select matching board in the selector
 
@@ -643,6 +706,8 @@ namespace GuiGenericBuilderDesktop
                                     selectedTag = "GUI_Generic_ESP32C6";
                                 else if (chipLower.Contains("c3") || chipLower.Contains("c-3"))
                                     selectedTag = "GUI_Generic_ESP32C3";
+                                else if (chipLower.Contains("s3") || chipLower.Contains("s-3"))
+                                    selectedTag = "GUI_Generic_ESP32S3";
                                 else if (chipLower.Contains("8266") || chipLower.Contains("esp8266"))
                                     selectedTag = "GUI_Generic_ESP8266";
                                 else if (chipLower.Contains("esp32") || chipLower.Contains("esp32"))
@@ -652,7 +717,10 @@ namespace GuiGenericBuilderDesktop
                                 {
                                     var match = boardSelector.Items.OfType<ComboBoxItem>().FirstOrDefault(ci => (ci.Tag as string) == selectedTag);
                                     if (match != null)
+                                    {
                                         boardSelector.SelectedItem = match;
+                                        _logger.Information("Board selector updated to: {BoardTag}", selectedTag);
+                                    }
                                 }
 
                                 // Set flash size selector if available
@@ -667,21 +735,43 @@ namespace GuiGenericBuilderDesktop
                                     if (fmatch != null)
                                     {
                                         flashSizeSelector.SelectedItem = fmatch;
+                                        _logger.Information("Flash size selector updated to: {FlashSize}", fs);
                                     }
                                 }
 
                             }
                         }
+                        else
+                        {
+                            _logger.Warning("Device detection completed but no port found");
+                            MessageBox.Show(
+                                "No ESP device detected.\n\n" +
+                                "Please ensure:\n" +
+                                "• Device is connected via USB\n" +
+                                "• USB drivers are installed\n" +
+                                "• Device is powered on",
+                                "Device Not Found",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Information);
+                        }
+                        
+                        _logger.Information("=== Device Detection Completed ===");
                     });
 
 
                 }
                 catch (Exception ex)
                 {
+                    _logger.Error(ex, "Error during device detection");
                     Dispatcher.Invoke(() =>
                     {
                         // Error during device detection - could log or show message
-                        System.Diagnostics.Debug.WriteLine($"Device detection error: {ex.Message}");
+                        MessageBox.Show(
+                            $"Device detection error: {ex.Message}\n\n" +
+                            $"Check the logs for more details.",
+                            "Detection Error",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
                     });
                 }
             });

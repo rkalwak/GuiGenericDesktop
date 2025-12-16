@@ -10,7 +10,7 @@ namespace CompilationLib.Tests
         public void CalculateHash_WithNullArray_ReturnsEmptyString()
         {
             // Arrange
-            string[]? options = null;
+            string[] options = null;
 
             // Act
             var result = BuildConfigurationHasher.CalculateHash(options);
@@ -131,7 +131,7 @@ namespace CompilationLib.Tests
         public void CalculateHash_WithNullBuildFlagItems_ReturnsEmptyString()
         {
             // Arrange
-            IEnumerable<BuildFlagItem>? buildFlags = null;
+            IEnumerable<BuildFlagItem> buildFlags = null;
 
             // Act
             var result = BuildConfigurationHasher.CalculateHash(buildFlags);

@@ -13,7 +13,7 @@ namespace GuiGenericBuilderDesktop
         private readonly List<SavedBuildConfiguration> _configurations;
         private readonly BuildConfigurationManager _configManager;
 
-        public SavedBuildConfiguration? SelectedConfiguration { get; private set; }
+        public SavedBuildConfiguration SelectedConfiguration { get; private set; }
 
         public ConfigurationSelectionWindow(List<SavedBuildConfiguration> configurations)
         {
@@ -34,6 +34,16 @@ namespace GuiGenericBuilderDesktop
             var isSelected = ConfigurationsListBox.SelectedItem != null;
             LoadButton.IsEnabled = isSelected;
             DeleteButton.IsEnabled = isSelected;
+            
+            // Update details panel
+            if (ConfigurationsListBox.SelectedItem is SavedBuildConfiguration config)
+            {
+                ShowConfigurationDetails(config);
+            }
+            else
+            {
+                HideConfigurationDetails();
+            }
         }
 
         private void LoadButton_Click(object sender, RoutedEventArgs e)
@@ -250,6 +260,39 @@ namespace GuiGenericBuilderDesktop
                 PasteHashButton_Click(sender, e);
                 e.Handled = true;
             }
+        }
+        
+        private void ShowConfigurationDetails(SavedBuildConfiguration config)
+        {
+            ConfigDetailsPanel.Visibility = Visibility.Visible;
+            EmptyStateText.Visibility = Visibility.Collapsed;
+            
+            // Populate details
+            DetailNameText.Text = config.ConfigurationName ?? "N/A";
+            DetailPlatformText.Text = config.Platform ?? "N/A";
+            DetailComPortText.Text = config.ComPort ?? "N/A";
+            DetailSavedDateText.Text = config.SavedDate.ToString("yyyy-MM-dd HH:mm:ss");
+            DetailHashText.Text = config.Hash ?? "N/A";
+            
+            // Populate flags list
+            if (config.EnabledFlagKeys != null && config.EnabledFlagKeys.Any())
+            {
+                FlagsCountText.Text = $"Enabled Flags ({config.EnabledFlagKeys.Count})";
+                FlagsListBox.ItemsSource = config.EnabledFlagKeys.OrderBy(f => f);
+            }
+            else
+            {
+                FlagsCountText.Text = "Enabled Flags (0)";
+                FlagsListBox.ItemsSource = null;
+            }
+        }
+        
+        private void HideConfigurationDetails()
+        {
+            ConfigDetailsPanel.Visibility = Visibility.Collapsed;
+            EmptyStateText.Visibility = Visibility.Visible;
+            FlagsListBox.ItemsSource = null;
+            FlagsCountText.Text = "Enabled Flags (0)";
         }
     }
 }

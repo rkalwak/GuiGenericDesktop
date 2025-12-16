@@ -9,8 +9,8 @@ namespace GuiGenericBuilderDesktop
     /// </summary>
     public partial class CompilationResultsWindow : Window
     {
-        private string? _hash;
-        private string? _logs;
+        private string _hash;
+        private string _logs;
         private bool _isSuccess;
 
         /// <summary>

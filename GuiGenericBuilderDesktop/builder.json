@@ -1874,6 +1874,46 @@
           "Parameters": [
 
           ]
+        },
+        "SUPLA_DEBUG": {
+          "name": "DEBUG in development",
+          "desc": "Pozwala testować opcję parametrów bez fizycznych sensorów",
+          "defOn": true,
+          "depRel": [
+           
+          ],
+          "translations": {
+            "en": {
+              "name": "DEBUG in development",
+              "desc": "DEBUG in development"
+            },
+            "es": {
+              "name": "DEBUG in development",
+              "desc": "DEBUG in development"
+            },
+            "de": {
+              "name": "DEBUG in development",
+              "desc": "DEBUG in development"
+            },
+            "fr": {
+              "name": "DEBUG in development",
+              "desc": "DEBUG in development"
+            }
+          },
+          "Parameters": [
+            {
+              "Name": "Text",
+              "Type": "string"
+            },
+            {
+              "Name": "Number",
+              "Type": "number"
+            },
+            {
+              "Name": "Bool",
+              "Type": "bool"
+            }
+          ]
         }
       }
     }
