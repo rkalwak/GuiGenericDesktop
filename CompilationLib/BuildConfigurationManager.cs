@@ -21,11 +21,22 @@ namespace CompilationLib
         }
 
         /// <summary>
-        /// Saves a build configuration with its hash
+        /// Saves a build configuration
         /// </summary>
+        public void SaveConfiguration(IEnumerable<BuildFlagItem> enabledFlags, string configName = null, string platform = null, string comPort = null)
+        {
+            // Call the obsolete method with empty hash - it will auto-generate
+            SaveConfiguration(string.Empty, enabledFlags, configName, platform, comPort);
+        }
+
+        /// <summary>
+        /// Saves a build configuration
+        /// </summary>
+        /// <param name="hash">Legacy parameter - kept for backward compatibility. Pass empty string or use EncodedConfig instead.</param>
+        [Obsolete("Pass empty string for hash parameter and rely on EncodedConfig instead.")]
         public void SaveConfiguration(string hash, IEnumerable<BuildFlagItem> enabledFlags, string configName = null, string platform = null, string comPort = null)
         {
-            if (string.IsNullOrEmpty(hash) || enabledFlags == null)
+            if (enabledFlags == null)
                 return;
 
             // Build the BuildFlagsParameters dictionary with all enabled flags
@@ -46,9 +57,18 @@ namespace CompilationLib
                 flagsParameters[flag.Key!] = paramValues;
             }
             
+            // Generate encoded configuration (reversible)
+            var encodedConfig = BuildConfigurationHasher.EncodeOptions(enabledFlags);
+            
+            // Generate hash internally if not provided (for backward compatibility and filename)
+            var internalHash = string.IsNullOrEmpty(hash) 
+                ? BuildConfigurationHasher.CalculateHash(enabledFlags) 
+                : hash;
+            
             var config = new SavedBuildConfiguration
             {
-                Hash = hash,
+                EncodedConfig = encodedConfig,
+                Hash = internalHash, // Keep for backward compatibility and filename
                 ConfigurationName = configName ?? $"Config_{DateTime.Now:yyyyMMdd_HHmmss}",
                 SavedDate = DateTime.Now,
                 Platform = platform ?? string.Empty,
@@ -73,7 +93,7 @@ namespace CompilationLib
             else
             {
                 // Auto-save: use hash as filename
-                fileName = $"{hash}.json";
+                fileName = $"{internalHash}.json";
             }
              
             var filePath = Path.Combine(_configurationsDirectory, fileName);
@@ -82,24 +102,31 @@ namespace CompilationLib
         }
 
         /// <summary>
-        /// Loads a build configuration by its hash
+        /// Loads a build configuration by its hash or encoded config
         /// </summary>
-        public SavedBuildConfiguration LoadConfiguration(string hash)
+        public SavedBuildConfiguration LoadConfiguration(string hashOrEncoded)
         {
-            if (string.IsNullOrEmpty(hash))
+            if (string.IsNullOrEmpty(hashOrEncoded))
                 return null;
 
             // Try direct hash-based filename first (auto-saved configs)
-            var filePath = Path.Combine(_configurationsDirectory, $"{hash}.json");
+            var filePath = Path.Combine(_configurationsDirectory, $"{hashOrEncoded}.json");
             if (File.Exists(filePath))
             {
                 var json = File.ReadAllText(filePath);
                 return JsonConvert.DeserializeObject<SavedBuildConfiguration>(json);
             }
             
-            // If not found, search through all configurations (manually-saved configs with custom names)
+            // Search through all configurations by hash or encoded config
             var allConfigs = GetAllConfigurations();
-            return allConfigs.FirstOrDefault(c => string.Equals(c.Hash, hash, StringComparison.OrdinalIgnoreCase));
+            
+            // Try matching by hash first
+            var configByHash = allConfigs.FirstOrDefault(c => string.Equals(c.Hash, hashOrEncoded, StringComparison.OrdinalIgnoreCase));
+            if (configByHash != null)
+                return configByHash;
+            
+            // Try matching by encoded config
+            return allConfigs.FirstOrDefault(c => string.Equals(c.EncodedConfig, hashOrEncoded, StringComparison.Ordinal));
         }
 
         /// <summary>
@@ -172,7 +199,17 @@ namespace CompilationLib
     /// </summary>
     public class SavedBuildConfiguration
     {
+        /// <summary>
+        /// Encoded configuration string (reversible, can decode to get flags)
+        /// </summary>
+        public string EncodedConfig { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// SHA256 hash for verification (kept for backward compatibility and validation)
+        /// </summary>
+        [Obsolete("Use EncodedConfig instead. Hash is kept for backward compatibility only.")]
         public string Hash { get; set; } = string.Empty;
+        
         public string ConfigurationName { get; set; } = string.Empty;
         public DateTime SavedDate { get; set; }
         public string Platform { get; set; } = string.Empty;

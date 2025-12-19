@@ -47,8 +47,8 @@ namespace GuiGenericBuilderDesktop
             AddParametersColumnDynamically();
 
             FlagsDataGrid.ItemsSource = AllBuildFlags;
-            _repositoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo", "gg");
-            //_repositoryPath = @"c:\repozytoria\platformio\GUI-Generic";
+            //_repositoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo", "gg");
+            _repositoryPath = @"c:\repozytoria\platformio\GUI-Generic";
             
             _logger.Information("MainWindow initialized successfully");
         }
@@ -145,29 +145,18 @@ namespace GuiGenericBuilderDesktop
             boardSelector.Items.Add(new ComboBoxItem { Content = "None", Tag = "None", IsSelected = true });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32 (default)", Tag = "GUI_Generic_ESP32" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C3", Tag = "GUI_Generic_ESP32C3" });
-            boardSelector.Items.Add(new ComboBoxItem { Content = "ESP8266", Tag = "GUI_Generic_ESP8266" });
+            //boardSelector.Items.Add(new ComboBoxItem { Content = "ESP8266", Tag = "GUI_Generic_ESP8266" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C6", Tag = "GUI_Generic_ESP32C6" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-S3", Tag = "GUI_Generic_ESP32S3" });
             var loadConfigButton = new Button
             {
-                Content = "Load Config...",
-                Width = 120,
+                Content = "Manage Configs...",
+                Width = 130,
                 Height = 28,
                 HorizontalAlignment = HorizontalAlignment.Right,
                 Margin = new Thickness(4)
             };
             loadConfigButton.Click += LoadConfig_Click;
-
-            var saveConfigButton = new Button
-            {
-                Content = "Save Config...",
-                Width = 120,
-                Height = 28,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                Margin = new Thickness(4)
-            };
-            saveConfigButton.Click += SaveConfig_Click;
-           
 
             var updateGGButton = new Button
             {
@@ -277,8 +266,6 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(checkBtn);
             DockPanel.SetDock(updateGGButton, Dock.Right);
             devicePanel.Children.Add(updateGGButton);
-            DockPanel.SetDock(saveConfigButton, Dock.Right);
-            devicePanel.Children.Add(saveConfigButton);
             
             DockPanel.SetDock(loadConfigButton, Dock.Right);
             devicePanel.Children.Add(loadConfigButton);
@@ -800,99 +787,19 @@ namespace GuiGenericBuilderDesktop
         {
             try
             {
-                // Get all saved configurations
-                var configs = _configManager.GetAllConfigurations();
-
-                if (!configs.Any())
-                {
-                    MessageBox.Show("No saved configurations found.", "Load Configuration", MessageBoxButton.OK, MessageBoxImage.Information);
-                    return;
-                }
-
-                // Show configuration selection window
-                var selectionWindow = new ConfigurationSelectionWindow(configs)
+                var managerWindow = new ConfigurationManagerWindow(AllBuildFlags)
                 {
                     Owner = this
                 };
 
-                if (selectionWindow.ShowDialog() == true && selectionWindow.SelectedConfiguration != null)
+                if (managerWindow.ShowDialog() == true && managerWindow.SelectedConfiguration != null)
                 {
-                    LoadConfiguration(selectionWindow.SelectedConfiguration);
+                    LoadConfiguration(managerWindow.SelectedConfiguration);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading configurations: {ex.Message}", "Load Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void SaveConfig_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // Check if there are any enabled flags
-                var selectedFlags = AllBuildFlags.Where(f => f.IsEnabled).ToList();
-                if (!selectedFlags.Any())
-                {
-                    MessageBox.Show(
-                        "No flags selected. Please enable some flags before saving the configuration.",
-                        "No Flags Selected",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
-                    return;
-                }
-
-                // Prompt for configuration name
-                var inputDialog = new ConfigurationNameInputWindow()
-                {
-                    Owner = this
-                };
-
-                if (inputDialog.ShowDialog() == true)
-                {
-                    var configName = inputDialog.ConfigurationName;
-                    
-                    if (string.IsNullOrWhiteSpace(configName))
-                    {
-                        MessageBox.Show(
-                            "Configuration name cannot be empty.",
-                            "Invalid Name",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Warning);
-                        return;
-                    }
-;
-                    // Calculate hash for the current configuration
-                    var hash = BuildConfigurationHasher.CalculateHash(selectedFlags);
-                    var platform = (boardSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
-                    var comPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
-
-                    // Save the configuration
-                    _configManager.SaveConfiguration(
-                        hash,
-                        selectedFlags,
-                        configName,
-                        platform,
-                        comPort);
-
-                    MessageBox.Show(
-                        $"Configuration '{configName}' saved successfully!\n\n" +
-                        $"Hash: {hash}\n" +
-                        $"Platform: {platform}\n" +
-                        $"COM Port: {comPort}\n" +
-                        $"Enabled flags: {selectedFlags.Count}",
-                        "Configuration Saved",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    $"Error saving configuration: {ex.Message}",
-                    "Save Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                MessageBox.Show($"Error opening configuration manager: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -903,9 +810,7 @@ namespace GuiGenericBuilderDesktop
             {
                 MessageBox.Show(
                     $"The configuration '{config.ConfigurationName}' has no saved flags.\n\n" +
-                    $"Target Hash: {config.Hash}\n\n" +
-                    "Please manually select the build flags that match this hash.\n" +
-                    "After compilation, verify that the generated hash matches the target.",
+                    "Please manually select the build flags.",
                     "Manual Configuration Required",
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
@@ -944,7 +849,7 @@ namespace GuiGenericBuilderDesktop
                         {
                             var parameter = flag.Parameters.FirstOrDefault(p => 
                                 string.Equals(p.Name, paramValue.Key, StringComparison.OrdinalIgnoreCase));
-                            
+							
                             if (parameter != null)
                             {
                                 parameter.Value = paramValue.Value;
@@ -978,35 +883,14 @@ namespace GuiGenericBuilderDesktop
                 }
             }
             
-            // Verify the loaded configuration
-            var currentHash = BuildConfigurationHasher.CalculateHash(
-                AllBuildFlags.Where(f => f.IsEnabled));
-            
-            if (currentHash == config.Hash)
-            {
-                MessageBox.Show(
-                    $"Configuration '{config.ConfigurationName}' loaded successfully!\n\n" +
-                    $"Platform: {config.Platform}\n" +
-                    $"COM Port: {config.ComPort}\n" +
-                    $"Hash: {config.Hash}\n" +
-                    $"Enabled flags: {config.EnabledFlagKeys.Count}",
-                    "Configuration Loaded",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-            }
-            else
-            {
-                MessageBox.Show(
-                    $"Warning: Configuration loaded but hash mismatch detected.\n\n" +
-                    $"Platform: {config.Platform}\n" +
-                    $"COM Port: {config.ComPort}\n" +
-                    $"Expected: {config.Hash}\n" +
-                    $"Actual: {currentHash}\n\n" +
-                    $"Some flags may have changed or be unavailable.",
-                    "Hash Mismatch",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-            }
+            MessageBox.Show(
+                $"Configuration '{config.ConfigurationName}' loaded successfully!\n\n" +
+                $"Platform: {config.Platform}\n" +
+                $"COM Port: {config.ComPort}\n" +
+                $"Enabled flags: {config.EnabledFlagKeys.Count}",
+                "Configuration Loaded",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
     }
 }
