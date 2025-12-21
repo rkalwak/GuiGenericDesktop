@@ -264,6 +264,212 @@
           "Parameters": [
 
           ]
+        },
+        "SUPLA_INITIAL_CONFIG_MODE": {
+          "name": "Tryb początkowy urządzenia",
+          "desc": "Określa sposób uruchomienia urządzenia przy pierwszym włączeniu z ustawieniami fabrycznymi. Pozwala wybrać czy urządzenie ma uruchomić punkt dostępowy (AP) i tryb konfiguracji, czy od razu przejść w tryb offline.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "Initial Configuration Mode",
+              "desc": "Specifies how the device starts when powered on for the first time with factory defaults. Allows you to choose whether the device should start an access point (AP) and config mode, or go directly to offline mode."
+            },
+            "es": {
+              "name": "Modo de configuración inicial",
+              "desc": "Especifica cómo se inicia el dispositivo cuando se enciende por primera vez con la configuración de fábrica. Permite elegir si el dispositivo debe iniciar un punto de acceso (AP) y el modo de configuración, o pasar directamente al modo sin conexión."
+            },
+            "de": {
+              "name": "Anfangskonfigurationsmodus",
+              "desc": "Gibt an, wie das Gerät startet, wenn es zum ersten Mal mit Werkseinstellungen eingeschaltet wird. Ermöglicht die Auswahl, ob das Gerät einen Zugangspunkt (AP) und den Konfigurationsmodus starten oder direkt in den Offline-Modus wechseln soll."
+            },
+            "fr": {
+              "name": "Mode de configuration initial",
+              "desc": "Spécifie comment l'appareil démarre lorsqu'il est allumé pour la première fois avec les paramètres d'usine. Permet de choisir si l'appareil doit démarrer un point d'accès (AP) et le mode de configuration, ou passer directement en mode hors ligne."
+            }
+          },
+          "Parameters": [
+            {
+              "Key": "Mode",
+              "Name": "Tryb",
+              "Type": "enum",
+              "DefaultValue": "0",
+              "IsRequired": true,
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "StartInCfgMode",
+                  "Description": "Enable AP and enter config mode (legacy behavior)"
+                },
+                {
+                  "Value": "1",
+                  "Name": "StartOffline",
+                  "Description": "Enter offline mode immediately, no AP started"
+                },
+                {
+                  "Value": "2",
+                  "Name": "StartWithCfgModeThenOffline",
+                  "Description": "Enable AP and config mode for 1 hour, then offline"
+                },
+                {
+                  "Value": "3",
+                  "Name": "StartInNotConfiguredMode",
+                  "Description": "Enter not configured mode (default)"
+                }
+              ],
+              "Translations": {
+                "en": {
+                  "Name": "Initial Mode",
+                  "EnumValues": [
+                    {
+                      "Value": "0",
+                      "Name": "Config Mode (Legacy)",
+                      "Description": "Device starts with AP enabled and enters configuration mode. This is the legacy behavior."
+                    },
+                    {
+                      "Value": "1",
+                      "Name": "Start Offline",
+                      "Description": "Device enters offline mode immediately. No AP will be started and no config mode will be entered automatically."
+                    },
+                    {
+                      "Value": "2",
+                      "Name": "Config Mode → Offline",
+                      "Description": "Device enables AP and enters config mode for 1 hour, then falls back to offline mode."
+                    },
+                    {
+                      "Value": "3",
+                      "Name": "Not Configured Mode",
+                      "Description": "Device enters 'not configured' mode. This is the default behavior."
+                    }
+                  ]
+                },
+                "pl": {
+                  "Name": "Tryb początkowy",
+                  "EnumValues": [
+                    {
+                      "Value": "0",
+                      "Name": "Tryb konfiguracji (starszy)",
+                      "Description": "Urządzenie uruchamia się z włączonym AP i wchodzi w tryb konfiguracji. To jest starsze zachowanie."
+                    },
+                    {
+                      "Value": "1",
+                      "Name": "Start w trybie offline",
+                      "Description": "Urządzenie od razu wchodzi w tryb offline. Nie zostanie uruchomiony AP i nie wejdzie automatycznie w tryb konfiguracji."
+                    },
+                    {
+                      "Value": "2",
+                      "Name": "Tryb konfiguracji → Offline",
+                      "Description": "Urządzenie włącza AP i wchodzi w tryb konfiguracji na 1 godzinę, następnie przechodzi w tryb offline."
+                    },
+                    {
+                      "Value": "3",
+                      "Name": "Tryb nieskonfigurowany",
+                      "Description": "Urządzenie wchodzi w tryb 'nie skonfigurowano'. To jest domyślne zachowanie."
+                    }
+                  ]
+                },
+                "es": {
+                  "Name": "Modo inicial",
+                  "EnumValues": [
+                    {
+                      "Value": "0",
+                      "Name": "Modo de configuración (heredado)",
+                      "Description": "El dispositivo se inicia con AP habilitado y entra en modo de configuración. Este es el comportamiento heredado."
+                    },
+                    {
+                      "Value": "1",
+                      "Name": "Iniciar sin conexión",
+                      "Description": "El dispositivo entra en modo sin conexión inmediatamente. No se iniciará AP y no entrará automáticamente en modo de configuración."
+                    },
+                    {
+                      "Value": "2",
+                      "Name": "Modo de configuración → Sin conexión",
+                      "Description": "El dispositivo habilita AP y entra en modo de configuración durante 1 hora, luego vuelve al modo sin conexión."
+                    },
+                    {
+                      "Value": "3",
+                      "Name": "Modo no configurado",
+                      "Description": "El dispositivo entra en modo 'no configurado'. Este es el comportamiento predeterminado."
+                    }
+                  ]
+                },
+                "de": {
+                  "Name": "Ausgangsmodus",
+                  "EnumValues": [
+                    {
+                      "Value": "0",
+                      "Name": "Konfigurationsmodus (veraltet)",
+                      "Description": "Das Gerät startet mit aktiviertem AP und wechselt in den Konfigurationsmodus. Dies ist das alte Verhalten."
+                    },
+                    {
+                      "Value": "1",
+                      "Name": "Offline starten",
+                      "Description": "Das Gerät wechselt sofort in den Offline-Modus. Es wird kein AP gestartet und der Konfigurationsmodus wird nicht automatisch aktiviert."
+                    },
+                    {
+                      "Value": "2",
+                      "Name": "Konfigurationsmodus → Offline",
+                      "Description": "Das Gerät aktiviert AP und wechselt für 1 Stunde in den Konfigurationsmodus, dann wechselt es in den Offline-Modus."
+                    },
+                    {
+                      "Value": "3",
+                      "Name": "Nicht konfigurierter Modus",
+                      "Description": "Das Gerät wechselt in den Modus 'nicht konfiguriert'. Dies ist das Standardverhalten."
+                    }
+                  ]
+                },
+                "fr": {
+                  "Name": "Mode initial",
+                  "EnumValues": [
+                    {
+                      "Value": "0",
+                      "Name": "Mode de configuration (hérité)",
+                      "Description": "L'appareil démarre avec AP activé et entre en mode de configuration. C'est le comportement hérité."
+                    },
+                    {
+                      "Value": "1",
+                      "Name": "Démarrer hors ligne",
+                      "Description": "L'appareil entre immédiatement en mode hors ligne. Aucun AP ne sera démarré et aucun mode de configuration ne sera activé automatiquement."
+                    },
+                    {
+                      "Value": "2",
+                      "Name": "Mode de configuration → Hors ligne",
+                      "Description": "L'appareil active l'AP et entre en mode de configuration pendant 1 heure, puis passe en mode hors ligne."
+                    },
+                    {
+                      "Value": "3",
+                      "Name": "Mode non configuré",
+                      "Description": "L'appareil entre en mode 'non configuré'. C'est le comportement par défaut."
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "Key": "TimeoutInMin",
+              "Name": "Timeout trybu configuracji",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "5",
+              "Translations": {
+                "en": {
+                  "Name": "Config Mode Timeout (minutes)",
+                  "Description": "Specifies the duration (in minutes) for which the device remains in configuration mode when 'Config Mode → Offline' is selected."
+                },
+                "es": {
+                  "Name": "Tiempo de espera del modo de configuración (minutos)",
+                  "Description": "Especifica la duración (en minutos) durante la cual el dispositivo permanece en modo de configuración cuando se selecciona 'Modo de configuración → Sin conexión'."
+                },
+                "de": {
+                  "Name": "Konfigurationsmodus-Timeout (Minuten)",
+                  "Description": "Gibt die Dauer (in Minuten) an, für die das Gerät im Konfigurationsmodus verbleibt, wenn 'Konfigurationsmodus → Offline' ausgewählt ist."
+                },
+                "fr": {
+                  "Name": "Délai d'attente du mode de configuration (minutes)",
+                  "Description": "Spécifie la durée (en minutes) pendant laquelle l'appareil reste en mode de configuration lorsque 'Mode de configuration → Hors ligne' est sélectionné."
+                }
+              }
+            }
+          ]
         }
       }
     },
@@ -1086,8 +1292,11 @@
           },
           "Parameters": [
             {
-              "Name": "Altitude",
-              "Type": "number"
+              "Key": "Altitude",
+              "Name": "Wysokość n.p.m.",
+              "Type": "number",
+              "IsRequired": true,
+              "DefaultValue": "0"
             }
           ]
         },

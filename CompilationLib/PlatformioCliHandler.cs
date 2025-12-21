@@ -122,8 +122,9 @@ public class PlatformioCliHandler : ICompileHandler
                 if (p == null)
                     continue;
 
-                var name = (p.Name ?? string.Empty).Trim();
-                if (string.IsNullOrEmpty(name))
+                // Use Identifier property which prefers Key over Name
+                var identifier = (p.Identifier ?? string.Empty).Trim();
+                if (string.IsNullOrEmpty(identifier))
                     continue;
 
                 // Convert value to string safely
@@ -131,14 +132,15 @@ public class PlatformioCliHandler : ICompileHandler
 
                 // Format based on declared type: numbers as-is, strings quoted
                 string value;
-                if (string.Equals(p.Type, "number", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(p.Type, "number", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(p.Type, "enum", StringComparison.OrdinalIgnoreCase))
                     value = string.IsNullOrEmpty(raw) ? "0" : raw;
                 else // treat everything else as string
                     value = $"'\"{raw}\"'";
 
-                // define is FLAGNAME_ParamName=Value
-                var define = $" -D {flag.Key}_{p.Name}={value}";
-                var indexOfNewParameter = lines.FindIndex(line => line.Contains($"{flag.Key}_{p.Name}"));
+                // define is FLAGNAME_ParamIdentifier=Value
+                var define = $" -D {flag.Key}_{identifier}={value}";
+                var indexOfNewParameter = lines.FindIndex(line => line.Contains($"{flag.Key}_{identifier}"));
                 if (indexOfNewParameter != -1)
                 {
                     lines[indexOfNewParameter] = define;

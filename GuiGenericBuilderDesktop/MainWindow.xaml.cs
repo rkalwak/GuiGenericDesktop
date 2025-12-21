@@ -112,6 +112,19 @@ namespace GuiGenericBuilderDesktop
                     {
                         flagItem.Value.Section = sectionItem.Key;
                         flagItem.Value.Key = flagItem.Key;
+                        
+                        // Initialize parameter values from DefaultValue if Value is not set
+                        if (flagItem.Value.Parameters != null)
+                        {
+                            foreach (var param in flagItem.Value.Parameters)
+                            {
+                                if (string.IsNullOrEmpty(param.Value) && !string.IsNullOrEmpty(param.DefaultValue))
+                                {
+                                    param.Value = param.DefaultValue;
+                                }
+                            }
+                        }
+                        
                         // SectionOrder has an internal setter in BuildFlagItem; cannot assign from this assembly.
                         // Preserve existing SectionOrder value from deserialization instead of assigning here.
                         AllBuildFlags.Add(flagItem.Value);

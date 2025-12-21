@@ -1,7 +1,9 @@
 using CompilationLib;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
+using System.Globalization;
 
 namespace GuiGenericBuilderDesktop
 {
@@ -24,16 +26,20 @@ namespace GuiGenericBuilderDesktop
             // Safely retrieve templates from the DataGrid scope (avoid exceptions if missing)
             var textTemplate = ParamsGrid.TryFindResource("TextTemplate") as DataTemplate;
             var numberTemplate = ParamsGrid.TryFindResource("NumberTemplate") as DataTemplate;
-            if (textTemplate != null && numberTemplate != null)
+            var enumTemplate = ParamsGrid.TryFindResource("EnumTemplate") as DataTemplate;
+            
+            if (textTemplate != null && numberTemplate != null && enumTemplate != null)
             {
                 this.Resources["TextTemplate"] = textTemplate;
                 this.Resources["NumberTemplate"] = numberTemplate;
+                this.Resources["EnumTemplate"] = enumTemplate;
 
                 // Add template selector resource
                 this.Resources["ValueEditorSelector"] = new ValueEditorTemplateSelector
                 {
                     TextTemplate = textTemplate,
-                    NumberTemplate = numberTemplate
+                    NumberTemplate = numberTemplate,
+                    EnumTemplate = enumTemplate
                 };
             }
         }
@@ -57,41 +63,70 @@ namespace GuiGenericBuilderDesktop
 
         private bool ValidateParameters()
         {
-            // Parameter names are now fixed, no need to validate them
-            // Could add value validation here if needed in the future
+            // Validate that all required parameters have values
+            foreach (var param in _parameters)
+            {
+                // Only validate if parameter is required
+                if (param.IsRequired && string.IsNullOrWhiteSpace(param.Value))
+                {
+                    MessageBox.Show(
+                        $"Parameter '{param.Name}' is required and must have a value.",
+                        "Validation Error",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return false;
+                }
+                
+                // For enum type, validate that the value exists in EnumValues (only if value is provided)
+                if (!string.IsNullOrWhiteSpace(param.Value) && 
+                    param.Type?.ToLowerInvariant() == "enum" && 
+                    param.EnumValues != null && 
+                    param.EnumValues.Any())
+                {
+                    if (!param.EnumValues.Any(ev => ev.Value == param.Value))
+                    {
+                        MessageBox.Show(
+                            $"Parameter '{param.Name}' has an invalid value. Please select from the dropdown.",
+                            "Validation Error",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Warning);
+                        return false;
+                    }
+                }
+            }
             
             return true;
         }
 
         private void ParamsGrid_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-            if (e.EditAction != DataGridEditAction.Commit) return;
-            if (_handlingRowEditEnding) return;
+        if (e.EditAction != DataGridEditAction.Commit) return;
+        if (_handlingRowEditEnding) return;
 
-            try
-            {
-                _handlingRowEditEnding = true;
-                ParamsGrid.CommitEdit(DataGridEditingUnit.Row, true);
+        try
+        {
+            _handlingRowEditEnding = true;
+            ParamsGrid.CommitEdit(DataGridEditingUnit.Row, true);
 
-                if (!ValidateParameters())
-                {
-                    var source = _parameters.ToList();
-                    ParamsGrid.ItemsSource = null;
-                    ParamsGrid.ItemsSource = source;
-                    _parameters.Clear();
-                    _parameters.AddRange(source);
-                }
-            }
-            finally
+            if (!ValidateParameters())
             {
-                _handlingRowEditEnding = false;
+                var source = _parameters.ToList();
+                ParamsGrid.ItemsSource = null;
+                ParamsGrid.ItemsSource = source;
+                _parameters.Clear();
+                _parameters.AddRange(source);
             }
+        }
+        finally
+        {
+            _handlingRowEditEnding = false;
+        }
         }
 
         private void NumberOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            // Allow digits and decimal separator
-            e.Handled = !e.Text.All(c => char.IsDigit(c) || c == '.' || c == ',');
+            // Allow digits, decimal separator, and minus sign
+            e.Handled = !e.Text.All(c => char.IsDigit(c) || c == '.' || c == ',' || c == '-');
         }
     }
 
@@ -99,16 +134,57 @@ namespace GuiGenericBuilderDesktop
     {
         public DataTemplate NumberTemplate { get; set; }
         public DataTemplate TextTemplate { get; set; }
+        public DataTemplate EnumTemplate { get; set; }
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container)
         {
             if (item is Parameter p)
             {
                 var t = (p.Type ?? string.Empty).Trim().ToLowerInvariant();
-                if (t == "number") return NumberTemplate;
+                
+                // Check for enum type - should use dropdown
+                if (t == "enum" && p.EnumValues != null && p.EnumValues.Any())
+                {
+                    return EnumTemplate;
+                }
+                
+                // Check for number type - should use number input
+                if (t == "number")
+                {
+                    return NumberTemplate;
+                }
+                
+                // Default to text input
                 return TextTemplate;
             }
             return base.SelectTemplate(item, container);
+        }
+    }
+
+    public class EnumValueToNameConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Length >= 2 && values[1] is Parameter param)
+            {
+                var currentValue = values[0]?.ToString() ?? string.Empty;
+                
+                if (param.Type?.ToLowerInvariant() == "enum" && param.EnumValues != null)
+                {
+                    var enumValue = param.EnumValues.FirstOrDefault(ev => ev.Value == currentValue);
+                    if (enumValue != null)
+                    {
+                        return $"{enumValue.Name} ({enumValue.Value})";
+                    }
+                }
+            }
+            
+            return values[0]?.ToString() ?? string.Empty;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

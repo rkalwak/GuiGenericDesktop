@@ -9,7 +9,7 @@
     
     <!-- Application Info for Signing -->
     <AssemblyName>GuiGenericBuilderDesktop</AssemblyName>
-    <Version>1.0.0.0</Version>
+    <Version>2.0.0.1</Version>
     <Company>GUI Generic Builder</Company>
     <Product>GUI Generic Builder Desktop</Product>
     <Copyright>Copyright © 2024</Copyright>

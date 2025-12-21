@@ -872,4 +872,148 @@ namespace CompilationLib.Tests
             finally { CleanupTempRepo(temp); }
         }
     }
+
+    public class SUPLA_INITIAL_CONFIG_MODE_Tests : PlatformioTestBase
+    {
+        [Theory]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms_WithMode0(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p,
+                    new List<BuildFlagItem>
+                    {
+                        new BuildFlagItem
+                        {
+                            FlagName = "SUPLA_INITIAL_CONFIG_MODE",
+                            Parameters = new List<Parameter>
+                            {
+                                new Parameter
+                                {
+                                    Name = "Mode",
+                                    Type = "enum",
+                                    Value = "0"
+                                }
+                            }
+                        }
+                    },
+                    temp);
+                using (new AssertionScope())
+                {
+                    res.IsSuccessful.Should().BeTrue();
+                    if (!res.IsSuccessful)
+                        res.Logs.Should().Be("");
+                }
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+
+        [Theory]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms_WithMode1(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p,
+                    new List<BuildFlagItem>
+                    {
+                        new BuildFlagItem
+                        {
+                            FlagName = "SUPLA_INITIAL_CONFIG_MODE",
+                            Parameters = new List<Parameter>
+                            {
+                                new Parameter
+                                {
+                                    Name = "Mode",
+                                    Type = "enum",
+                                    Value = "1"
+                                }
+                            }
+                        }
+                    },
+                    temp);
+                Assert.True(res.IsSuccessful);
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+
+        [Theory]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms_WithMode2(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p,
+                    new List<BuildFlagItem>
+                    {
+                        new BuildFlagItem
+                        {
+                            FlagName = "SUPLA_INITIAL_CONFIG_MODE",
+                            Parameters = new List<Parameter>
+                            {
+                                new Parameter
+                                {
+                                    Name = "Mode",
+                                    Type = "enum",
+                                    Value = "2"
+                                }
+                            }
+                        }
+                    },
+                    temp);
+                Assert.True(res.IsSuccessful);
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+
+        [Theory]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms_WithMode3(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p,
+                    new List<BuildFlagItem>
+                    {
+                        new BuildFlagItem
+                        {
+                            FlagName = "SUPLA_INITIAL_CONFIG_MODE",
+                            Parameters = new List<Parameter>
+                            {
+                                new Parameter
+                                {
+                                    Name = "Mode",
+                                    Type = "enum",
+                                    Value = "3"
+                                }
+                            }
+                        }
+                    },
+                    temp);
+                Assert.True(res.IsSuccessful);
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+
+        [Theory]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms_WithoutParameter(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p, new List<BuildFlagItem>
+                {
+                    new BuildFlagItem { FlagName = "SUPLA_INITIAL_CONFIG_MODE" }
+                }, temp);
+                Assert.True(res.IsSuccessful);
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+    }
 }
