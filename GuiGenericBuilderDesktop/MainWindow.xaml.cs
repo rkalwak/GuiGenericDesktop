@@ -26,6 +26,7 @@ namespace GuiGenericBuilderDesktop
         private ProgressBar compileProgressBar;
         private TextBlock compileCountdownText;
         private CheckBox deployCheckBox;
+        private CheckBox backupCheckBox;
         private CancellationTokenSource _compileCountdownCts;
         private readonly ILogger _logger;
 
@@ -268,11 +269,24 @@ namespace GuiGenericBuilderDesktop
                 FontWeight = FontWeights.SemiBold
             };
 
+            // Backup checkbox - positioned right before deploy checkbox
+            backupCheckBox = new CheckBox 
+            { 
+                Content = "Backup",
+                IsChecked = true,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(12, 0, 4, 0),
+                FontWeight = FontWeights.SemiBold,
+                ToolTip = "Create backup before deploying firmware"
+            };
+
 
             DockPanel.SetDock(compileButton, Dock.Right);
             devicePanel.Children.Add(compileButton);
             DockPanel.SetDock(deployCheckBox, Dock.Right);
             devicePanel.Children.Add(deployCheckBox);
+            DockPanel.SetDock(backupCheckBox, Dock.Right);
+            devicePanel.Children.Add(backupCheckBox);
             
             
             DockPanel.SetDock(checkBtn, Dock.Right);
@@ -500,8 +514,6 @@ namespace GuiGenericBuilderDesktop
                 checkBox.IsChecked = null; // Indeterminate
         }
 
-
-
         private async void CompileSelected_Click(object sender, RoutedEventArgs e)
         {
 
@@ -512,8 +524,9 @@ namespace GuiGenericBuilderDesktop
                 return;
             }
 
-            // Get deploy checkbox state
+            // Get deploy and backup checkbox states
             bool shouldDeploy = deployCheckBox?.IsChecked ?? true;
+            bool shouldBackup = backupCheckBox?.IsChecked ?? true;
 
             // Validate COM port selection only if deploying
             if (shouldDeploy)
@@ -581,7 +594,8 @@ namespace GuiGenericBuilderDesktop
                         ProjectDirectory = _repositoryPath,
                         LibrariesPath = Path.Combine(_repositoryPath, "lib"),
                         PortCom = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
-                        ShouldDeploy = shouldDeploy
+                        ShouldDeploy = shouldDeploy,
+                        ShouldBackup = shouldBackup
                     };
                     var handler = new PlatformioCliHandler();
                     ICompileHandler compiler = new PlatformioCliHandler();
@@ -620,8 +634,12 @@ namespace GuiGenericBuilderDesktop
                     {
                         System.Diagnostics.Debug.WriteLine($"Failed to save configuration: {ex.Message}");
                     }
-                    // Show success results with hash
-                    var resultsWindow = new CompilationResultsWindow(result.HashOfOptions ?? string.Empty, true)
+                    
+                    // Show success results with hash and backup path
+                    var resultsWindow = new CompilationResultsWindow(
+                        result.HashOfOptions ?? string.Empty, 
+                        true, 
+                        result.BackupFilePath)
                     {
                         Owner = this
                     };

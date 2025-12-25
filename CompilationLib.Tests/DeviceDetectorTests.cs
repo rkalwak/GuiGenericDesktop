@@ -26,6 +26,12 @@ namespace CompilationLib.Tests
 
             public Task<EsptoolResult> ReadFlashId(string comPort, System.Threading.CancellationToken cancellation = default)
             => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = _flashStdOut, StdErr = _flashStdErr, Command = "esptool --flash-id" });
+
+            public Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, System.Threading.CancellationToken cancellation = default)
+            => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Read flash success", StdErr = "", Command = "esptool read-flash" });
+
+            public Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, System.Threading.CancellationToken cancellation = default)
+            => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Write flash success", StdErr = "", Command = "esptool write-flash" });
         }
 
         [Fact]

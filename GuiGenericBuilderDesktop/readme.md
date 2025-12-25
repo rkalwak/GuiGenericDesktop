@@ -35,4 +35,13 @@ Install Vistual Studio Code and then install the Platform.io extension or just P
 - partition selection
 - building Zigbee Gateway
 - CC1101 given version downloading
--
+- Fix issues:
+	
+	- https://forum.supla.org/viewtopic.php?t=17742
+	- Analog as kpop i inne te¿ 
+	- I2c sensory jako kpop
+	- https://tasmota.github.io/docs/Components/
+	- https://forum.supla.org/viewtopic.php?p=200757#p200757
+	- https://forum.supla.org/viewtopic.php?p=201170#p201170
+	- https://forum.supla.org/viewtopic.php?p=194354#p194354
+	- https://forum.supla.org/viewtopic.php?t=16885

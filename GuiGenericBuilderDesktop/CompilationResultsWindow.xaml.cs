@@ -11,6 +11,7 @@ namespace GuiGenericBuilderDesktop
     {
         private string _hash;
         private string _logs;
+        private string _backupFilePath;
         private bool _isSuccess;
 
         /// <summary>
@@ -32,6 +33,18 @@ namespace GuiGenericBuilderDesktop
             InitializeComponent();
             _hash = hash;
             _isSuccess = isSuccess;
+            ConfigureForSuccess();
+        }
+
+        /// <summary>
+        /// Constructor for showing compilation success with hash and backup path
+        /// </summary>
+        public CompilationResultsWindow(string hash, bool isSuccess, string backupFilePath)
+        {
+            InitializeComponent();
+            _hash = hash;
+            _isSuccess = isSuccess;
+            _backupFilePath = backupFilePath;
             ConfigureForSuccess();
         }
 
@@ -59,6 +72,14 @@ namespace GuiGenericBuilderDesktop
             HashSection.Visibility = Visibility.Visible;
             HashTextBox.Text = _hash ?? "No hash available.";
             CopyHashButton.Visibility = Visibility.Visible;
+            
+            // Show backup section if backup file path is available
+            if (!string.IsNullOrEmpty(_backupFilePath) && File.Exists(_backupFilePath))
+            {
+                BackupSection.Visibility = Visibility.Visible;
+                BackupFileNameText.Text = Path.GetFileName(_backupFilePath);
+                BackupPathText.Text = _backupFilePath;
+            }
             
             // Hide or minimize log section if no logs
             if (string.IsNullOrWhiteSpace(_logs))
@@ -158,6 +179,70 @@ namespace GuiGenericBuilderDesktop
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        private void CopyBackupPathButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_backupFilePath))
+                {
+                    Clipboard.SetText(_backupFilePath);
+                    MessageBox.Show(
+                        $"Backup file path copied to clipboard!\n\n{_backupFilePath}", 
+                        "Copy Success", 
+                        MessageBoxButton.OK, 
+                        MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Failed to copy backup path to clipboard: {ex.Message}", 
+                    "Copy Error", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private void OpenBackupFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_backupFilePath) && File.Exists(_backupFilePath))
+                {
+                    var directoryPath = Path.GetDirectoryName(_backupFilePath);
+                    if (Directory.Exists(directoryPath))
+                    {
+                        // Open folder in Windows Explorer and select the file
+                        System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{_backupFilePath}\"");
+                    }
+                    else
+                    {
+                        MessageBox.Show(
+                            $"Backup directory not found:\n{directoryPath}", 
+                            "Directory Not Found", 
+                            MessageBoxButton.OK, 
+                            MessageBoxImage.Warning);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Backup file not found.", 
+                        "File Not Found", 
+                        MessageBoxButton.OK, 
+                        MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Failed to open backup folder: {ex.Message}", 
+                    "Open Folder Error", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Error);
+            }
         }
     }
 }

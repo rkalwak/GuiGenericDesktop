@@ -28,6 +28,52 @@ public class PlatformioCliHandler : ICompileHandler
 
         // PlatformIO uses 'run' command for compilation
         CommentUnlistedFlagsBetweenMarkers($"{request.ProjectDirectory}/platformio.ini", request.BuildFlags);
+        
+        // Create backup before deployment if both deploying and backup are enabled
+        if (request.ShouldDeploy && request.ShouldBackup && !string.IsNullOrEmpty(request.PortCom))
+        {
+            try
+            {
+                Console.WriteLine("=== Creating Flash Backup ===");
+                
+                var backupDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backup");
+                var backupManager = new BackupManager(backupDir, new EsptoolWrapper());
+                
+                // Generate encoded config for this build
+                var encodedConfig = BuildConfigurationHasher.EncodeOptions(request.BuildFlags);
+                
+                // Determine chip type from platform
+                var chipType = request.Platform?.ToLowerInvariant() ?? "esp32";
+                
+                var backupPath = await backupManager.CreateBackupAsync(
+                    request.PortCom,
+                    chipType,
+                    encodedConfig,
+                    cancellationToken);
+                
+                if (!string.IsNullOrEmpty(backupPath))
+                {
+                    Console.WriteLine($"? Backup saved to: {backupPath}");
+                    compileResponse.BackupFilePath = backupPath;
+                }
+                else
+                {
+                    Console.WriteLine("? Warning: Backup creation failed, but continuing with compilation...");
+                    // Don't fail the build if backup fails - it's a nice-to-have feature
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"? Backup error: {ex.Message}");
+                Console.WriteLine("? Continuing with compilation despite backup failure...");
+                // Don't fail the build if backup fails
+            }
+        }
+        else if (request.ShouldDeploy && !request.ShouldBackup)
+        {
+            Console.WriteLine("? Backup skipped (Backup checkbox is unchecked)");
+        }
+        
         string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.Platform} {(request.ShouldDeploy ? ("--target upload --upload-port " + request.PortCom+ " ") : "")}--verbose";
 
         var processStartInfo = new ProcessStartInfo
