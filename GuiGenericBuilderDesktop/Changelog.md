@@ -26,3 +26,25 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 - Backup uses esptool command: `read-flash 0x000000 0x400000` at 921600 baud
 - Backup files are raw flash dumps (4-16MB depending on device)
 
+## [2025-01-15] - Version 2.1.0
+
+### Added
+
+**CI/CD GitHub Actions Workflows**
+- Added comprehensive CI/CD pipeline using GitHub Actions
+- Three workflows for different purposes:
+  - **CI Workflow**: Runs on every push, validates build and tests
+  - **Build and Publish**: Creates artifacts for master/main branches, handles nightly builds
+  - **Release Workflow**: Automates release creation from version tags
+- Release workflow features:
+  - Builds two variants: self-contained and framework-dependent
+  - Automatic version extraction from git tags
+  - Creates GitHub releases with ZIP archives
+  - Includes release notes and installation instructions
+- Nightly builds retained for 90 days
+- Release artifacts include builder.json and documentation
+- Supports semantic versioning (v*.*.*) and prerelease tags (alpha, beta, rc)
+- Comprehensive documentation in `.github/workflows/README.md`
+
+**Backup Path Display in Compilation Results**
+

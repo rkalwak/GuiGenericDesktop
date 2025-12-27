@@ -1,0 +1,132 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  PROJECT_PATH: 'GuiGenericBuilderDesktop/GuiGenericBuilderDesktop.csproj'
+  SOLUTION_PATH: 'GuiGenericV2.sln'
+  BUILD_CONFIGURATION: 'Release'
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Get version from tag
+      id: get_version
+      run: |
+        $version = "${{ github.ref_name }}" -replace '^v', ''
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "Building version: $version"
+      shell: pwsh
+    
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+    
+    - name: Build
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore -p:Version=${{ steps.get_version.outputs.VERSION }}
+    
+    - name: Run tests
+      run: dotnet test ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal
+    
+    - name: Publish Windows x64
+      run: |
+        dotnet publish ${{ env.PROJECT_PATH }} `
+          --configuration ${{ env.BUILD_CONFIGURATION }} `
+          --runtime win-x64 `
+          --self-contained true `
+          --output ./publish/win-x64 `
+          -p:PublishSingleFile=true `
+          -p:Version=${{ steps.get_version.outputs.VERSION }}
+    
+    - name: Publish Windows x64 (Framework-dependent)
+      run: |
+        dotnet publish ${{ env.PROJECT_PATH }} `
+          --configuration ${{ env.BUILD_CONFIGURATION }} `
+          --runtime win-x64 `
+          --self-contained false `
+          --output ./publish/win-x64-fd `
+          -p:Version=${{ steps.get_version.outputs.VERSION }}
+    
+    - name: Copy additional files
+      run: |
+        Copy-Item -Path "README.md" -Destination "./publish/win-x64/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "GuiGenericBuilderDesktop/readme.md" -Destination "./publish/win-x64/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "LICENSE" -Destination "./publish/win-x64/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "GuiGenericBuilderDesktop/builder.json" -Destination "./publish/win-x64/" -ErrorAction SilentlyContinue
+        
+        Copy-Item -Path "README.md" -Destination "./publish/win-x64-fd/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "GuiGenericBuilderDesktop/readme.md" -Destination "./publish/win-x64-fd/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "LICENSE" -Destination "./publish/win-x64-fd/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "GuiGenericBuilderDesktop/builder.json" -Destination "./publish/win-x64-fd/" -ErrorAction SilentlyContinue
+      shell: pwsh
+    
+    - name: Create release archives
+      run: |
+        $version = "${{ steps.get_version.outputs.VERSION }}"
+        
+        # Self-contained archive
+        Compress-Archive -Path ./publish/win-x64/* -DestinationPath "GuiGenericBuilder-v$version-win-x64.zip"
+        
+        # Framework-dependent archive
+        Compress-Archive -Path ./publish/win-x64-fd/* -DestinationPath "GuiGenericBuilder-v$version-win-x64-framework-dependent.zip"
+      shell: pwsh
+    
+    - name: Generate changelog
+      id: changelog
+      run: |
+        $changelog = @"
+        ## What's New in ${{ github.ref_name }}
+        
+        ### Installation
+        
+        **Self-Contained (Recommended)**
+        - Download: ``GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64.zip``
+        - No .NET installation required
+        - Larger file size (~150MB)
+        
+        **Framework-Dependent**
+        - Download: ``GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64-framework-dependent.zip``
+        - Requires .NET 10 Runtime installed
+        - Smaller file size (~10MB)
+        
+        ### Prerequisites
+        - Platform.IO must be installed
+        - Windows 10/11 (x64)
+        
+        ### Features
+        See [Changelog](./GuiGenericBuilderDesktop/Changelog.md) for detailed changes.
+        "@
+        
+        $changelog | Out-File -FilePath changelog.txt -Encoding utf8
+      shell: pwsh
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64.zip
+          GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64-framework-dependent.zip
+        body_path: changelog.txt
+        draft: false
+        prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

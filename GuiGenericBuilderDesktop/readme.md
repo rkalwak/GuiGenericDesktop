@@ -25,7 +25,7 @@ Install Vistual Studio Code and then install the Platform.io extension or just P
 ## To do
 
 - Languages support
-- CI/CD integration
+
 - detection of c3, s3 , c6 boards
 - ESP32-S works with proper boot sequence, s3 works
 - network publishing with build flag
@@ -38,8 +38,7 @@ Install Vistual Studio Code and then install the Platform.io extension or just P
 - Fix issues:
 	
 	- https://forum.supla.org/viewtopic.php?t=17742
-	- Analog as kpop i inne te¿ 
-	- I2c sensory jako kpop
+	- I2c sensors as kpop
 	- https://tasmota.github.io/docs/Components/
 	- https://forum.supla.org/viewtopic.php?p=200757#p200757
 	- https://forum.supla.org/viewtopic.php?p=201170#p201170
