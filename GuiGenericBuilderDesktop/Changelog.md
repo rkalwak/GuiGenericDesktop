@@ -50,6 +50,19 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 
 ### Changed
 
+**Test Organization and CI/CD Updates**
+- Marked all Platform.IO integration tests with `[Trait("Category", "Integration")]`
+- Updated CI workflow to exclude integration tests from regular builds
+  - CI now only runs unit tests: `--filter "Category!=Integration"`
+  - Faster feedback loop for developers (< 5 minutes vs 60+ minutes)
+- Updated build-and-publish and release workflows to exclude integration tests
+- Created dedicated `integration-tests.yml` workflow for running full integration tests
+  - Runs on manual trigger or daily schedule (2 AM UTC)
+  - Runs automatically on changes to CompilationLib
+  - Installs Platform.IO and clones GUI-Generic repository
+  - Timeout set to 120 minutes for long-running tests
+  - Test results uploaded as artifacts (30-day retention)
+
 **CI/CD Configuration Updates**
 - Updated all workflow files to use correct solution name: `GuiGenericBuilderDesktop.sln` (was incorrectly set to `GuiGenericV2.sln`)
 - Verified .NET 10.0 target framework configuration

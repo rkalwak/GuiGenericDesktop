@@ -21,9 +21,12 @@ This repository uses GitHub Actions for continuous integration and deployment.
 **What it does:**
 - Restores dependencies
 - Builds the solution in Release configuration
-- Runs all tests
+- Runs **unit tests only** (excludes integration tests)
+- Uses filter: `--filter "Category!=Integration"`
 
-**Purpose:** Quick validation that code compiles and tests pass.
+**Purpose:** Quick validation that code compiles and unit tests pass.
+
+**Duration:** ~5 minutes
 
 ---
 
@@ -60,7 +63,7 @@ This repository uses GitHub Actions for continuous integration and deployment.
 
 **What it does:**
 - Builds with version from tag
-- Runs tests
+- Runs **unit tests only** (excludes integration tests)
 - Creates two publish variants:
   - **Self-Contained**: No .NET runtime required (~150MB)
   - **Framework-Dependent**: Requires .NET 10 runtime (~10MB)

@@ -20,8 +20,23 @@ git push
 **What happens:**
 - ? CI workflow runs
 - ? Code builds
-- ? Tests run
+- ? **Unit tests run** (integration tests excluded)
 - ? Status visible in PR/commit
+- ? Fast feedback (~5 minutes)
+
+### Running Integration Tests
+
+**Manual Trigger:**
+1. Go to Actions ? Integration Tests
+2. Click "Run workflow"
+3. Select branch
+4. Click "Run workflow"
+
+**Automatic:**
+- Runs daily at 2 AM UTC
+- Runs on changes to `CompilationLib/**`
+
+**Note:** Integration tests take 60-120 minutes to complete.
 
 ### Nightly Builds (master/main)
 
@@ -231,8 +246,11 @@ yamllint .github/workflows/*.yml
 # Build locally
 dotnet build --configuration Release
 
-# Test locally
-dotnet test --configuration Release
+# Test locally (unit tests only)
+dotnet test --configuration Release --filter "Category!=Integration"
+
+# Run integration tests locally (requires Platform.IO)
+dotnet test --configuration Release --filter "Category=Integration"
 
 # Create release
 git tag -a v2.1.0 -m "Release 2.1.0"
