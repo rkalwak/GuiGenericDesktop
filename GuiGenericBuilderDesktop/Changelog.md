@@ -89,10 +89,7 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 - Color-coded status messages for quick visual feedback
 - Non-intrusive auto-hiding status messages
 
-**SmartScreen Warning Mitigation**
-- Added code signing preparation and mitigation strategies
-- Documentation for handling Windows SmartScreen warnings
-- Guidance for building application reputation with Microsoft
+
 
 ### Changed
 

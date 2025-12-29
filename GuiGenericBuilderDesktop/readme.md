@@ -24,16 +24,17 @@ Install Vistual Studio Code and then install the Platform.io extension or just P
 
 ## To do
 
+- add configuration from builder for wifi and supla server
+- change progress bar to count compilation time instead of counting down
+- add SD version, application version
+- add option to clean device flash
+- sound when compilation is done
+- Niestety ca³kowicie wirtualny termostat (oparty na linkach bezpoœrednich) nie dzia³a. To znaczy dzia³a odczyt temperatury, ale jeœli dodamy linki bezpoœrednie do przekaŸnika (w³¹cznika) to modu³ odmawia wspó³pracy. 
+Zawiesza siê, nie loguje do cloud i trzeba go przeflashowaæ na nowo, bo nawet w tryb config wejœæ nie chce. Krystian nie da³ z tym rady, ale mia³em nadziejê, ¿e siê "cudownie" naprawi³o. Niestety nie ;-)
 - Languages support
-
-- detection of c3, s3 , c6 boards
-- ESP32-S works with proper boot sequence, s3 works
-- network publishing with build flag
-	- SuplaDevice.allowWorkInOfflineMode(0); 
-	- SuplaDevice.setLeaveCfgModeAfterInactivityMin(0);
 - json settings
 - partition selection
-- building Zigbee Gateway
+- building Zigbee Gateway?
 - CC1101 given version downloading
 - Fix issues:
 	
