@@ -9,7 +9,7 @@ namespace GuiGenericBuilderDesktop
     /// </summary>
     public partial class CompilationResultsWindow : Window
     {
-        private string _hash;
+        private string _encodedConfig;
         private string _logs;
         private string _backupFilePath;
         private bool _isSuccess;
@@ -26,35 +26,35 @@ namespace GuiGenericBuilderDesktop
         }
 
         /// <summary>
-        /// Constructor for showing compilation success with hash
+        /// Constructor for showing compilation success with encoded configuration string
         /// </summary>
-        public CompilationResultsWindow(string hash, bool isSuccess)
+        public CompilationResultsWindow(string encodedConfig, bool isSuccess)
         {
             InitializeComponent();
-            _hash = hash;
+            _encodedConfig = encodedConfig;
             _isSuccess = isSuccess;
             ConfigureForSuccess();
         }
 
         /// <summary>
-        /// Constructor for showing compilation success with hash and backup path
+        /// Constructor for showing compilation success with encoded configuration string and backup path
         /// </summary>
-        public CompilationResultsWindow(string hash, bool isSuccess, string backupFilePath)
+        public CompilationResultsWindow(string encodedConfig, bool isSuccess, string backupFilePath)
         {
             InitializeComponent();
-            _hash = hash;
+            _encodedConfig = encodedConfig;
             _isSuccess = isSuccess;
             _backupFilePath = backupFilePath;
             ConfigureForSuccess();
         }
 
         /// <summary>
-        /// Constructor for showing both hash and logs (comprehensive view)
+        /// Constructor for showing both encoded configuration and logs (comprehensive view)
         /// </summary>
-        public CompilationResultsWindow(string hash, string logs, bool isSuccess)
+        public CompilationResultsWindow(string encodedConfig, string logs, bool isSuccess)
         {
             InitializeComponent();
-            _hash = hash;
+            _encodedConfig = encodedConfig;
             _logs = logs;
             _isSuccess = isSuccess;
             
@@ -68,9 +68,9 @@ namespace GuiGenericBuilderDesktop
         {
             TitleText.Text = "Compilation Successful";
             
-            // Show hash section
+            // Show encoded configuration section
             HashSection.Visibility = Visibility.Visible;
-            HashTextBox.Text = _hash ?? "No hash available.";
+            HashTextBox.Text = _encodedConfig ?? "No configuration available.";
             CopyHashButton.Visibility = Visibility.Visible;
             
             // Show backup section if backup file path is available
@@ -116,15 +116,15 @@ namespace GuiGenericBuilderDesktop
         {
             try
             {
-                if (!string.IsNullOrWhiteSpace(_hash))
+                if (!string.IsNullOrWhiteSpace(_encodedConfig))
                 {
-                    Clipboard.SetText(_hash);
-                    MessageBox.Show("Hash copied to clipboard successfully!", "Copy Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                    Clipboard.SetText(_encodedConfig);
+                    MessageBox.Show("Configuration string copied to clipboard successfully!", "Copy Success", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to copy hash to clipboard: {ex.Message}", "Copy Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Failed to copy configuration string to clipboard: {ex.Message}", "Copy Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -160,10 +160,10 @@ namespace GuiGenericBuilderDesktop
                 {
                     var contentToSave = _logs ?? string.Empty;
                     
-                    // Include hash in file if available
-                    if (!string.IsNullOrWhiteSpace(_hash))
+                    // Include encoded configuration in file if available
+                    if (!string.IsNullOrWhiteSpace(_encodedConfig))
                     {
-                        contentToSave = $"Build Configuration Hash:\n{_hash}\n\n{new string('=', 80)}\n\n{contentToSave}";
+                        contentToSave = $"Build Configuration String:\n{_encodedConfig}\n\n{new string('=', 80)}\n\n{contentToSave}";
                     }
                     
                     File.WriteAllText(saveFileDialog.FileName, contentToSave);

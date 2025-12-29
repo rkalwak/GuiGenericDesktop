@@ -58,6 +58,35 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 
 **Backup Path Display in Compilation Results**
 
+**Loading Indicators for Long Operations**
+- Added status text indicator for repository download operation
+  - Shows "⏳ Downloading GUI-Generic repository..." during download
+  - Shows "✓ Repository updated successfully!" on success (green)
+  - Shows "✗ Repository update failed" on error (red)
+  - Button is disabled during operation to prevent multiple clicks
+  - Status auto-hides after 3 seconds
+- Added status text indicator for device detection operation
+  - Shows "⏳ Detecting device..." during detection
+  - Shows "✓ Device detected: [chip] on [port]" on success (green)
+  - Shows "✗ No device detected" when no device found (orange-red)
+  - Shows "✗ Device detection error" on error (red)
+  - Button is disabled during operation
+  - Status auto-hides after 3 seconds
+- Added status text indicator for compilation operation
+  - Shows "⏳ Compiling firmware..." during compilation (black text)
+  - Shows "✓ Compilation successful!" on success (green)
+  - Shows "✗ Compilation failed" on error (red)
+  - Shows "✗ Compilation error" on exception (red)
+  - Button is disabled during operation
+  - Status auto-hides after 3 seconds
+  - Extended compilation timer from 90 to 120 seconds (2 minutes)
+  - Timer now displays "02:00" initially and counts down
+- Improved user feedback with emoji indicators (⏳, ✓, ✗)
+- Color-coded status messages for quick visual feedback
+- Non-intrusive auto-hiding status messages
+
+**SmartScreen Warning Mitigation**
+
 ### Changed
 
 **Test Organization and CI/CD Updates**
@@ -79,4 +108,24 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 - Added solution structure documentation to workflow README
 
 **PlatformioCliHandler**
+
+### Changed
+
+**Compilation Results Window - Now Shows Encoded Configuration String**
+- Changed compilation results window to display encoded configuration string instead of SHA256 hash
+- Encoded string is reversible and can be decoded to restore the exact build configuration
+- Updated UI labels:
+  - "Build Configuration Hash" → "Build Configuration String"
+  - Description now mentions it's encoded and can be shared/reused
+  - "Copy Hash" button → "Copy Configuration" button
+- Encoded string can be:
+  - Copied to clipboard for sharing
+  - Pasted into "Load from Encoded String" tab to recreate configuration
+  - Decoded to view all build flags
+- Maintains backward compatibility with hash-based configuration files
+- More user-friendly than hash - users can actually restore their configuration from this string
+
+### Added
+
+**Loading Indicators for Long Operations**
 

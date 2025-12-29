@@ -28,7 +28,7 @@
                     Grid.Row="1" 
                     Visibility="Collapsed"
                     Margin="0,0,0,12">
-            <TextBlock Text="Build Configuration Hash:" 
+            <TextBlock Text="Build Configuration String:" 
                        FontWeight="SemiBold" 
                        Margin="0,0,0,4"/>
             <Border BorderBrush="#CCCCCC" 
@@ -44,7 +44,7 @@
                          BorderThickness="0"
                          TextWrapping="Wrap"/>
             </Border>
-            <TextBlock Text="This SHA256 hash uniquely identifies your build configuration." 
+            <TextBlock Text="This encoded string contains your complete build configuration and can be shared or reused." 
                        FontSize="10"
                        Foreground="#666666"
                        Margin="0,4,0,0"/>
@@ -162,8 +162,8 @@
                     HorizontalAlignment="Right" 
                     Margin="0,12,0,0">
             <Button x:Name="CopyHashButton"
-                    Content="Copy Hash"
-                    Width="100"
+                    Content="Copy Configuration"
+                    Width="140"
                     Height="32"
                     Margin="0,0,8,0"
                     Visibility="Collapsed"

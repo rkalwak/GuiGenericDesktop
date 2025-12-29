@@ -29,6 +29,10 @@ namespace GuiGenericBuilderDesktop
         private CheckBox backupCheckBox;
         private CancellationTokenSource _compileCountdownCts;
         private readonly ILogger _logger;
+        private Button updateGGButton;
+        private Button checkDeviceButton;
+        private Button compileButton;
+        private TextBlock statusText;
 
         public MainWindow()
         {
@@ -172,7 +176,7 @@ namespace GuiGenericBuilderDesktop
             };
             loadConfigButton.Click += LoadConfig_Click;
 
-            var updateGGButton = new Button
+            updateGGButton = new Button
             {
                 Content = "1. Update Gui-Generic",
                 Width = 140,
@@ -187,8 +191,19 @@ namespace GuiGenericBuilderDesktop
            
 
 
-            var checkBtn = new Button { Content = "2. Check Device", Width = 120, Height = 28, Margin = new Thickness(8, 0, 0, 0) };
-            checkBtn.Click += CheckConnectedDevice_Click;
+            checkDeviceButton = new Button { Content = "2. Check Device", Width = 120, Height = 28, Margin = new Thickness(8, 0, 0, 0) };
+            checkDeviceButton.Click += CheckConnectedDevice_Click;
+            
+            // Status text for operations
+            statusText = new TextBlock
+            {
+                Text = string.Empty,
+                Margin = new Thickness(12, 0, 8, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                FontWeight = FontWeights.Normal,
+                Foreground = System.Windows.Media.Brushes.DarkBlue,
+                Visibility = Visibility.Collapsed
+            };
             
             // Progress bar and countdown for compile operation
             compileProgressBar = new ProgressBar 
@@ -198,8 +213,8 @@ namespace GuiGenericBuilderDesktop
                 Margin = new Thickness(8, 0, 4, 0), 
                 VerticalAlignment = VerticalAlignment.Center,
                 Minimum = 0,
-                Maximum = 60,
-                Value = 60
+                Maximum = 120,
+                Value = 120
             };
             
             compileCountdownText = new TextBlock 
@@ -210,7 +225,7 @@ namespace GuiGenericBuilderDesktop
                 FontWeight = FontWeights.SemiBold,
             };
             
-            var compileButton = new Button
+            compileButton = new Button
             {
                 Content = "3. Compile",
                 Width = 140,
@@ -255,6 +270,9 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(flashSizeLabel);
             devicePanel.Children.Add(flashSizeSelector);
             
+            // Status text (hidden initially)
+            devicePanel.Children.Add(statusText);
+            
             // Progress bar and countdown (these will be hidden initially)
             devicePanel.Children.Add(compileCountdownText);
             devicePanel.Children.Add(compileProgressBar);
@@ -289,8 +307,8 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(backupCheckBox);
             
             
-            DockPanel.SetDock(checkBtn, Dock.Right);
-            devicePanel.Children.Add(checkBtn);
+            DockPanel.SetDock(checkDeviceButton, Dock.Right);
+            devicePanel.Children.Add(checkDeviceButton);
             DockPanel.SetDock(updateGGButton, Dock.Right);
             devicePanel.Children.Add(updateGGButton);
             
@@ -472,6 +490,11 @@ namespace GuiGenericBuilderDesktop
 
         private async void UpdateGG_Click(object sender, RoutedEventArgs e)
         {            
+            // Disable button and show status
+            updateGGButton.IsEnabled = false;
+            statusText.Text = "⏳ Downloading GUI-Generic repository...";
+            statusText.Visibility = Visibility.Visible;
+            
             try
             {
                 _repositoryPath = await _gitHubRepoDownloader.DownloadRepositoryAsync(
@@ -482,11 +505,34 @@ namespace GuiGenericBuilderDesktop
                     branch: "master",
                     cancellationToken: CancellationToken.None);
                 
+                // Success status
+                statusText.Text = "✓ Repository updated successfully!";
+                statusText.Foreground = System.Windows.Media.Brushes.Green;
+                
+                // Hide status after 3 seconds
+                await Task.Delay(3000);
+                statusText.Visibility = Visibility.Collapsed;
+                statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
+                
                 MessageBox.Show("Repository updated successfully!", "Update Complete", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
+                // Error status
+                statusText.Text = "✗ Repository update failed";
+                statusText.Foreground = System.Windows.Media.Brushes.Red;
+                
+                // Hide status after 3 seconds
+                await Task.Delay(3000);
+                statusText.Visibility = Visibility.Collapsed;
+                statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
+                
                 MessageBox.Show($"Error updating repository: {ex.Message}", "Update Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                // Re-enable button
+                updateGGButton.IsEnabled = true;
             }
         }
 
@@ -586,12 +632,20 @@ namespace GuiGenericBuilderDesktop
                 }
             }
             
+            // Disable compile button
+            compileButton.IsEnabled = false;
+            
+            // Show status indicator
+            statusText.Text = "⏳ Compiling firmware...";
+            statusText.Foreground = System.Windows.Media.Brushes.Black;
+            statusText.Visibility = Visibility.Visible;
+            
             // Show and initialize progress UI
             if (compileProgressBar != null && compileCountdownText != null)
             {
-                compileProgressBar.Value = 90;
+                compileProgressBar.Value = 120;
                 compileProgressBar.Visibility = Visibility.Visible;
-                compileCountdownText.Text = "01:30";
+                compileCountdownText.Text = "02:00";
                 compileCountdownText.Visibility = Visibility.Visible;
             }
             
@@ -600,10 +654,10 @@ namespace GuiGenericBuilderDesktop
             _compileCountdownCts = new CancellationTokenSource();
             var countdownToken = _compileCountdownCts.Token;
 
-            // Start 60-second countdown task
+            // Start 120-second countdown task
             var countdownTask = Task.Run(async () =>
             {
-                int remaining = 90;
+                int remaining = 120;
                 try
                 {
                     while (remaining > 0 && !countdownToken.IsCancellationRequested)
@@ -658,6 +712,24 @@ namespace GuiGenericBuilderDesktop
 
                 if (result.IsSuccessful)
                 {
+                    // Success status
+                    statusText.Text = "✓ Compilation successful!";
+                    statusText.Foreground = System.Windows.Media.Brushes.Green;
+                    
+                    // Hide status after 3 seconds
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(3000);
+                        Dispatcher.Invoke(() =>
+                        {
+                            statusText.Visibility = Visibility.Collapsed;
+                            statusText.Foreground = System.Windows.Media.Brushes.Black;
+                        });
+                    });
+                    
+                    // Generate encoded configuration string
+                    var encodedConfig = BuildConfigurationHasher.EncodeOptions(selectedFlags);
+                    
                     // Save configuration with hash
                     try
                     {
@@ -675,9 +747,9 @@ namespace GuiGenericBuilderDesktop
                         System.Diagnostics.Debug.WriteLine($"Failed to save configuration: {ex.Message}");
                     }
                     
-                    // Show success results with hash and backup path
+                    // Show success results with encoded configuration string and backup path
                     var resultsWindow = new CompilationResultsWindow(
-                        result.HashOfOptions ?? string.Empty, 
+                        encodedConfig, 
                         true, 
                         result.BackupFilePath)
                     {
@@ -688,6 +760,21 @@ namespace GuiGenericBuilderDesktop
 
                 else
                 {
+                    // Error status
+                    statusText.Text = "✗ Compilation failed";
+                    statusText.Foreground = System.Windows.Media.Brushes.Red;
+                    
+                    // Hide status after 3 seconds
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(3000);
+                        Dispatcher.Invoke(() =>
+                        {
+                            statusText.Visibility = Visibility.Collapsed;
+                            statusText.Foreground = System.Windows.Media.Brushes.Black;
+                        });
+                    });
+                    
                     // Show detailed logs in modal window
                     var resultsWindow = new CompilationResultsWindow(result.Logs)
                     {
@@ -708,7 +795,27 @@ namespace GuiGenericBuilderDesktop
                     compileCountdownText.Visibility = Visibility.Collapsed;
                 }
                 
+                // Error status
+                statusText.Text = "✗ Compilation error";
+                statusText.Foreground = System.Windows.Media.Brushes.Red;
+                
+                // Hide status after 3 seconds
+                Task.Run(async () =>
+                {
+                    await Task.Delay(3000);
+                    Dispatcher.Invoke(() =>
+                    {
+                        statusText.Visibility = Visibility.Collapsed;
+                        statusText.Foreground = System.Windows.Media.Brushes.Black;
+                    });
+                });
+                
                 MessageBox.Show($"Compilation error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                // Re-enable compile button
+                compileButton.IsEnabled = true;
             }
 
         }
@@ -716,6 +823,12 @@ namespace GuiGenericBuilderDesktop
         private async void CheckConnectedDevice_Click(object sender, RoutedEventArgs e)
         {
             _logger.Information("=== Device Detection Started ===");
+            
+            // Disable button and show status
+            checkDeviceButton.IsEnabled = false;
+            statusText.Text = "⏳ Detecting device...";
+            statusText.Visibility = Visibility.Visible;
+            statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
             
             await Task.Run(async () =>
             {
@@ -798,10 +911,41 @@ namespace GuiGenericBuilderDesktop
                                 }
 
                             }
+                            
+                            // Success status
+                            statusText.Text = $"✓ Device detected: {chip} on {port}";
+                            statusText.Foreground = System.Windows.Media.Brushes.Green;
+                            
+                            // Hide status after 3 seconds
+                            Task.Run(async () =>
+                            {
+                                await Task.Delay(3000);
+                                Dispatcher.Invoke(() =>
+                                {
+                                    statusText.Visibility = Visibility.Collapsed;
+                                    statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
+                                });
+                            });
                         }
                         else
                         {
                             _logger.Warning("Device detection completed but no port found");
+                            
+                            // No device status
+                            statusText.Text = "✗ No device detected";
+                            statusText.Foreground = System.Windows.Media.Brushes.OrangeRed;
+                            
+                            // Hide status after 3 seconds
+                            Task.Run(async () =>
+                            {
+                                await Task.Delay(3000);
+                                Dispatcher.Invoke(() =>
+                                {
+                                    statusText.Visibility = Visibility.Collapsed;
+                                    statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
+                                });
+                            });
+                            
                             MessageBox.Show(
                                 "No ESP device detected.\n\n" +
                                 "Please ensure:\n" +
@@ -813,6 +957,9 @@ namespace GuiGenericBuilderDesktop
                                 MessageBoxImage.Information);
                         }
                         
+                        // Re-enable button
+                        checkDeviceButton.IsEnabled = true;
+                        
                         _logger.Information("=== Device Detection Completed ===");
                     });
 
@@ -823,6 +970,24 @@ namespace GuiGenericBuilderDesktop
                     _logger.Error(ex, "Error during device detection");
                     Dispatcher.Invoke(() =>
                     {
+                        // Error status
+                        statusText.Text = "✗ Device detection error";
+                        statusText.Foreground = System.Windows.Media.Brushes.Red;
+                        
+                        // Hide status after 3 seconds
+                        Task.Run(async () =>
+                        {
+                            await Task.Delay(3000);
+                            Dispatcher.Invoke(() =>
+                            {
+                                statusText.Visibility = Visibility.Collapsed;
+                                statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
+                            });
+                        });
+                        
+                        // Re-enable button
+                        checkDeviceButton.IsEnabled = true;
+                        
                         // Error during device detection - could log or show message
                         MessageBox.Show(
                             $"Device detection error: {ex.Message}\n\n" +
