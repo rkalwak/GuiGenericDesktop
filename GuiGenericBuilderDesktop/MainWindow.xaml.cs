@@ -48,8 +48,8 @@ namespace GuiGenericBuilderDesktop
             AddParametersColumnDynamically();
 
             FlagsDataGrid.ItemsSource = AllBuildFlags;
-            //_repositoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo", "gg");
-            _repositoryPath = @"c:\repozytoria\platformio\GUI-Generic";
+            _repositoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo", "gg");
+            //_repositoryPath = @"c:\repozytoria\platformio\GUI-Generic";
             
             _logger.Information("MainWindow initialized successfully");
         }
@@ -516,6 +516,46 @@ namespace GuiGenericBuilderDesktop
 
         private async void CompileSelected_Click(object sender, RoutedEventArgs e)
         {
+            // Check if GUI-Generic repository exists and is not empty
+            if (string.IsNullOrEmpty(_repositoryPath) || !Directory.Exists(_repositoryPath))
+            {
+                MessageBox.Show(
+                    "GUI-Generic repository not found!\n\n" +
+                    "Please click '1. Update Gui-Generic' button first to download the repository.\n\n" +
+                    "The repository is required for firmware compilation.",
+                    "Repository Not Found",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            // Check if the repository directory is empty
+            if (!Directory.EnumerateFileSystemEntries(_repositoryPath).Any())
+            {
+                MessageBox.Show(
+                    "GUI-Generic repository directory is empty!\n\n" +
+                    $"Repository path: {_repositoryPath}\n\n" +
+                    "Please click '1. Update Gui-Generic' button to download the repository.",
+                    "Empty Repository",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            // Verify essential files exist in the repository
+            var platformioIniPath = Path.Combine(_repositoryPath, "platformio.ini");
+            if (!File.Exists(platformioIniPath))
+            {
+                MessageBox.Show(
+                    "GUI-Generic repository appears to be incomplete or corrupted.\n\n" +
+                    $"Missing file: platformio.ini\n" +
+                    $"Repository path: {_repositoryPath}\n\n" +
+                    "Please click '1. Update Gui-Generic' button to re-download the repository.",
+                    "Incomplete Repository",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
 
             List<BuildFlagItem> selectedFlags = AllBuildFlags.Where(f => f.IsEnabled).ToList();
             if (!selectedFlags.Any())

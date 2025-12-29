@@ -30,6 +30,16 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 
 ### Added
 
+**Repository Validation Before Compilation**
+- Added validation to check if GUI-Generic repository exists before compilation
+- **Added check for empty repository directory** - prevents compilation when directory exists but is empty
+- Shows user-friendly message if repository is missing: "Please click '1. Update Gui-Generic' button first"
+- Shows specific message if directory is empty: "GUI-Generic repository directory is empty!"
+- Validates essential files (platformio.ini) to detect corrupted/incomplete repositories
+- Prevents compilation errors by catching missing repository early
+- Clear error messages guide users to download repository first
+- Uses `Directory.EnumerateFileSystemEntries()` for efficient empty directory detection
+
 **CI/CD GitHub Actions Workflows**
 - Added comprehensive CI/CD pipeline using GitHub Actions
 - Three workflows for different purposes:
