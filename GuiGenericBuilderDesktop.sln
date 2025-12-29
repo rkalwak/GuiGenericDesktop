@@ -8,6 +8,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GuiGenericBuilderDesktop", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompilationLib.Tests", "CompilationLib.Tests\CompilationLib.Tests.csproj", "{EB470FC6-F2EB-0C34-D9FF-A389F0307CA6}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".workflow", ".workflow", "{BC017422-E561-4074-9A05-9D9C4ACBD30C}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build-and-publish.yml = .github\workflows\build-and-publish.yml
+		.github\workflows\ci.yml = .github\workflows\ci.yml
+		.github\workflows\release.yml = .github\workflows\release.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

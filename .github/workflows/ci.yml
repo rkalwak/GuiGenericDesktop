@@ -8,7 +8,7 @@ on:
 
 env:
   DOTNET_VERSION: '10.0.x'
-  SOLUTION_PATH: 'GuiGenericV2.sln'
+  SOLUTION_PATH: 'GuiGenericBuilderDesktop.sln'
 
 jobs:
   ci:

@@ -2,6 +2,14 @@
 
 This repository uses GitHub Actions for continuous integration and deployment.
 
+## Solution Structure
+
+- **Solution File**: `GuiGenericBuilderDesktop.sln`
+- **Main Project**: `GuiGenericBuilderDesktop/GuiGenericBuilderDesktop.csproj`
+- **Library Project**: `CompilationLib/CompilationLib.csproj`
+- **Test Project**: `CompilationLib.Tests/CompilationLib.Tests.csproj`
+- **.NET Version**: 10.0 (net10.0-windows)
+
 ## Workflows
 
 ### 1. CI Workflow (`.github/workflows/ci.yml`)

@@ -4,6 +4,10 @@
 
 This project uses GitHub Actions for automated building, testing, and releasing.
 
+**Solution**: `GuiGenericBuilderDesktop.sln`  
+**.NET Version**: 10.0  
+**Target Framework**: net10.0-windows
+
 ## For Developers
 
 ### Every Push
