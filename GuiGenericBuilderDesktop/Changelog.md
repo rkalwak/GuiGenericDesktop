@@ -57,6 +57,10 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 - Comprehensive documentation in `.github/workflows/README.md`
 
 **Backup Path Display in Compilation Results**
+- Shows backup file path in compilation results window when backup is created
+- Displays both backup file name and full path
+- Includes "Copy Path" and "Open Folder" buttons for easy access
+- Visual confirmation that backup was successfully created
 
 **Loading Indicators for Long Operations**
 - Added status text indicator for repository download operation
@@ -86,6 +90,9 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 - Non-intrusive auto-hiding status messages
 
 **SmartScreen Warning Mitigation**
+- Added code signing preparation and mitigation strategies
+- Documentation for handling Windows SmartScreen warnings
+- Guidance for building application reputation with Microsoft
 
 ### Changed
 
@@ -107,9 +114,29 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 - Verified .NET 10.0 target framework configuration
 - Added solution structure documentation to workflow README
 
-**PlatformioCliHandler**
-
-### Changed
+**Enhanced Device Detection with USB Bridge Support**
+- Added `DetectByUsbBridge()` method to detect microcontrollers via USB VID/PID identifiers
+- Refactored to use comprehensive `UsbDeviceRecognition` database with 27+ USB bridge variants
+- Enhanced device information with vendor name, product name, and maximum baudrate
+- Supports detection even when COM port drivers are not fully loaded
+- Recognizes common USB-to-UART bridges:
+  - **QinHeng Electronics**: CH340, CH341, CH343, CH9102, CH9101 (7 variants, 460K-6M baud)
+  - **Silicon Labs**: CP2102(n), CP2105, CP2108 (3 variants, 2M-3M baud)
+  - **FTDI**: FT232R, FT2232, FT4232, FT232H, FT230X (5 variants, 3M-12M baud)
+  - **Espressif Systems**: ESP32-S2/S3/C3 Native USB (5 variants, 2M baud)
+  - **Prolific**: PL2303
+- Added `DetectCOMPortWithUsbBridge()` method that combines both detection approaches
+- Detection now tries USB Bridge first (more reliable), then falls back to standard method
+- Updated "Check Device" button to use combined detection for better reliability
+- Added vendor prioritization (Espressif > Silicon Labs > FTDI > Others)
+- Automatic VID/PID parsing from Windows device IDs
+- Baudrate optimization based on bridge capabilities
+- Improved logging with detailed device specifications:
+  - Device descriptions with max baudrate
+  - VID:PID hex values (e.g., VID:0x1A86 PID:0x7523)
+  - Full vendor and product identification
+- Cleaner separation of detection logic with internal `DetectedUsbDevice` class
+- More robust device identification by matching against 27+ known VID/PID combinations
 
 **Compilation Results Window - Now Shows Encoded Configuration String**
 - Changed compilation results window to display encoded configuration string instead of SHA256 hash
@@ -124,8 +151,4 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
   - Decoded to view all build flags
 - Maintains backward compatibility with hash-based configuration files
 - More user-friendly than hash - users can actually restore their configuration from this string
-
-### Added
-
-**Loading Indicators for Long Operations**
 

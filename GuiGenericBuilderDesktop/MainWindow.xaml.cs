@@ -835,7 +835,7 @@ namespace GuiGenericBuilderDesktop
                 try
                 {
                     _logger.Debug("Detecting COM port...");
-                    var port = _deviceDetector.DetectCOMPort();
+                    var port = _deviceDetector.DetectCOMPortWithUsbBridge();
                     
                     if (port != null)
                     {

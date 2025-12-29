@@ -89,6 +89,140 @@ namespace CompilationLib
         }
 
         /// <summary>
+        /// Detects microcontroller devices by USB Bridge VID/PID identifiers.
+        /// This method can detect devices even if COM port drivers are not fully loaded.
+        /// Uses the comprehensive USB device database from UsbDeviceRecognition.
+        /// </summary>
+        /// <returns>COM port name if detected, null otherwise</returns>
+        public string DetectByUsbBridge()
+        {
+            _logger.Debug("Starting USB Bridge detection using UsbDeviceRecognition database");
+            
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                _logger.Debug("USB Bridge detection not implemented for non-Windows platforms");
+                return null;
+            }
+
+            try
+            {
+                // Query all USB devices
+                using var searcher = new ManagementObjectSearcher("SELECT * FROM Win32_PnPEntity WHERE PNPDeviceID LIKE 'USB\\\\VID_%'");
+                var detectedDevices = new List<DetectedUsbDevice>();
+                
+                foreach (ManagementObject mo in searcher.Get())
+                {
+                    var deviceId = (mo["PNPDeviceID"] as string) ?? string.Empty;
+                    var name = (mo["Name"] as string) ?? string.Empty;
+                    
+                    // Parse VID and PID from device ID
+                    // Format: USB\VID_1A86&PID_7523\...
+                    var vidMatch = Regex.Match(deviceId, @"VID_([0-9A-F]{4})", RegexOptions.IgnoreCase);
+                    var pidMatch = Regex.Match(deviceId, @"PID_([0-9A-F]{4})", RegexOptions.IgnoreCase);
+                    
+                    if (!vidMatch.Success || !pidMatch.Success)
+                        continue;
+                    
+                    var vid = Convert.ToInt32(vidMatch.Groups[1].Value, 16);
+                    var pid = Convert.ToInt32(pidMatch.Groups[1].Value, 16);
+                    
+                    // Check if this is a supported vendor
+                    if (!UsbDeviceRecognition.IsVendorSupported(vid))
+                        continue;
+                    
+                    // Get device information from the database
+                    var deviceInfo = UsbDeviceRecognition.GetUsbDeviceInfo(vid, pid);
+                    
+                    if (deviceInfo != null)
+                    {
+                        var description = UsbDeviceRecognition.GetDeviceDescription(vid, pid);
+                        _logger.Debug("Found supported USB bridge: {Description}, Device: {Name}, ID: {DeviceId}", 
+                            description, name, deviceId);
+                        
+                        // Try to extract COM port from the device name
+                        var portMatch = Regex.Match(name, @"\((COM\d+)\)", RegexOptions.IgnoreCase);
+                        if (portMatch.Success)
+                        {
+                            var port = portMatch.Groups[1].Value;
+                            detectedDevices.Add(new DetectedUsbDevice
+                            {
+                                Port = port,
+                                VendorId = vid,
+                                ProductId = pid,
+                                VendorName = deviceInfo.VendorName,
+                                ProductName = deviceInfo.ProductName ?? "Unknown Product",
+                                MaxBaudrate = deviceInfo.MaxBaudrate ?? UsbDeviceRecognition.DefaultFlashBaud,
+                                DeviceId = deviceId,
+                                DeviceName = name
+                            });
+                            
+                            _logger.Information("USB Bridge detected: {VendorName} {ProductName} on {Port} (Max baudrate: {MaxBaudrate:N0})", 
+                                deviceInfo.VendorName, deviceInfo.ProductName, port, deviceInfo.MaxBaudrate);
+                        }
+                        else
+                        {
+                            // Device found but COM port not yet assigned or visible
+                            _logger.Debug("USB Bridge {VendorName} {ProductName} found but COM port not assigned: {Name}", 
+                                deviceInfo.VendorName, deviceInfo.ProductName, name);
+                        }
+                    }
+                }
+                
+                // Return the first detected device with a valid COM port
+                // Prioritize by vendor: Espressif > Silicon Labs > FTDI > Others
+                if (detectedDevices.Any())
+                {
+                    var espressifDevice = detectedDevices.FirstOrDefault(d => d.VendorId == 0x303a);
+                    var selectedDevice = espressifDevice ?? detectedDevices.First();
+                    
+                    _logger.Information("Selecting USB Bridge device: {VendorName} {ProductName} on {Port} (VID:0x{VendorId:X4} PID:0x{ProductId:X4})", 
+                        selectedDevice.VendorName, selectedDevice.ProductName, selectedDevice.Port, 
+                        selectedDevice.VendorId, selectedDevice.ProductId);
+                    
+                    return selectedDevice.Port;
+                }
+                
+                _logger.Debug("No supported USB Bridge devices detected");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error during USB Bridge detection");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Combined detection method that tries both USB Bridge and standard COM port detection.
+        /// First attempts USB Bridge detection for more reliable identification, then falls back to standard detection.
+        /// </summary>
+        /// <returns>COM port name if detected, null otherwise</returns>
+        public string DetectCOMPortWithUsbBridge()
+        {
+            _logger.Debug("Starting combined COM port detection (USB Bridge + Standard)");
+            
+            // First try USB Bridge detection (more reliable)
+            var usbBridgePort = DetectByUsbBridge();
+            if (!string.IsNullOrEmpty(usbBridgePort))
+            {
+                _logger.Information("Device detected via USB Bridge: {Port}", usbBridgePort);
+                return usbBridgePort;
+            }
+            
+            // Fall back to standard detection
+            _logger.Debug("USB Bridge detection found no devices, falling back to standard detection");
+            var standardPort = DetectCOMPort();
+            if (!string.IsNullOrEmpty(standardPort))
+            {
+                _logger.Information("Device detected via standard detection: {Port}", standardPort);
+                return standardPort;
+            }
+            
+            _logger.Warning("No device detected by either USB Bridge or standard detection");
+            return null;
+        }
+
+        /// <summary>
         /// Runs esptool.exe (--port {comPort} chip-id and flash-id), parses output and returns model + flash size.
         /// </summary>
         /// <param name="comPort">COM port to query (e.g. "COM3" or "/dev/ttyUSB0").</param>
@@ -212,82 +346,20 @@ namespace CompilationLib
 
             return info;
         }
+
+        /// <summary>
+        /// Internal class to hold detected USB device information
+        /// </summary>
+        private class DetectedUsbDevice
+        {
+            public string Port { get; set; }
+            public int VendorId { get; set; }
+            public int ProductId { get; set; }
+            public string VendorName { get; set; }
+            public string ProductName { get; set; }
+            public int MaxBaudrate { get; set; }
+            public string DeviceId { get; set; }
+            public string DeviceName { get; set; }
+        }
     }
 }
-
-/*
- * esptool v5.1.0
-Serial port COM3:
-Connecting...................
-Detecting chip type... ESP32
-Connected to ESP32 on COM3:
-Chip type:          ESP32-D0WD-V3 (revision v3.1)
-Features:           Wi-Fi, BT, Dual Core + LP Core, 240MHz, Vref calibration in eFuse, Coding Scheme None
-Crystal frequency:  40MHz
-MAC:                c4:d8:d5:96:1f:30
-
-Uploading stub flasher...
-Running stub flasher...
-Stub flasher running.
-
-Warning: ESP32 has no chip ID. Reading MAC address instead.
-MAC:                c4:d8:d5:96:1f:30
-
-Hard resetting via RTS pin...
-
-esptool v5.1.0
-Serial port COM3:
-Connecting....
-Detecting chip type... ESP32
-Connected to ESP32 on COM3:
-Chip type:          ESP32-D0WD-V3 (revision v3.1)
-Features:           Wi-Fi, BT, Dual Core + LP Core, 240MHz, Vref calibration in eFuse, Coding Scheme None
-Crystal frequency:  40MHz
-MAC:                c4:d8:d5:96:1f:30
-
-Uploading stub flasher...
-Running stub flasher...
-Stub flasher running.
-
-Flash Memory Information:
-=========================
-Manufacturer: 68
-Device: 4016
-Detected flash size: 4MB
-Flash voltage set by a strapping pin: 3.3V
-
-Hard resetting via RTS pin...
-
-
-c3
-[08:59:57 DBG] Starting COM port detection
-[08:59:57 DBG] Available serial ports: COM1
-[08:59:57 DBG] Running on Windows platform, using WMI for device detection
-[08:59:57 DBG] Found device: Port komunikacyjny (COM1), Device ID: ACPI\PNP0501\0, Port: COM1
-[08:59:57 DBG] Scanned 1 COM devices via WMI, no ESP device found
-[08:59:57 WRN] No ESP-compatible COM port detected
-[08:59:57 WRN] No COM port detected
-[08:59:57 WRN] Device detection completed but no port found
-[09:00:00 INF] === Device Detection Completed ===
-[09:00:04 INF] === Device Detection Started ===
-[09:00:04 DBG] Detecting COM port...
-[09:00:04 DBG] Starting COM port detection
-[09:00:04 DBG] Available serial ports: COM1, COM6
-[09:00:04 DBG] Running on Windows platform, using WMI for device detection
-[09:00:04 DBG] Found device: Port komunikacyjny (COM1), Device ID: ACPI\PNP0501\0, Port: COM1
-[09:00:04 DBG] Found device: USB-SERIAL CH340 (COM6), Device ID: USB\VID_1A86&PID_7523\8&129DF91D&0&8, Port: COM6
-[09:00:04 INF] ESP device detected on port: COM6, Device: USB-SERIAL CH340 (COM6)
-[09:00:04 INF] COM port detected: COM6
-[09:00:04 DBG] Detecting ESP model on port COM6...
-[09:00:04 INF] Starting ESP device detection on port: COM6
-[09:00:04 DBG] Reading chip ID from COM6
-'GuiGenericBuilderDesktop.exe' (CoreCLR: clrhost): Loaded 'C:\Program Files\dotnet\shared\Microsoft.NETCore.App\10.0.1\System.Console.dll'. Skipped loading symbols. Module is optimized and the debugger option 'Just My Code' is enabled.
-[09:00:05 DBG] Chip ID read completed. Exit code: 2, Success: false
-[09:00:05 DBG] Reading flash ID from COM6
-[09:00:05 DBG] Flash ID read completed. Exit code: 2, Success: false
-[09:00:05 WRN] Device detection completed but ESP model not recognized. ChipType: null, Model: null
-[09:00:05 INF] Device detected: ChipType=null, Model=null, FlashSize=null, MAC=null
-[09:00:05 DBG] COM port selector updated to: COM6
-[09:00:05 INF] === Device Detection Completed ===
-
-*/
