@@ -13,4 +13,5 @@ public class CompileRequest
     public string PortCom { get;  set; }
     public bool ShouldDeploy { get; set; }
     public bool ShouldBackup { get; set; }
+    public bool ShouldEraseFlash { get; set; }
 }

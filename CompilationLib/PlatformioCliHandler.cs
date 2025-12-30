@@ -74,7 +74,24 @@ public class PlatformioCliHandler : ICompileHandler
             Console.WriteLine("? Backup skipped (Backup checkbox is unchecked)");
         }
         
-        string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.Platform} {(request.ShouldDeploy ? ("--target upload --upload-port " + request.PortCom+ " ") : "")}--verbose";
+        // Build the arguments for PlatformIO run command
+        string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.Platform}";
+        
+        // Add erase target if enabled (before upload)
+        if (request.ShouldDeploy && request.ShouldEraseFlash)
+        {
+            arguments += " --target erase";
+            Console.WriteLine("? Flash will be erased before upload");
+        }
+        
+        // Add upload target if deploying
+        if (request.ShouldDeploy)
+        {
+            arguments += $" --target upload --upload-port {request.PortCom}";
+        }
+        
+        // Add verbose flag
+        arguments += " --verbose";
 
         var processStartInfo = new ProcessStartInfo
         {

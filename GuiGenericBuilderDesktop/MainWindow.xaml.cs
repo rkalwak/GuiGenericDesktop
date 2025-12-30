@@ -27,6 +27,7 @@ namespace GuiGenericBuilderDesktop
         private TextBlock compileCountdownText;
         private CheckBox deployCheckBox;
         private CheckBox backupCheckBox;
+        private CheckBox eraseFlashCheckBox;
         private CancellationTokenSource _compileCountdownCts;
         private readonly ILogger _logger;
         private Button updateGGButton;
@@ -298,6 +299,17 @@ namespace GuiGenericBuilderDesktop
                 ToolTip = "Create backup before deploying firmware"
             };
 
+            // Erase Flash checkbox - positioned right before backup checkbox
+            eraseFlashCheckBox = new CheckBox 
+            { 
+                Content = "Erase Flash",
+                IsChecked = false,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(12, 0, 4, 0),
+                FontWeight = FontWeights.SemiBold,
+                ToolTip = "Erase flash memory before deploying firmware (recommended for clean installation)"
+            };
+
 
             DockPanel.SetDock(compileButton, Dock.Right);
             devicePanel.Children.Add(compileButton);
@@ -305,6 +317,8 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(deployCheckBox);
             DockPanel.SetDock(backupCheckBox, Dock.Right);
             devicePanel.Children.Add(backupCheckBox);
+            DockPanel.SetDock(eraseFlashCheckBox, Dock.Right);
+            devicePanel.Children.Add(eraseFlashCheckBox);
             
             
             DockPanel.SetDock(checkDeviceButton, Dock.Right);
@@ -613,6 +627,7 @@ namespace GuiGenericBuilderDesktop
             // Get deploy and backup checkbox states
             bool shouldDeploy = deployCheckBox?.IsChecked ?? true;
             bool shouldBackup = backupCheckBox?.IsChecked ?? true;
+            bool shouldEraseFlash = eraseFlashCheckBox?.IsChecked ?? false;
 
             // Validate COM port selection only if deploying
             if (shouldDeploy)
@@ -689,7 +704,8 @@ namespace GuiGenericBuilderDesktop
                         LibrariesPath = Path.Combine(_repositoryPath, "lib"),
                         PortCom = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
                         ShouldDeploy = shouldDeploy,
-                        ShouldBackup = shouldBackup
+                        ShouldBackup = shouldBackup,
+                        ShouldEraseFlash = shouldEraseFlash
                     };
                     var handler = new PlatformioCliHandler();
                     ICompileHandler compiler = new PlatformioCliHandler();
