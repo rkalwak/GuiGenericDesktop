@@ -31,6 +31,7 @@
     <!-- Code Signing Configuration -->
     <CodeSigningEnabled Condition="Exists('$(ProjectDir)GuiGenericBuilder.pfx')">true</CodeSigningEnabled>
     <CertificateFile>$(ProjectDir)GuiGenericBuilder.pfx</CertificateFile>
+    <ApplicationIcon>supla-logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -41,6 +42,7 @@
     <Content Include="builder.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="supla-logo.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -61,9 +63,7 @@
       <SignToolPath Condition="'$(SignToolPath)' == '' AND Exists('C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64\signtool.exe')">C:\Program Files (x86)\Windows Kits\10\bin\10.0.19041.0\x64\signtool.exe</SignToolPath>
       <SignToolPath Condition="'$(SignToolPath)' == ''">signtool.exe</SignToolPath>
     </PropertyGroup>
-    <Exec Command='"$(SignToolPath)" sign /f "$(CertificateFile)" /p "$(CertificatePassword)" /tr http://timestamp.digicert.com /td sha256 /fd sha256 "$(TargetPath)"' 
-          IgnoreExitCode="false"
-          ContinueOnError="true" />
+    <Exec Command="&quot;$(SignToolPath)&quot; sign /f &quot;$(CertificateFile)&quot; /p &quot;$(CertificatePassword)&quot; /tr http://timestamp.digicert.com /td sha256 /fd sha256 &quot;$(TargetPath)&quot;" IgnoreExitCode="false" ContinueOnError="true" />
     <Message Text="Executable signed successfully: $(TargetPath)" Importance="high" />
   </Target>
 
