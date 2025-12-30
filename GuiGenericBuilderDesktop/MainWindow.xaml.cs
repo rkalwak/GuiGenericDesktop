@@ -24,11 +24,11 @@ namespace GuiGenericBuilderDesktop
         private ComboBox comPortSelector;
         private ComboBox flashSizeSelector;
         private ProgressBar compileProgressBar;
-        private TextBlock compileCountdownText;
+        private TextBlock compileTimerText;
         private CheckBox deployCheckBox;
         private CheckBox backupCheckBox;
         private CheckBox eraseFlashCheckBox;
-        private CancellationTokenSource _compileCountdownCts;
+        private CancellationTokenSource _compileTimerCts;
         private readonly ILogger _logger;
         private Button updateGGButton;
         private Button checkDeviceButton;
@@ -40,7 +40,7 @@ namespace GuiGenericBuilderDesktop
             InitializeComponent();
             _logger = Log.ForContext<MainWindow>();
             _logger.Information("MainWindow initializing");
-            
+
             AllBuildFlags = new List<BuildFlagItem>();
 
             // Initialize configuration manager
@@ -53,9 +53,16 @@ namespace GuiGenericBuilderDesktop
             AddParametersColumnDynamically();
 
             FlagsDataGrid.ItemsSource = AllBuildFlags;
-            _repositoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo", "gg");
-            //_repositoryPath = @"c:\repozytoria\platformio\GUI-Generic";
-            
+            if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("GGLocal"))) 
+            {
+                _repositoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo", "gg");
+            }
+            else
+            {
+                _repositoryPath = @"c:\repozytoria\platformio\GUI-Generic";
+            }
+
+
             _logger.Information("MainWindow initialized successfully");
         }
 
@@ -118,7 +125,7 @@ namespace GuiGenericBuilderDesktop
                     {
                         flagItem.Value.Section = sectionItem.Key;
                         flagItem.Value.Key = flagItem.Key;
-                        
+
                         // Initialize parameter values from DefaultValue if Value is not set
                         if (flagItem.Value.Parameters != null)
                         {
@@ -130,7 +137,7 @@ namespace GuiGenericBuilderDesktop
                                 }
                             }
                         }
-                        
+
                         // SectionOrder has an internal setter in BuildFlagItem; cannot assign from this assembly.
                         // Preserve existing SectionOrder value from deserialization instead of assigning here.
                         AllBuildFlags.Add(flagItem.Value);
@@ -186,15 +193,15 @@ namespace GuiGenericBuilderDesktop
                 Margin = new Thickness(4)
             };
             updateGGButton.Click += UpdateGG_Click;
-         
+
 
             // Load Configuration button
-           
+
 
 
             checkDeviceButton = new Button { Content = "2. Check Device", Width = 120, Height = 28, Margin = new Thickness(8, 0, 0, 0) };
             checkDeviceButton.Click += CheckConnectedDevice_Click;
-            
+
             // Status text for operations
             statusText = new TextBlock
             {
@@ -205,27 +212,28 @@ namespace GuiGenericBuilderDesktop
                 Foreground = System.Windows.Media.Brushes.DarkBlue,
                 Visibility = Visibility.Collapsed
             };
-            
-            // Progress bar and countdown for compile operation
-            compileProgressBar = new ProgressBar 
-            { 
-                Width = 200, 
-                Height = 20, 
-                Margin = new Thickness(8, 0, 4, 0), 
+
+            // Progress bar and timer for compile operation (counts elapsed time)
+            compileProgressBar = new ProgressBar
+            {
+                Width = 200,
+                Height = 20,
+                Margin = new Thickness(8, 0, 4, 0),
                 VerticalAlignment = VerticalAlignment.Center,
                 Minimum = 0,
-                Maximum = 120,
-                Value = 120
+                Maximum = 180, // 3 minutes maximum for display purposes
+                Value = 0,
+                IsIndeterminate = false
             };
-            
-            compileCountdownText = new TextBlock 
-            { 
-                Text = string.Empty, 
-                Margin = new Thickness(4, 0, 8, 0), 
+
+            compileTimerText = new TextBlock
+            {
+                Text = string.Empty,
+                Margin = new Thickness(4, 0, 8, 0),
                 VerticalAlignment = VerticalAlignment.Center,
                 FontWeight = FontWeights.SemiBold,
             };
-            
+
             compileButton = new Button
             {
                 Content = "3. Compile",
@@ -236,7 +244,7 @@ namespace GuiGenericBuilderDesktop
             };
             compileButton.Click += CompileSelected_Click;
             // right-align the button inside the DockPanel
-            
+
             // COM port selector (COM1..COM10)
             var portLabel = new TextBlock(new Run("Port:")) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
             comPortSelector = new ComboBox { Width = 100, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
@@ -258,7 +266,7 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(comPortSelector);
             devicePanel.Children.Add(boardLabel);
             devicePanel.Children.Add(boardSelector);
-            
+
             // Flash size selector
             var flashSizeLabel = new TextBlock(new Run("Flash:")) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
             flashSizeSelector = new ComboBox { Width = 120, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
@@ -270,17 +278,17 @@ namespace GuiGenericBuilderDesktop
             flashSizeSelector.Items.Add(new ComboBoxItem { Content = "64MB", Tag = "64MB" });
             devicePanel.Children.Add(flashSizeLabel);
             devicePanel.Children.Add(flashSizeSelector);
-            
+
             // Status text (hidden initially)
             devicePanel.Children.Add(statusText);
-            
+
             // Progress bar and countdown (these will be hidden initially)
-            devicePanel.Children.Add(compileCountdownText);
+            devicePanel.Children.Add(compileTimerText);
             devicePanel.Children.Add(compileProgressBar);
-            
+
             // Deploy checkbox - positioned right before compile button
-            deployCheckBox = new CheckBox 
-            { 
+            deployCheckBox = new CheckBox
+            {
                 Content = "Deploy",
                 IsChecked = true,
                 VerticalAlignment = VerticalAlignment.Center,
@@ -289,8 +297,8 @@ namespace GuiGenericBuilderDesktop
             };
 
             // Backup checkbox - positioned right before deploy checkbox
-            backupCheckBox = new CheckBox 
-            { 
+            backupCheckBox = new CheckBox
+            {
                 Content = "Backup",
                 IsChecked = true,
                 VerticalAlignment = VerticalAlignment.Center,
@@ -300,8 +308,8 @@ namespace GuiGenericBuilderDesktop
             };
 
             // Erase Flash checkbox - positioned right before backup checkbox
-            eraseFlashCheckBox = new CheckBox 
-            { 
+            eraseFlashCheckBox = new CheckBox
+            {
                 Content = "Erase Flash",
                 IsChecked = false,
                 VerticalAlignment = VerticalAlignment.Center,
@@ -319,17 +327,17 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(backupCheckBox);
             DockPanel.SetDock(eraseFlashCheckBox, Dock.Right);
             devicePanel.Children.Add(eraseFlashCheckBox);
-            
-            
+
+
             DockPanel.SetDock(checkDeviceButton, Dock.Right);
             devicePanel.Children.Add(checkDeviceButton);
             DockPanel.SetDock(updateGGButton, Dock.Right);
             devicePanel.Children.Add(updateGGButton);
-            
+
             DockPanel.SetDock(loadConfigButton, Dock.Right);
             devicePanel.Children.Add(loadConfigButton);
-          
-          
+
+
             // right-align the button inside the DockPanel
 
 
@@ -340,8 +348,9 @@ namespace GuiGenericBuilderDesktop
             foreach (var group in grouped)
             {
                 // Section header with a checkbox to toggle all flags in the section
-                var headerPanel = new DockPanel { 
-                    LastChildFill = true, 
+                var headerPanel = new DockPanel
+                {
+                    LastChildFill = true,
                     Margin = new Thickness(0, 8, 0, 4),
 
                 };
@@ -412,7 +421,7 @@ namespace GuiGenericBuilderDesktop
 
                     var chk = new CheckBox { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(2) };
                     chk.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(BuildFlagItem.IsEnabled)) { Source = item, Mode = BindingMode.TwoWay });
-                    
+
                     chk.Checked += (s, e) =>
                     {
                         var errorMessage = DependencyResolver.ProcessFlagEnabled(item, AllBuildFlags);
@@ -447,7 +456,7 @@ namespace GuiGenericBuilderDesktop
                             editor.ShowDialog();
                         }
                     };
-                    Grid.SetRow(btn, r); 
+                    Grid.SetRow(btn, r);
                     Grid.SetColumn(btn, 4);
                     if (item.Parameters.Any())
                     {
@@ -471,7 +480,6 @@ namespace GuiGenericBuilderDesktop
                     g.Children.Add(tb);
                 }
             }
-
 
 
 
@@ -503,12 +511,12 @@ namespace GuiGenericBuilderDesktop
         }
 
         private async void UpdateGG_Click(object sender, RoutedEventArgs e)
-        {            
+        {
             // Disable button and show status
             updateGGButton.IsEnabled = false;
             statusText.Text = "⏳ Downloading GUI-Generic repository...";
             statusText.Visibility = Visibility.Visible;
-            
+
             try
             {
                 _repositoryPath = await _gitHubRepoDownloader.DownloadRepositoryAsync(
@@ -518,16 +526,16 @@ namespace GuiGenericBuilderDesktop
                     destinationSubdir: "gg",
                     branch: "master",
                     cancellationToken: CancellationToken.None);
-                
+
                 // Success status
                 statusText.Text = "✓ Repository updated successfully!";
                 statusText.Foreground = System.Windows.Media.Brushes.Green;
-                
+
                 // Hide status after 3 seconds
                 await Task.Delay(3000);
                 statusText.Visibility = Visibility.Collapsed;
                 statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
-                
+
                 MessageBox.Show("Repository updated successfully!", "Update Complete", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
@@ -535,12 +543,12 @@ namespace GuiGenericBuilderDesktop
                 // Error status
                 statusText.Text = "✗ Repository update failed";
                 statusText.Foreground = System.Windows.Media.Brushes.Red;
-                
+
                 // Hide status after 3 seconds
                 await Task.Delay(3000);
                 statusText.Visibility = Visibility.Collapsed;
                 statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
-                
+
                 MessageBox.Show($"Error updating repository: {ex.Message}", "Update Failed", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -646,83 +654,86 @@ namespace GuiGenericBuilderDesktop
                     return;
                 }
             }
-            
+
             // Disable compile button
             compileButton.IsEnabled = false;
-            
+
             // Show status indicator
             statusText.Text = "⏳ Compiling firmware...";
             statusText.Foreground = System.Windows.Media.Brushes.Black;
             statusText.Visibility = Visibility.Visible;
-            
-            // Show and initialize progress UI
-            if (compileProgressBar != null && compileCountdownText != null)
-            {
-                compileProgressBar.Value = 120;
-                compileProgressBar.Visibility = Visibility.Visible;
-                compileCountdownText.Text = "02:00";
-                compileCountdownText.Visibility = Visibility.Visible;
-            }
-            
-            // Cancel any existing countdown
-            _compileCountdownCts?.Cancel();
-            _compileCountdownCts = new CancellationTokenSource();
-            var countdownToken = _compileCountdownCts.Token;
 
-            // Start 120-second countdown task
-            var countdownTask = Task.Run(async () =>
+            // Show and initialize progress UI for elapsed time tracking
+            if (compileProgressBar != null && compileTimerText != null)
             {
-                int remaining = 120;
+                compileProgressBar.Value = 0;
+                compileProgressBar.Visibility = Visibility.Visible;
+                compileTimerText.Text = "00:00";
+                compileTimerText.Visibility = Visibility.Visible;
+            }
+
+            // Cancel any existing timer
+            _compileTimerCts?.Cancel();
+            _compileTimerCts = new CancellationTokenSource();
+            var timerToken = _compileTimerCts.Token;
+
+            // Start elapsed time counter task
+            var timerTask = Task.Run(async () =>
+            {
+                int elapsed = 0;
                 try
                 {
-                    while (remaining > 0 && !countdownToken.IsCancellationRequested)
+                    while (!timerToken.IsCancellationRequested)
                     {
-                        await Task.Delay(1000, countdownToken);
-                        remaining--;
+                        await Task.Delay(1000, timerToken);
+                        elapsed++;
                         Dispatcher.Invoke(() =>
                         {
-                            if (compileProgressBar != null && compileCountdownText != null)
+                            if (compileProgressBar != null && compileTimerText != null)
                             {
-                                compileProgressBar.Value = remaining;
-                                compileCountdownText.Text = TimeSpan.FromSeconds(remaining).ToString(@"mm\:ss");
+                                // Update progress bar (capped at maximum)
+                                compileProgressBar.Value = Math.Min(elapsed, compileProgressBar.Maximum);
+                                
+                                // Display elapsed time
+                                compileTimerText.Text = TimeSpan.FromSeconds(elapsed).ToString(@"mm\:ss");
                             }
                         });
                     }
                 }
                 catch (TaskCanceledException) { }
-            }, countdownToken);
+            }, timerToken);
 
             try
             {
 
-                    var ggRequest = new CompileRequest
-                    {
-                        BuildFlags = selectedFlags,
-                        Platform = (boardSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
-                        ProjectPath = Path.Combine(_repositoryPath, "src"),
-                        ProjectDirectory = _repositoryPath,
-                        LibrariesPath = Path.Combine(_repositoryPath, "lib"),
-                        PortCom = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
-                        ShouldDeploy = shouldDeploy,
-                        ShouldBackup = shouldBackup,
-                        ShouldEraseFlash = shouldEraseFlash
-                    };
-                    var handler = new PlatformioCliHandler();
-                    ICompileHandler compiler = new PlatformioCliHandler();
-                    var result = await compiler.Handle(ggRequest, CancellationToken.None);
-          
-                // Stop countdown
-                _compileCountdownCts?.Cancel();
+                var ggRequest = new CompileRequest
+                {
+                    BuildFlags = selectedFlags,
+                    Platform = (boardSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
+                    ProjectPath = Path.Combine(_repositoryPath, "src"),
+                    ProjectDirectory = _repositoryPath,
+                    LibrariesPath = Path.Combine(_repositoryPath, "lib"),
+                    PortCom = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
+                    ShouldDeploy = shouldDeploy,
+                    ShouldBackup = shouldBackup,
+                    ShouldEraseFlash = shouldEraseFlash
+                };
+                var handler = new PlatformioCliHandler();
+                ICompileHandler compiler = new PlatformioCliHandler();
+                var result = await compiler.Handle(ggRequest, CancellationToken.None);
+
+                // Stop timer
+                _compileTimerCts?.Cancel();
                 try
                 {
-                    await countdownTask;
+                    await timerTask;
                 }
                 catch (TaskCanceledException) { }
 
                 // Hide progress UI
-                if (compileProgressBar != null && compileCountdownText != null)
+                if (compileProgressBar != null && compileTimerText != null)
                 {
-                    compileCountdownText.Visibility = Visibility.Collapsed;
+                    compileTimerText.Visibility = Visibility.Collapsed;
                     compileProgressBar.Visibility = Visibility.Collapsed;
                 }
 
@@ -731,7 +742,7 @@ namespace GuiGenericBuilderDesktop
                     // Success status
                     statusText.Text = "✓ Compilation successful!";
                     statusText.Foreground = System.Windows.Media.Brushes.Green;
-                    
+
                     // Hide status after 3 seconds
                     Task.Run(async () =>
                     {
@@ -742,10 +753,10 @@ namespace GuiGenericBuilderDesktop
                             statusText.Foreground = System.Windows.Media.Brushes.Black;
                         });
                     });
-                    
+
                     // Generate encoded configuration string
                     var encodedConfig = BuildConfigurationHasher.EncodeOptions(selectedFlags);
-                    
+
                     // Save configuration with hash
                     try
                     {
@@ -762,11 +773,11 @@ namespace GuiGenericBuilderDesktop
                     {
                         System.Diagnostics.Debug.WriteLine($"Failed to save configuration: {ex.Message}");
                     }
-                    
+
                     // Show success results with encoded configuration string and backup path
                     var resultsWindow = new CompilationResultsWindow(
-                        encodedConfig, 
-                        true, 
+                        encodedConfig,
+                        true,
                         result.BackupFilePath)
                     {
                         Owner = this
@@ -779,7 +790,7 @@ namespace GuiGenericBuilderDesktop
                     // Error status
                     statusText.Text = "✗ Compilation failed";
                     statusText.Foreground = System.Windows.Media.Brushes.Red;
-                    
+
                     // Hide status after 3 seconds
                     Task.Run(async () =>
                     {
@@ -790,7 +801,7 @@ namespace GuiGenericBuilderDesktop
                             statusText.Foreground = System.Windows.Media.Brushes.Black;
                         });
                     });
-                    
+
                     // Show detailed logs in modal window
                     var resultsWindow = new CompilationResultsWindow(result.Logs)
                     {
@@ -801,20 +812,20 @@ namespace GuiGenericBuilderDesktop
             }
             catch (Exception ex)
             {
-                // Stop countdown on error
-                _compileCountdownCts?.Cancel();
-                
+                // Stop timer on error
+                _compileTimerCts?.Cancel();
+
                 // Hide progress UI
-                if (compileProgressBar != null && compileCountdownText != null)
+                if (compileProgressBar != null && compileTimerText != null)
                 {
                     compileProgressBar.Visibility = Visibility.Collapsed;
-                    compileCountdownText.Visibility = Visibility.Collapsed;
+                    compileTimerText.Visibility = Visibility.Collapsed;
                 }
-                
+
                 // Error status
                 statusText.Text = "✗ Compilation error";
                 statusText.Foreground = System.Windows.Media.Brushes.Red;
-                
+
                 // Hide status after 3 seconds
                 Task.Run(async () =>
                 {
@@ -825,7 +836,7 @@ namespace GuiGenericBuilderDesktop
                         statusText.Foreground = System.Windows.Media.Brushes.Black;
                     });
                 });
-                
+
                 MessageBox.Show($"Compilation error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -839,20 +850,20 @@ namespace GuiGenericBuilderDesktop
         private async void CheckConnectedDevice_Click(object sender, RoutedEventArgs e)
         {
             _logger.Information("=== Device Detection Started ===");
-            
+
             // Disable button and show status
             checkDeviceButton.IsEnabled = false;
             statusText.Text = "⏳ Detecting device...";
             statusText.Visibility = Visibility.Visible;
             statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
-            
+
             await Task.Run(async () =>
             {
                 try
                 {
                     _logger.Debug("Detecting COM port...");
                     var port = _deviceDetector.DetectCOMPortWithUsbBridge();
-                    
+
                     if (port != null)
                     {
                         _logger.Information("COM port detected: {Port}", port);
@@ -861,20 +872,20 @@ namespace GuiGenericBuilderDesktop
                     {
                         _logger.Warning("No COM port detected");
                     }
-                    
+
                     EspInfo deviceModel = null;
                     if (port != null)
                     {
                         _logger.Debug("Detecting ESP model on port {Port}...", port);
                         deviceModel = await _deviceDetector.DetectEspModelAsync(port);
-                        
+
                         if (deviceModel != null)
                         {
-                            _logger.Information("Device detected: ChipType={ChipType}, Model={Model}, FlashSize={FlashSize}, MAC={Mac}", 
+                            _logger.Information("Device detected: ChipType={ChipType}, Model={Model}, FlashSize={FlashSize}, MAC={Mac}",
                                 deviceModel.ChipType, deviceModel.Model, deviceModel.FlashSize, deviceModel.Mac);
                         }
                     }
-                    
+
                     Dispatcher.Invoke(() =>
                     {
                         if (!string.IsNullOrWhiteSpace(port))
@@ -917,7 +928,7 @@ namespace GuiGenericBuilderDesktop
                                 {
                                     // Normalize like '16MB' or '16M'
                                     var normalized = fs.Trim().ToUpperInvariant();
-                                                                    // Try to match beginning of string
+                                    // Try to match beginning of string
                                     var fmatch = flashSizeSelector.Items.OfType<ComboBoxItem>().FirstOrDefault(ci => normalized.Contains((ci.Tag as string) ?? (ci.Content as string)));
                                     if (fmatch != null)
                                     {
@@ -927,11 +938,11 @@ namespace GuiGenericBuilderDesktop
                                 }
 
                             }
-                            
+
                             // Success status
                             statusText.Text = $"✓ Device detected: {chip} on {port}";
                             statusText.Foreground = System.Windows.Media.Brushes.Green;
-                            
+
                             // Hide status after 3 seconds
                             Task.Run(async () =>
                             {
@@ -946,11 +957,11 @@ namespace GuiGenericBuilderDesktop
                         else
                         {
                             _logger.Warning("Device detection completed but no port found");
-                            
+
                             // No device status
                             statusText.Text = "✗ No device detected";
                             statusText.Foreground = System.Windows.Media.Brushes.OrangeRed;
-                            
+
                             // Hide status after 3 seconds
                             Task.Run(async () =>
                             {
@@ -961,7 +972,7 @@ namespace GuiGenericBuilderDesktop
                                     statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
                                 });
                             });
-                            
+
                             MessageBox.Show(
                                 "No ESP device detected.\n\n" +
                                 "Please ensure:\n" +
@@ -972,10 +983,10 @@ namespace GuiGenericBuilderDesktop
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Information);
                         }
-                        
+
                         // Re-enable button
                         checkDeviceButton.IsEnabled = true;
-                        
+
                         _logger.Information("=== Device Detection Completed ===");
                     });
 
@@ -989,7 +1000,7 @@ namespace GuiGenericBuilderDesktop
                         // Error status
                         statusText.Text = "✗ Device detection error";
                         statusText.Foreground = System.Windows.Media.Brushes.Red;
-                        
+
                         // Hide status after 3 seconds
                         Task.Run(async () =>
                         {
@@ -1000,10 +1011,10 @@ namespace GuiGenericBuilderDesktop
                                 statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
                             });
                         });
-                        
+
                         // Re-enable button
                         checkDeviceButton.IsEnabled = true;
-                        
+
                         // Error during device detection - could log or show message
                         MessageBox.Show(
                             $"Device detection error: {ex.Message}\n\n" +
@@ -1078,9 +1089,9 @@ namespace GuiGenericBuilderDesktop
             // Enable flags from the configuration
             foreach (var flagKey in config.EnabledFlagKeys)
             {
-                var flag = AllBuildFlags.FirstOrDefault(f => 
+                var flag = AllBuildFlags.FirstOrDefault(f =>
                     string.Equals(f.Key, flagKey, StringComparison.OrdinalIgnoreCase));
-                
+
                 if (flag != null)
                 {
                     flag.IsEnabled = true;
@@ -1092,16 +1103,16 @@ namespace GuiGenericBuilderDesktop
             {
                 foreach (var flagParams in config.BuildFlagsParameters)
                 {
-                    var flag = AllBuildFlags.FirstOrDefault(f => 
+                    var flag = AllBuildFlags.FirstOrDefault(f =>
                         string.Equals(f.Key, flagParams.Key, StringComparison.OrdinalIgnoreCase));
-                    
+
                     if (flag != null && flag.Parameters != null)
                     {
                         foreach (var paramValue in flagParams.Value)
                         {
-                            var parameter = flag.Parameters.FirstOrDefault(p => 
-                                string.Equals(p.Name, paramValue.Key, StringComparison.OrdinalIgnoreCase));
-							
+                            var parameter = flag.Parameters.FirstOrDefault(p =>
+                                string.Equals(p.Identifier, paramValue.Key, StringComparison.OrdinalIgnoreCase));
+
                             if (parameter != null)
                             {
                                 parameter.Value = paramValue.Value;
@@ -1110,31 +1121,31 @@ namespace GuiGenericBuilderDesktop
                     }
                 }
             }
-            
+
             // Restore platform selection if available
             if (!string.IsNullOrEmpty(config.Platform) && boardSelector != null)
             {
                 var platformItem = boardSelector.Items.OfType<ComboBoxItem>()
                     .FirstOrDefault(item => string.Equals(item.Tag?.ToString(), config.Platform, StringComparison.OrdinalIgnoreCase));
-                
+
                 if (platformItem != null)
                 {
                     boardSelector.SelectedItem = platformItem;
                 }
             }
-            
+
             // Restore COM port selection if available
             if (!string.IsNullOrEmpty(config.ComPort) && comPortSelector != null)
             {
                 var comPortItem = comPortSelector.Items.OfType<ComboBoxItem>()
                     .FirstOrDefault(item => string.Equals(item.Tag?.ToString(), config.ComPort, StringComparison.OrdinalIgnoreCase));
-                
+
                 if (comPortItem != null)
                 {
                     comPortSelector.SelectedItem = comPortItem;
                 }
             }
-            
+
             MessageBox.Show(
                 $"Configuration '{config.ConfigurationName}' loaded successfully!\n\n" +
                 $"Platform: {config.Platform}\n" +

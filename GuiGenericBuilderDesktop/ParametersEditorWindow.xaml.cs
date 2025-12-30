@@ -63,18 +63,17 @@ namespace GuiGenericBuilderDesktop
 
         private bool ValidateParameters()
         {
+            // Collect all validation errors first
+            var errors = new List<string>();
+            
             // Validate that all required parameters have values
             foreach (var param in _parameters)
             {
                 // Only validate if parameter is required
                 if (param.IsRequired && string.IsNullOrWhiteSpace(param.Value))
                 {
-                    MessageBox.Show(
-                        $"Parameter '{param.Name}' is required and must have a value.",
-                        "Validation Error",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
-                    return false;
+                    var paramName = !string.IsNullOrEmpty(param.Name) ? param.Name : param.Key;
+                    errors.Add($"• {paramName} (required)");
                 }
                 
                 // For enum type, validate that the value exists in EnumValues (only if value is provided)
@@ -85,14 +84,22 @@ namespace GuiGenericBuilderDesktop
                 {
                     if (!param.EnumValues.Any(ev => ev.Value == param.Value))
                     {
-                        MessageBox.Show(
-                            $"Parameter '{param.Name}' has an invalid value. Please select from the dropdown.",
-                            "Validation Error",
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Warning);
-                        return false;
+                        var paramName = !string.IsNullOrEmpty(param.Name) ? param.Name : param.Key;
+                        errors.Add($"• {paramName} (invalid value)");
                     }
                 }
+            }
+            
+            // If there are errors, show them all at once
+            if (errors.Any())
+            {
+                var errorMessage = "Please fix the following validation errors:\n\n" + string.Join("\n", errors);
+                MessageBox.Show(
+                    errorMessage,
+                    "Validation Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return false;
             }
             
             return true;
@@ -100,27 +107,21 @@ namespace GuiGenericBuilderDesktop
 
         private void ParamsGrid_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
         {
-        if (e.EditAction != DataGridEditAction.Commit) return;
-        if (_handlingRowEditEnding) return;
+            if (e.EditAction != DataGridEditAction.Commit) return;
+            if (_handlingRowEditEnding) return;
 
-        try
-        {
-            _handlingRowEditEnding = true;
-            ParamsGrid.CommitEdit(DataGridEditingUnit.Row, true);
-
-            if (!ValidateParameters())
+            try
             {
-                var source = _parameters.ToList();
-                ParamsGrid.ItemsSource = null;
-                ParamsGrid.ItemsSource = source;
-                _parameters.Clear();
-                _parameters.AddRange(source);
+                _handlingRowEditEnding = true;
+                ParamsGrid.CommitEdit(DataGridEditingUnit.Row, true);
+                
+                // Don't validate here - let user finish editing all parameters
+                // Validation will happen when user clicks OK button
             }
-        }
-        finally
-        {
-            _handlingRowEditEnding = false;
-        }
+            finally
+            {
+                _handlingRowEditEnding = false;
+            }
         }
 
         private void NumberOnly_PreviewTextInput(object sender, TextCompositionEventArgs e)

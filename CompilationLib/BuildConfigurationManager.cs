@@ -47,9 +47,9 @@ namespace CompilationLib
                 
                 if (flag.Parameters != null && flag.Parameters.Any())
                 {
-                    foreach (var param in flag.Parameters.Where(p => !string.IsNullOrEmpty(p?.Name)))
+                    foreach (var param in flag.Parameters.Where(p => !string.IsNullOrEmpty(p?.Identifier)))
                     {
-                        paramValues[param.Name!] = param.Value ?? string.Empty;
+                        paramValues[param.Identifier!] = param.Value ?? string.Empty;
                     }
                 }
                 
