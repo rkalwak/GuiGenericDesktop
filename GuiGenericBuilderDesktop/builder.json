@@ -446,7 +446,7 @@
             },
             {
               "Key": "TimeoutInMin",
-              "Name": "Timeout trybu configuracji",
+              "Name": "Timeout trybu konfiguracji",
               "Type": "number",
               "IsRequired": false,
               "DefaultValue": "5",
@@ -466,6 +466,153 @@
                 "fr": {
                   "Name": "Délai d'attente du mode de configuration (minutes)",
                   "Description": "Spécifie la durée (en minutes) pendant laquelle l'appareil reste en mode de configuration lorsque 'Mode de configuration → Hors ligne' est sélectionné."
+                }
+              }
+            },
+            {
+              "Key": "WIFISsid",
+              "Name": "SSID sieci WIFI",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "WIFI SSID"
+                },
+                "es": {
+                  "Name": "SSID de WIFI"
+                },
+                "de": {
+                  "Name": "WIFI SSID"
+                },
+                "fr": {
+                  "Name": "SSID WIFI"
+                }
+              }
+            },
+            {
+              "Key": "WIFIPass",
+              "Name": "Hasło do sieci WIFI",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "WIFI Password"
+                },
+                "es": {
+                  "Name": "Contraseña de WIFI"
+                },
+                "de": {
+                  "Name": "WIFI Passwort"
+                },
+                "fr": {
+                  "Name": "Mot de passe WIFI"
+                }
+              }
+            },
+            {
+              "Key": "Server",
+              "Name": "Adres serwera Supla",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "Supla Server Address"
+                },
+                "es": {
+                  "Name": "Dirección del servidor Supla"
+                },
+                "de": {
+                  "Name": "Supla-Serveradresse"
+                },
+                "fr": {
+                  "Name": "Adresse du serveur Supla"
+                }
+              }
+            },
+            {
+              "Key": "Email",
+              "Name": "Adres e-mail konta Supla",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "Supla Account Email Address"
+                },
+                "es": {
+                  "Name": "Dirección de correo electrónico de la cuenta Supla"
+                },
+                "de": {
+                  "Name": "E-Mail-Adresse des Supla-Kontos"
+                },
+                "fr": {
+                  "Name": "Adresse e-mail du compte Supla"
+                }
+              }
+            },
+            {
+              "Key": "Login",
+              "Name": "Login do GUI",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "admin",
+              "Translations": {
+                "en": {
+                  "Name": "GUI Login"
+                },
+                "es": {
+                  "Name": "Inicio de sesión de GUI"
+                },
+                "de": {
+                  "Name": "GUI Login"
+                },
+                "fr": {
+                  "Name": "Connexion GUI"
+                }
+              }
+            },
+            {
+              "Key": "Password",
+              "Name": "Hasło do GUI",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "pass",
+              "Translations": {
+                "en": {
+                  "Name": "GUI Password"
+                },
+                "es": {
+                  "Name": "Contraseña de GUI"
+                },
+                "de": {
+                  "Name": "GUI Passwort"
+                },
+                "fr": {
+                  "Name": "Mot de passe GUI"
+                }
+              }
+            },
+            {
+              "Key": "DeviceName",
+              "Name": "Nazwa urządzenia w Supla",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "GG BD",
+              "Translations": {
+                "en": {
+                  "Name": "Device Name in Supla"
+                },
+                "es": {
+                  "Name": "Nombre del dispositivo en Supla"
+                },
+                "de": {
+                  "Name": "Gerätename in Supla"
+                },
+                "fr": {
+                  "Name": "Nom de l´appareil dans Supla"
                 }
               }
             }

@@ -245,7 +245,7 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_FLAG",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter { Key = "MODE", Name = "Mode", Value = "", Type = "enum" }
+                            new Parameter { Key = "MODE", Name = "Mode", Value = "", Type = "enum", IsRequired = true }
                         }
                     }
                 };
@@ -283,7 +283,7 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_FLAG",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter { Key = "TIMEOUT", Name = "Timeout", Value = null, Type = "number" }
+                            new Parameter { Key = "TIMEOUT", Name = "Timeout", Value = null, Type = "number", IsRequired = true }
                         }
                     }
                 };
@@ -415,7 +415,8 @@ namespace CompilationLib.Tests
                                 Name = "Tryb", 
                                 Value = "",
                                 DefaultValue = "3",
-                                Type = "enum" 
+                                Type = "enum",
+                                IsRequired = true  // Required parameters get default value of 0
                             }
                         }
                     }
@@ -425,7 +426,7 @@ namespace CompilationLib.Tests
 
                 var result = File.ReadAllText(temp);
 
-                // When Value is empty, it should still use "0" not DefaultValue in the handler
+                // When Value is empty and IsRequired is true, it should use "0" not DefaultValue in the handler
                 // The DefaultValue should be used to initialize Value in the UI layer
                 result.Should().Contain(" -D SUPLA_INITIAL_CONFIG_MODE_Mode=0");
             }
@@ -517,6 +518,405 @@ namespace CompilationLib.Tests
                 var result = File.ReadAllText(temp);
 
                 result.Should().Contain(" -D SUPLA_TEST_FLAG_OldParamName=123");
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_OptionalParameterWithoutValue_NotAdded()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_FLAG
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_FLAG",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter 
+                            { 
+                                Key = "OptionalParam",
+                                Name = "Optional Parameter", 
+                                Value = "",
+                                IsRequired = false,
+                                Type = "number" 
+                            }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    result.Should().Contain(" -D SUPLA_FLAG");
+                    result.Should().NotContain("SUPLA_FLAG_OptionalParam");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_OptionalParameterWithValue_IsAdded()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_FLAG
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_FLAG",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter 
+                            { 
+                                Key = "OptionalParam",
+                                Name = "Optional Parameter", 
+                                Value = "42",
+                                IsRequired = false,
+                                Type = "number" 
+                            }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    result.Should().Contain(" -D SUPLA_FLAG");
+                    result.Should().Contain(" -D SUPLA_FLAG_OptionalParam=42");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_RequiredParameterWithoutValue_IsAddedWithDefault()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_FLAG
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_FLAG",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter 
+                            { 
+                                Key = "RequiredParam",
+                                Name = "Required Parameter", 
+                                Value = "",
+                                IsRequired = true,
+                                Type = "number" 
+                            }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    result.Should().Contain(" -D SUPLA_FLAG");
+                    result.Should().Contain(" -D SUPLA_FLAG_RequiredParam=0");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_OptionalParameterExistsInFile_GetsCommentedOut()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_FLAG
+ -D SUPLA_FLAG_OptionalParam=100
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_FLAG",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter 
+                            { 
+                                Key = "OptionalParam",
+                                Name = "Optional Parameter", 
+                                Value = "",  // No value provided
+                                IsRequired = false,
+                                Type = "number" 
+                            }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    result.Should().Contain(" -D SUPLA_FLAG");
+                    result.Should().Contain(";-D SUPLA_FLAG_OptionalParam=100");
+                    result.Should().NotContain("\n -D SUPLA_FLAG_OptionalParam=");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_OptionalParameterAlreadyCommented_StaysCommented()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_FLAG
+;-D SUPLA_FLAG_OptionalParam=100
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_FLAG",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter 
+                            { 
+                                Key = "OptionalParam",
+                                Name = "Optional Parameter", 
+                                Value = "",  // No value provided
+                                IsRequired = false,
+                                Type = "number" 
+                            }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    result.Should().Contain(" -D SUPLA_FLAG");
+                    result.Should().Contain(";-D SUPLA_FLAG_OptionalParam=100");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_MixedRequiredAndOptionalParameters()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_COMPLEX
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_COMPLEX",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter 
+                            { 
+                                Key = "RequiredMode",
+                                Value = "1",
+                                IsRequired = true,
+                                Type = "enum" 
+                            },
+                            new Parameter 
+                            { 
+                                Key = "OptionalTimeout",
+                                Value = "",  // No value
+                                IsRequired = false,
+                                Type = "number" 
+                            },
+                            new Parameter 
+                            { 
+                                Key = "OptionalName",
+                                Value = "MyName",  // Has value
+                                IsRequired = false,
+                                Type = "text" 
+                            }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    result.Should().Contain(" -D SUPLA_COMPLEX_RequiredMode=1");
+                    result.Should().NotContain("SUPLA_COMPLEX_OptionalTimeout");
+                    result.Should().Contain(" -D SUPLA_COMPLEX_OptionalName='\"MyName\"'");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_OptionalEnumWithoutValue_NotAdded()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_FLAG
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_FLAG",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter 
+                            { 
+                                Key = "OptionalMode",
+                                Value = null,
+                                IsRequired = false,
+                                Type = "enum" 
+                            }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+
+                var result = File.ReadAllText(temp);
+
+                result.Should().NotContain("SUPLA_FLAG_OptionalMode");
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_OptionalTextWithoutValue_NotAdded()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_FLAG
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_FLAG",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter 
+                            { 
+                                Key = "OptionalText",
+                                Value = "",
+                                IsRequired = false,
+                                Type = "text" 
+                            }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+
+                var result = File.ReadAllText(temp);
+
+                result.Should().NotContain("SUPLA_FLAG_OptionalText");
             }
             finally
             {

@@ -193,6 +193,34 @@ public class PlatformioCliHandler : ICompileHandler
                 // Convert value to string safely
                 var raw = (p.Value ?? string.Empty).Trim();
 
+                // Check if parameter is optional and has no value
+                bool isOptionalWithoutValue = !p.IsRequired && string.IsNullOrEmpty(raw);
+                
+                var paramDefineName = $"{flag.Key}_{identifier}";
+                var indexOfExistingParameter = lines.FindIndex(line => line.Contains(paramDefineName));
+
+                if (isOptionalWithoutValue)
+                {
+                    // If optional parameter has no value:
+                    // - Comment it out if it exists in the file
+                    // - Don't add it if it doesn't exist
+                    if (indexOfExistingParameter != -1)
+                    {
+                        var existingLine = lines[indexOfExistingParameter];
+                        // Comment out if not already commented
+                        if (!existingLine.TrimStart().StartsWith(";"))
+                        {
+                            // Find the first non-whitespace character and add ; before it
+                            var trimmedStart = existingLine.TrimStart();
+                            var leadingWhitespace = existingLine.Substring(0, existingLine.Length - trimmedStart.Length);
+                            lines[indexOfExistingParameter] = leadingWhitespace + ";" + trimmedStart;
+                        }
+                    }
+                    // If it doesn't exist, don't add it (skip to next parameter)
+                    continue;
+                }
+
+                // Parameter has a value or is required, process it normally
                 // Format based on declared type: numbers as-is, strings quoted
                 string value;
                 if (string.Equals(p.Type, "number", StringComparison.OrdinalIgnoreCase) ||
@@ -202,11 +230,11 @@ public class PlatformioCliHandler : ICompileHandler
                     value = $"'\"{raw}\"'";
 
                 // define is FLAGNAME_ParamIdentifier=Value
-                var define = $" -D {flag.Key}_{identifier}={value}";
-                var indexOfNewParameter = lines.FindIndex(line => line.Contains($"{flag.Key}_{identifier}"));
-                if (indexOfNewParameter != -1)
+                var define = $" -D {paramDefineName}={value}";
+                
+                if (indexOfExistingParameter != -1)
                 {
-                    lines[indexOfNewParameter] = define;
+                    lines[indexOfExistingParameter] = define;
                 }
                 else
                 {
