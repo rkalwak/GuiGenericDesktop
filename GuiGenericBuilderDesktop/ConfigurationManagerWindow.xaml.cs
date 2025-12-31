@@ -95,9 +95,7 @@ namespace GuiGenericBuilderDesktop
                 {
                     try
                     {
-#pragma warning disable CS0618 // Type or member is obsolete
-                        var deleted = !string.IsNullOrEmpty(config.Hash) && _configManager.DeleteConfiguration(config.Hash);
-#pragma warning restore CS0618 // Type or member is obsolete
+                        var deleted = !string.IsNullOrEmpty(config.FileName) && _configManager.DeleteConfiguration(config.FileName);
                         
                         if (deleted)
                         {

@@ -6,7 +6,6 @@
     public string OutputFile { get; internal set; }
     public string Logs { get; internal set; }
     public bool IsSuccessful { get; set; }
-    public string HashOfOptions { get; set; }
     public string BackupFilePath { get; set; }
 
     public override string ToString()

@@ -716,7 +716,6 @@ namespace GuiGenericBuilderDesktop
                         var platform = (boardSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
                         var comPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
                         _configManager.SaveConfiguration(
-                            result.HashOfOptions ?? string.Empty,
                             selectedFlags,
                             configName: null,
                             platform: platform,

@@ -124,7 +124,6 @@ public class PlatformioCliHandler : ICompileHandler
 
             await process.WaitForExitAsync();
             stopwatch.Stop();
-            compileResponse.HashOfOptions = BuildConfigurationHasher.CalculateHash(request.BuildFlags);
             compileResponse.IsSuccessful = process.ExitCode == 0;
             compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
             compileResponse.OutputDirectory = $"{request.ProjectDirectory}/.pio/build/{request.Platform}";
@@ -134,8 +133,6 @@ public class PlatformioCliHandler : ICompileHandler
 
         return compileResponse;
     }
-
-
 
     /// <summary>
     /// Comments out all entries between ;flagsstart and ;flagsend that are not in the allowedFlags list.
