@@ -149,3 +149,117 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 - Maintains backward compatibility with hash-based configuration files
 - More user-friendly than hash - users can actually restore their configuration from this string
 
+## [2025-01-08] - Version 2.0.4
+
+### Changed
+
+**Complete Hash Removal - EncodedConfig as Primary Identifier**
+- Completely removed SHA256 hash functionality from codebase
+- No backward compatibility maintained - clean slate approach
+- **SaveConfiguration API simplified**:
+  - Removed obsolete `SaveConfiguration(string hash, ...)` method
+  - Single method signature: `SaveConfiguration(enabledFlags, configName, platform, comPort)`
+  - Auto-save filenames now use timestamps instead of hash: `Config_20250108_143022.json`
+  - Manual save filenames use sanitized custom names: `MyConfig.json`
+- **LoadConfiguration simplified**:
+  - Only works with `EncodedConfig` parameter (no hash lookup)
+  - Method signature: `LoadConfiguration(string encodedConfig)`
+- **DeleteConfiguration simplified**:
+  - Now works with filename instead of hash
+  - Method signature: `DeleteConfiguration(string fileName)`
+  - Automatically adds `.json` extension if missing
+- **SavedBuildConfiguration class cleaned up**:
+  - Removed `Hash` property completely
+  - EncodedConfig is now the sole identifier
+  - Cleaner JSON structure without obsolete hash field
+- **ConfigurationManagerWindow updated**:
+  - Delete button now uses `FileName` property instead of `Hash`
+  - No more obsolete property warnings
+- **CompileResponse cleaned up**:
+  - Removed `HashOfOptions` property completely
+- **Benefits**:
+  - 76 lines of code removed
+  - More readable auto-save filenames with timestamps
+  - Simpler API with no obsolete methods
+  - Focus on reversible EncodedConfig strings
+  - Easier to debug with timestamp-based filenames
+  - No SHA256 complexity
+
+**Live Compilation Time Display with Permanent Status**
+- Added real-time compilation time display that updates during compilation
+- Timer updates every 100ms for smooth visual feedback
+- Shows elapsed time in format: "⏳ Compiling firmware... Elapsed: 45.3s"
+- **Permanent status display** - compilation results stay visible after completion
+  - Removed auto-hide behavior (previously hid after 3 seconds)
+  - Success message stays visible: "✓ Compilation successful! Time: 45.3s"
+  - Failure message stays visible: "✗ Compilation failed! Time: 37.8s"
+  - Error message stays visible: "✗ Compilation error! Time: 5.2s"
+- Status messages remain until next user action
+- Color-coded results:
+  - Black text with oblique font during compilation
+  - Green for success
+  - Red for failures
+- Time displayed with 1 decimal place precision (e.g., "45.3s")
+- Background timer task properly managed with cancellation tokens
+- Thread-safe UI updates using Dispatcher.Invoke
+- Provides immediate feedback on compilation duration
+- Helps users track compilation performance over time
+
+**Library Version Extraction - Return Empty String Instead of Null**
+- Updated `LibraryVersionExtractor` to return empty strings instead of null
+- **Public methods updated**:
+  - `GetSuplaDeviceVersion()` returns `string.Empty` instead of `null`
+  - `GetGuiGenericVersion()` returns `string.Empty` instead of `null`
+- **Private helper methods updated**:
+  - `ExtractVersionFromLibraryJson()` returns `string.Empty`
+  - `ExtractVersionFromLibraryProperties()` returns `string.Empty`
+  - `ExtractVersionFromHeader()` returns `string.Empty`
+- **Benefits**:
+  - No null reference exceptions
+  - Simpler null checks: `if (!string.IsNullOrEmpty(version))`
+  - No need for null coalescing operators
+  - Cleaner code throughout the codebase
+  - Consistent behavior across all methods
+- **All tests updated**:
+  - 5 test methods renamed to reflect empty string expectations
+  - Changed assertions from `BeNull()` to `BeEmpty()`
+  - All 13 LibraryVersionExtractor tests passing
+
+**Version Display Improvements**
+- Removed version label TextBlocks from UI (SuplaDevice and GUI-Generic versions)
+- Versions now displayed only in window title: `GUI-Generic Builder - GG v25.02.11 - SD v2.4.5`
+- Cleaner UI with less visual clutter
+- More space for status messages and compilation feedback
+- Versions still logged for debugging purposes
+- Permanent display in window title (always visible)
+- Simpler information hierarchy
+
+**Compilation Progress Bar Removed**
+- Removed visual progress bar and countdown timer from compilation UI
+- Replaced with simpler status text messages
+- Cleaner, less cluttered interface
+- No time pressure or anxiety from countdown
+- Focus on compilation status rather than time remaining
+- Status messages provide clear feedback:
+  - "⏳ Compiling firmware..." during compilation
+  - "✓ Compilation successful!" on success
+  - "✗ Compilation failed!" on failure
+
+### Technical Details
+
+**Code Quality Improvements**:
+- Removed ~200 lines of obsolete/complex code
+- Eliminated progress bar, timer, and hash calculation logic
+- Simplified API surfaces across multiple classes
+- Better separation of concerns
+- Cleaner JSON serialization
+- More maintainable codebase
+
+**Breaking Changes**:
+- Old configuration files with hash-based filenames will need manual renaming
+- `LoadConfiguration(hash)` calls will not work (use `EncodedConfig` instead)
+- `DeleteConfiguration(hash)` now expects filename
+- Applications relying on `Hash` property in `SavedBuildConfiguration` will need updates
+- Applications relying on `HashOfOptions` in `CompileResponse` will need updates
+
+
