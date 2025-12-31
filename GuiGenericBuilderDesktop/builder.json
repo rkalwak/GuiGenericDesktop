@@ -1865,7 +1865,6 @@
         "fr": "Autre"
       },
       "Flags": {
-
         "SUPLA_RGBW": {
           "name": "RGBW, RGB, Dimmer",
           "desc": "Ustawienia urządzenia->Inne. Umożliwia obsługę urządzeń RGBW, RGB i ściemniaczy.",
@@ -2076,60 +2075,60 @@
         "es": "boneIO",
         "de": "boneIO",
         "fr": "boneIO"
-      }
-    },
-    "Flags": {
-      "SUPLA_BONEIO_32x10A": {
-        "name": "boneIO 32x10A",
-        "desc": "",
-        "defOn": false,
-        "translations": {
-          "en": {
-            "name": "boneIO 32x10A",
-            "desc": ""
-          },
-          "es": {
-            "name": "boneIO 32x10A",
-            "desc": ""
-          },
-          "de": {
-            "name": "boneIO 32x10A",
-            "desc": ""
-          },
-          "fr": {
-            "name": "boneIO 32x10A",
-            "desc": ""
-          }
-        },
-        "Parameters": [
-
-        ]
       },
-      "SUPLA_BONEIO_24x16A": {
-        "name": "boneIO 24x16A",
-        "desc": "",
-        "defOn": false,
-        "translations": {
-          "en": {
-            "name": "boneIO 24x16A",
-            "desc": ""
+      "Flags": {
+        "SUPLA_BONEIO_32x10A": {
+          "name": "boneIO 32x10A",
+          "desc": "",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "boneIO 32x10A",
+              "desc": ""
+            },
+            "es": {
+              "name": "boneIO 32x10A",
+              "desc": ""
+            },
+            "de": {
+              "name": "boneIO 32x10A",
+              "desc": ""
+            },
+            "fr": {
+              "name": "boneIO 32x10A",
+              "desc": ""
+            }
           },
-          "es": {
-            "name": "boneIO 24x16A",
-            "desc": ""
-          },
-          "de": {
-            "name": "boneIO 24x16A",
-            "desc": ""
-          },
-          "fr": {
-            "name": "boneIO 24x16A",
-            "desc": ""
-          }
-        },
-        "Parameters": [
+          "Parameters": [
 
-        ]
+          ]
+        },
+        "SUPLA_BONEIO_24x16A": {
+          "name": "boneIO 24x16A",
+          "desc": "",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "boneIO 24x16A",
+              "desc": ""
+            },
+            "es": {
+              "name": "boneIO 24x16A",
+              "desc": ""
+            },
+            "de": {
+              "name": "boneIO 24x16A",
+              "desc": ""
+            },
+            "fr": {
+              "name": "boneIO 24x16A",
+              "desc": ""
+            }
+          },
+          "Parameters": [
+
+          ]
+        }
       }
     },
     "DEBUG": {
@@ -2236,7 +2235,7 @@
           "desc": "Pozwala testować opcję parametrów bez fizycznych sensorów",
           "defOn": true,
           "depRel": [
-           
+
           ],
           "translations": {
             "en": {
