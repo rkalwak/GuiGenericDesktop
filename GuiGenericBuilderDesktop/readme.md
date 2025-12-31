@@ -20,25 +20,41 @@ Install Vistual Studio Code and then install the Platform.io extension or just P
 
 - ESP8266
 
+## Development Guidelines
+
+### Testing
+
+**Important:** When making code changes, **DO NOT run integration tests** during development.
+
+Integration tests can take a very long time (50+ seconds) as they compile actual firmware for multiple ESP32 platforms. Use unit tests for rapid feedback during development.
+
+**Run unit tests only:**
+```bash
+dotnet test CompilationLib.Tests\CompilationLib.Tests.csproj --filter "Category!=Integration" --verbosity minimal
+```
+
+**Run all tests (including integration) only for final validation:**
+```bash
+dotnet test CompilationLib.Tests\CompilationLib.Tests.csproj --verbosity minimal
+```
+
+**Test categories:**
+- **Unit Tests**: Fast, isolated tests (<1 second total)
+- **Integration Tests**: Slow, compile actual firmware (50+ seconds per platform)
+
+### Code Changes
+
+When implementing features or fixes:
+1. Write/update unit tests first
+2. Run unit tests frequently (`Category!=Integration`)
+3. Make incremental changes
+4. Only run integration tests before committing
+5. Use `--verbosity minimal` for cleaner output
+
 ## How to
 
 ## To do
 
-- add SD version, application version
 - sound when compilation is done
 - Niestety ca³kowicie wirtualny termostat (oparty na linkach bezpoœrednich) nie dzia³a. To znaczy dzia³a odczyt temperatury, ale jeœli dodamy linki bezpoœrednie do przekaŸnika (w³¹cznika) to modu³ odmawia wspó³pracy. 
 Zawiesza siê, nie loguje do cloud i trzeba go przeflashowaæ na nowo, bo nawet w tryb config wejœæ nie chce. Krystian nie da³ z tym rady, ale mia³em nadziejê, ¿e siê "cudownie" naprawi³o. Niestety nie ;-)
-- Languages support
-- json settings
-- partition selection
-- building Zigbee Gateway?
-- CC1101 given version downloading
-- Fix issues:
-	
-	- https://forum.supla.org/viewtopic.php?t=17742
-	- I2c sensors as kpop
-	- https://tasmota.github.io/docs/Components/
-	- https://forum.supla.org/viewtopic.php?p=200757#p200757
-	- https://forum.supla.org/viewtopic.php?p=201170#p201170
-	- https://forum.supla.org/viewtopic.php?p=194354#p194354
-	- https://forum.supla.org/viewtopic.php?t=16885

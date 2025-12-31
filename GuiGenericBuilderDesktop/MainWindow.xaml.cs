@@ -23,12 +23,9 @@ namespace GuiGenericBuilderDesktop
         private ComboBox boardSelector;
         private ComboBox comPortSelector;
         private ComboBox flashSizeSelector;
-        private ProgressBar compileProgressBar;
-        private TextBlock compileTimerText;
         private CheckBox deployCheckBox;
         private CheckBox backupCheckBox;
         private CheckBox eraseFlashCheckBox;
-        private CancellationTokenSource _compileTimerCts;
         private readonly ILogger _logger;
         private Button updateGGButton;
         private Button checkDeviceButton;
@@ -62,6 +59,8 @@ namespace GuiGenericBuilderDesktop
                 _repositoryPath = @"c:\repozytoria\platformio\GUI-Generic";
             }
 
+            // Update version display and window title on startup
+            UpdateVersionDisplay();
 
             _logger.Information("MainWindow initialized successfully");
         }
@@ -213,27 +212,6 @@ namespace GuiGenericBuilderDesktop
                 Visibility = Visibility.Collapsed
             };
 
-            // Progress bar and timer for compile operation (counts elapsed time)
-            compileProgressBar = new ProgressBar
-            {
-                Width = 200,
-                Height = 20,
-                Margin = new Thickness(8, 0, 4, 0),
-                VerticalAlignment = VerticalAlignment.Center,
-                Minimum = 0,
-                Maximum = 180, // 3 minutes maximum for display purposes
-                Value = 0,
-                IsIndeterminate = false
-            };
-
-            compileTimerText = new TextBlock
-            {
-                Text = string.Empty,
-                Margin = new Thickness(4, 0, 8, 0),
-                VerticalAlignment = VerticalAlignment.Center,
-                FontWeight = FontWeights.SemiBold,
-            };
-
             compileButton = new Button
             {
                 Content = "3. Compile",
@@ -281,10 +259,6 @@ namespace GuiGenericBuilderDesktop
 
             // Status text (hidden initially)
             devicePanel.Children.Add(statusText);
-
-            // Progress bar and countdown (these will be hidden initially)
-            devicePanel.Children.Add(compileTimerText);
-            devicePanel.Children.Add(compileProgressBar);
 
             // Deploy checkbox - positioned right before compile button
             deployCheckBox = new CheckBox
@@ -527,6 +501,9 @@ namespace GuiGenericBuilderDesktop
                     branch: "master",
                     cancellationToken: CancellationToken.None);
 
+                // Update version display after successful download
+                UpdateVersionDisplay();
+
                 // Success status
                 statusText.Text = "✓ Repository updated successfully!";
                 statusText.Foreground = System.Windows.Media.Brushes.Green;
@@ -658,54 +635,40 @@ namespace GuiGenericBuilderDesktop
             // Disable compile button
             compileButton.IsEnabled = false;
 
-            // Show status indicator
-            statusText.Text = "⏳ Compiling firmware...";
+            // Track compilation time
+            var compilationStopwatch = System.Diagnostics.Stopwatch.StartNew();
+
+            // Show status indicator with initial time
+            statusText.Text = "⏳ Compiling firmware... Elapsed: 0.0s";
             statusText.Foreground = System.Windows.Media.Brushes.Black;
+            statusText.FontStyle = FontStyles.Oblique;
             statusText.Visibility = Visibility.Visible;
 
-            // Show and initialize progress UI for elapsed time tracking
-            if (compileProgressBar != null && compileTimerText != null)
-            {
-                compileProgressBar.Value = 0;
-                compileProgressBar.Visibility = Visibility.Visible;
-                compileTimerText.Text = "00:00";
-                compileTimerText.Visibility = Visibility.Visible;
-            }
-
-            // Cancel any existing timer
-            _compileTimerCts?.Cancel();
-            _compileTimerCts = new CancellationTokenSource();
-            var timerToken = _compileTimerCts.Token;
-
-            // Start elapsed time counter task
+            // Start a timer to update elapsed time
+            var timerCancellation = new CancellationTokenSource();
             var timerTask = Task.Run(async () =>
             {
-                int elapsed = 0;
                 try
                 {
-                    while (!timerToken.IsCancellationRequested)
+                    while (!timerCancellation.Token.IsCancellationRequested)
                     {
-                        await Task.Delay(1000, timerToken);
-                        elapsed++;
+                        await Task.Delay(100, timerCancellation.Token); // Update every 100ms for smooth display
+                        
+                        var elapsed = compilationStopwatch.Elapsed.TotalSeconds;
                         Dispatcher.Invoke(() =>
                         {
-                            if (compileProgressBar != null && compileTimerText != null)
-                            {
-                                // Update progress bar (capped at maximum)
-                                compileProgressBar.Value = Math.Min(elapsed, compileProgressBar.Maximum);
-                                
-                                // Display elapsed time
-                                compileTimerText.Text = TimeSpan.FromSeconds(elapsed).ToString(@"mm\:ss");
-                            }
+                            statusText.Text = $"⏳ Compiling firmware... Elapsed: {elapsed:F1}s";
                         });
                     }
                 }
-                catch (TaskCanceledException) { }
-            }, timerToken);
+                catch (TaskCanceledException)
+                {
+                    // Timer cancelled, this is expected
+                }
+            }, timerCancellation.Token);
 
             try
             {
-
                 var ggRequest = new CompileRequest
                 {
                     BuildFlags = selectedFlags,
@@ -722,37 +685,27 @@ namespace GuiGenericBuilderDesktop
                 ICompileHandler compiler = new PlatformioCliHandler();
                 var result = await compiler.Handle(ggRequest, CancellationToken.None);
 
-                // Stop timer
-                _compileTimerCts?.Cancel();
+                // Stop the timer and stopwatch
+                timerCancellation.Cancel();
+                compilationStopwatch.Stop();
                 try
                 {
                     await timerTask;
                 }
-                catch (TaskCanceledException) { }
-
-                // Hide progress UI
-                if (compileProgressBar != null && compileTimerText != null)
+                catch (TaskCanceledException)
                 {
-                    compileTimerText.Visibility = Visibility.Collapsed;
-                    compileProgressBar.Visibility = Visibility.Collapsed;
+                    // Expected
                 }
+
+                var compilationTime = compilationStopwatch.Elapsed;
 
                 if (result.IsSuccessful)
                 {
-                    // Success status
-                    statusText.Text = "✓ Compilation successful!";
-                    statusText.Foreground = System.Windows.Media.Brushes.Green;
-
-                    // Hide status after 3 seconds
-                    Task.Run(async () =>
-                    {
-                        await Task.Delay(3000);
-                        Dispatcher.Invoke(() =>
-                        {
-                            statusText.Visibility = Visibility.Collapsed;
-                            statusText.Foreground = System.Windows.Media.Brushes.Black;
-                        });
-                    });
+                    // Success status with compilation time - KEEP IT VISIBLE
+                    statusText.Text = $"✓ Compilation successful! Time: {compilationTime.TotalSeconds:F1}s";
+                    statusText.Foreground = System.Windows.Media.Brushes.Black;
+                    statusText.FontStyle = FontStyles.Oblique;
+                    // DO NOT hide the status - keep it visible
 
                     // Generate encoded configuration string
                     var encodedConfig = BuildConfigurationHasher.EncodeOptions(selectedFlags);
@@ -787,20 +740,10 @@ namespace GuiGenericBuilderDesktop
 
                 else
                 {
-                    // Error status
-                    statusText.Text = "✗ Compilation failed";
+                    // Error status with compilation time - KEEP IT VISIBLE
+                    statusText.Text = $"✗ Compilation failed! Time: {compilationTime.TotalSeconds:F1}s";
                     statusText.Foreground = System.Windows.Media.Brushes.Red;
-
-                    // Hide status after 3 seconds
-                    Task.Run(async () =>
-                    {
-                        await Task.Delay(3000);
-                        Dispatcher.Invoke(() =>
-                        {
-                            statusText.Visibility = Visibility.Collapsed;
-                            statusText.Foreground = System.Windows.Media.Brushes.Black;
-                        });
-                    });
+                    // DO NOT hide the status - keep it visible
 
                     // Show detailed logs in modal window
                     var resultsWindow = new CompilationResultsWindow(result.Logs)
@@ -812,30 +755,22 @@ namespace GuiGenericBuilderDesktop
             }
             catch (Exception ex)
             {
-                // Stop timer on error
-                _compileTimerCts?.Cancel();
-
-                // Hide progress UI
-                if (compileProgressBar != null && compileTimerText != null)
+                // Stop the timer and stopwatch
+                timerCancellation.Cancel();
+                compilationStopwatch.Stop();
+                try
                 {
-                    compileProgressBar.Visibility = Visibility.Collapsed;
-                    compileTimerText.Visibility = Visibility.Collapsed;
+                    await timerTask;
+                }
+                catch (TaskCanceledException)
+                {
+                    // Expected
                 }
 
-                // Error status
-                statusText.Text = "✗ Compilation error";
+                // Error status with time - KEEP IT VISIBLE
+                statusText.Text = $"✗ Compilation error! Time: {compilationStopwatch.Elapsed.TotalSeconds:F1}s";
                 statusText.Foreground = System.Windows.Media.Brushes.Red;
-
-                // Hide status after 3 seconds
-                Task.Run(async () =>
-                {
-                    await Task.Delay(3000);
-                    Dispatcher.Invoke(() =>
-                    {
-                        statusText.Visibility = Visibility.Collapsed;
-                        statusText.Foreground = System.Windows.Media.Brushes.Black;
-                    });
-                });
+                // DO NOT hide the status - keep it visible
 
                 MessageBox.Show($"Compilation error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -1154,6 +1089,75 @@ namespace GuiGenericBuilderDesktop
                 "Configuration Loaded",
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
+        }
+
+        private void UpdateVersionDisplay()
+        {
+            try
+            {
+                // Get SuplaDevice version
+                var suplaVersion = LibraryVersionExtractor.GetSuplaDeviceVersion(_repositoryPath);
+                
+                if (!string.IsNullOrEmpty(suplaVersion))
+                {
+                    _logger.Information("SuplaDevice version detected: {Version}", suplaVersion);
+                }
+                else
+                {
+                    _logger.Debug("SuplaDevice version not found in repository");
+                }
+
+                // Get GUI-Generic version
+                var ggVersion = LibraryVersionExtractor.GetGuiGenericVersion(_repositoryPath);
+                
+                if (!string.IsNullOrEmpty(ggVersion))
+                {
+                    _logger.Information("GUI-Generic version detected: {Version}", ggVersion);
+                }
+                else
+                {
+                    _logger.Debug("GUI-Generic version not found in repository");
+                }
+
+                // Update window title with versions
+                UpdateWindowTitle(suplaVersion, ggVersion);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, "Failed to extract library versions");
+                
+                // Update window title even if version extraction fails
+                UpdateWindowTitle(null, null);
+            }
+        }
+
+        private void UpdateWindowTitle(string suplaVersion, string ggVersion)
+        {
+            const string baseTitle = "GUI-Generic Builder";
+            
+            var titleParts = new List<string> { baseTitle };
+            
+            if (!string.IsNullOrEmpty(ggVersion))
+            {
+                titleParts.Add($"GG v{ggVersion}");
+            }
+            
+            if (!string.IsNullOrEmpty(suplaVersion))
+            {
+                titleParts.Add($"SD v{suplaVersion}");
+            }
+            
+            // If no versions found, just show base title
+            if (titleParts.Count == 1)
+            {
+                Title = baseTitle;
+            }
+            else
+            {
+                Title = string.Join(" - ", titleParts);
+            }
+            
+            _logger.Debug("Window title updated to: {Title}", Title);
         }
     }
 }
