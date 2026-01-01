@@ -1066,4 +1066,164 @@ namespace CompilationLib.Tests
             finally { CleanupTempRepo(temp); }
         }
     }
+
+    public class SUPLA_INA219_Tests : PlatformioTestBase
+    {
+        [Theory]
+        [Trait("Category", "Integration")]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p, new List<BuildFlagItem>
+                {
+                    new BuildFlagItem { FlagName = "SUPLA_INA219" }
+                }, temp);
+                Assert.True(res.IsSuccessful);
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+    }
+
+    public class SUPLA_INA226_Tests : PlatformioTestBase
+    {
+        [Theory]
+        [Trait("Category", "Integration")]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p, new List<BuildFlagItem>
+                {
+                    new BuildFlagItem { FlagName = "SUPLA_INA226" }
+                }, temp);
+                Assert.True(res.IsSuccessful);
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+    }
+
+    public class SUPLA_INA228_Tests : PlatformioTestBase
+    {
+        [Theory]
+        [Trait("Category", "Integration")]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p, new List<BuildFlagItem>
+                {
+                    new BuildFlagItem { FlagName = "SUPLA_INA228" }
+                }, temp);
+                Assert.True(res.IsSuccessful);
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+    }
+
+    public class SUPLA_INA229_Tests : PlatformioTestBase
+    {
+        [Theory]
+        [Trait("Category", "Integration")]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p, new List<BuildFlagItem>
+                {
+                    new BuildFlagItem { FlagName = "SUPLA_INA229" }
+                }, temp);
+                Assert.True(res.IsSuccessful);
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+    }
+
+    public class SUPLA_INA236_Tests : PlatformioTestBase
+    {
+        [Theory]
+        [Trait("Category", "Integration")]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p, new List<BuildFlagItem>
+                {
+                    new BuildFlagItem { FlagName = "SUPLA_INA236" }
+                }, temp);
+                Assert.True(res.IsSuccessful);
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+    }
+
+    public class SUPLA_INA238_Tests : PlatformioTestBase
+    {
+        [Theory]
+        [Trait("Category", "Integration")]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p, new List<BuildFlagItem>
+                {
+                    new BuildFlagItem { FlagName = "SUPLA_INA238" }
+                }, temp);
+                Assert.True(res.IsSuccessful);
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+    }
+
+    public class SUPLA_INA239_Tests : PlatformioTestBase
+    {
+        [Theory]
+        [Trait("Category", "Integration")]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p, new List<BuildFlagItem>
+                {
+                    new BuildFlagItem { FlagName = "SUPLA_INA239" }
+                }, temp);
+                Assert.True(res.IsSuccessful);
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+    }
+
+    public class SUPLA_INA260_Tests : PlatformioTestBase
+    {
+        [Theory]
+        [Trait("Category", "Integration")]
+        [MemberData(nameof(PlatformProviders.PlatformsData), MemberType = typeof(PlatformProviders))]
+        public async Task Runs_On_All_Platforms(string p)
+        {
+            var temp = CreateTempRepoCopy();
+            try
+            {
+                var res = await RunHandlerAsync(p, new List<BuildFlagItem>
+                {
+                    new BuildFlagItem { FlagName = "SUPLA_INA260" }
+                }, temp);
+                Assert.True(res.IsSuccessful);
+            }
+            finally { CleanupTempRepo(temp); }
+        }
+    }
 }

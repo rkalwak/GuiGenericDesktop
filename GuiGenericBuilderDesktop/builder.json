@@ -504,7 +504,7 @@
                   "Name": "Contraseña de WIFI"
                 },
                 "de": {
-                  "Name": "WIFI Passwort"
+                  "Name": "GUI Passwort"
                 },
                 "fr": {
                   "Name": "Mot de passe WIFI"
@@ -1522,7 +1522,6 @@
             }
           },
           "Parameters": [
-
           ]
         }
       }
@@ -2268,6 +2267,218 @@
               "Name": "Bool",
               "Type": "bool"
             }
+          ]
+        }
+      }
+    },
+    "Experimental": {
+      "Order": 12,
+      "Translations": {
+        "pl": "Eksperymentalne",
+        "en": "Experimental",
+        "es": "Experimental",
+        "de": "Experimentell",
+        "fr": "Expérimental"
+      },
+      "Flags": {
+        "SUPLA_INA219": {
+          "name": "Czujnik prądu INA219",
+          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA219.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "INA219 current sensor",
+              "desc": "Device settings->I2C. It enables the support of INA219 current sensor."
+            },
+            "es": {
+              "name": "Sensor de corriente INA219",
+              "desc": "Configuración del dispositivo->I2C. Habilita el soporte del sensor de corriente INA219."
+            },
+            "de": {
+              "name": "INA219 Stromsensor",
+              "desc": "Geräteeinstellungen->I2C. Es ermöglicht die Unterstützung des INA219-Stromsensors."
+            },
+            "fr": {
+              "name": "Capteur de courant INA219",
+              "desc": "Paramètres de l´appareil->I2C. Il permet la prise en charge du capteur de courant INA219."
+            }
+          },
+          "Parameters": [
+          ]
+        },
+        "SUPLA_INA226": {
+          "name": "Czujnik prądu INA226",
+          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA226.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "INA226 current sensor",
+              "desc": "Device settings->I2C. It enables the support of INA226 current sensor."
+            },
+            "es": {
+              "name": "Sensor de corriente INA226",
+              "desc": "Configuración del dispositivo->I2C. Habilita el soporte del sensor de corriente INA226."
+            },
+            "de": {
+              "name": "INA226 Stromsensor",
+              "desc": "Geräteeinstellungen->I2C. Es ermöglicht die Unterstützung des INA226-Stromsensors."
+            },
+            "fr": {
+              "name": "Capteur de courant INA226",
+              "desc": "Paramètres de l´appareil->I2C. Il permet la prise en charge du capteur de courant INA226."
+            }
+          },
+          "Parameters": [
+          ]
+        },
+        "SUPLA_INA228": {
+          "name": "Czujnik prądu INA228",
+          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA228.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "INA228 current sensor",
+              "desc": "Device settings->I2C. It enables the support of INA228 current sensor."
+            },
+            "es": {
+              "name": "Sensor de corriente INA228",
+              "desc": "Configuración del dispositivo->I2C. Habilita el soporte del sensor de corriente INA228."
+            },
+            "de": {
+              "name": "INA228 Stromsensor",
+              "desc": "Geräteeinstellungen->I2C. Es ermöglicht die Unterstützung des INA228-Stromsensors."
+            },
+            "fr": {
+              "name": "Capteur de courant INA228",
+              "desc": "Paramètres de l´appareil->I2C. Il permet la prise en charge du capteur de courant INA228."
+            }
+          },
+          "Parameters": [
+          ]
+        },
+        "SUPLA_INA229": {
+          "name": "Czujnik prądu INA229",
+          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA229.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "INA229 current sensor",
+              "desc": "Device settings->I2C. It enables the support of INA229 current sensor."
+            },
+            "es": {
+              "name": "Sensor de corriente INA229",
+              "desc": "Configuración del dispositivo->I2C. Habilita el soporte del sensor de corriente INA229."
+            },
+            "de": {
+              "name": "INA229 Stromsensor",
+              "desc": "Geräteeinstellungen->I2C. Es ermöglicht die Unterstützung des INA229-Stromsensors."
+            },
+            "fr": {
+              "name": "Capteur de courant INA229",
+              "desc": "Paramètres de l´appareil->I2C. Il permet la prise en charge du capteur de courant INA229."
+            }
+          },
+          "Parameters": [
+          ]
+        },
+        "SUPLA_INA236": {
+          "name": "Czujnik prądu INA236",
+          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA236.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "INA236 current sensor",
+              "desc": "Device settings->I2C. It enables the support of INA236 current sensor."
+            },
+            "es": {
+              "name": "Sensor de corriente INA236",
+              "desc": "Configuración del dispositivo->I2C. Habilita el soporte del sensor de corriente INA236."
+            },
+            "de": {
+              "name": "INA236 Stromsensor",
+              "desc": "Geräteeinstellungen->I2C. Es ermöglicht die Unterstützung des INA236-Stromsensors."
+            },
+            "fr": {
+              "name": "Capteur de courant INA236",
+              "desc": "Paramètres de l´appareil->I2C. Il permet la prise en charge du capteur de courant INA236."
+            }
+          },
+          "Parameters": [
+          ]
+        },
+        "SUPLA_INA238": {
+          "name": "Czujnik prądu INA238",
+          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA238.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "INA238 current sensor",
+              "desc": "Device settings->I2C. It enables the support of INA238 current sensor."
+            },
+            "es": {
+              "name": "Sensor de corriente INA238",
+              "desc": "Configuración del dispositivo->I2C. Habilita el soporte del sensor de corriente INA238."
+            },
+            "de": {
+              "name": "INA238 Stromsensor",
+              "desc": "Geräteeinstellungen->I2C. Es ermöglicht die Unterstützung des INA238-Stromsensors."
+            },
+            "fr": {
+              "name": "Capteur de courant INA238",
+              "desc": "Paramètres de l´appareil->I2C. Il permet la prise en charge du capteur de courant INA238."
+            }
+          },
+          "Parameters": [
+          ]
+        },
+        "SUPLA_INA239": {
+          "name": "Czujnik prądu INA239",
+          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA239.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "INA239 current sensor",
+              "desc": "Device settings->I2C. It enables the support of INA239 current sensor."
+            },
+            "es": {
+              "name": "Sensor de corriente INA239",
+              "desc": "Configuración del dispositivo->I2C. Habilita el soporte del sensor de corriente INA239."
+            },
+            "de": {
+              "name": "INA239 Stromsensor",
+              "desc": "Geräteeinstellungen->I2C. Es ermöglicht die Unterstützung des INA239-Stromsensors."
+            },
+            "fr": {
+              "name": "Capteur de courant INA239",
+              "desc": "Paramètres de l´appareil->I2C. Il permet la prise en charge du capteur de courant INA239."
+            }
+          },
+          "Parameters": [
+          ]
+        },
+        "SUPLA_INA260": {
+          "name": "Czujnik prądu INA260",
+          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA260.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "INA260 current sensor",
+              "desc": "Device settings->I2C. It enables the support of INA260 current sensor."
+            },
+            "es": {
+              "name": "Sensor de corriente INA260",
+              "desc": "Configuración del dispositivo->I2C. Habilita el soporte del sensor de corriente INA260."
+            },
+            "de": {
+              "name": "INA260 Stromsensor",
+              "desc": "Geräteeinstellungen->I2C. Es ermöglicht die Unterstützung des INA260-Stromsensors."
+            },
+            "fr": {
+              "name": "Capteur de courant INA260",
+              "desc": "Paramètres de l´appareil->I2C. Il permet la prise en charge du capteur de courant INA260."
+            }
+          },
+          "Parameters": [
           ]
         }
       }
