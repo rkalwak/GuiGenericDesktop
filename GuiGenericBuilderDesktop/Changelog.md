@@ -245,21 +245,81 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
   - "✓ Compilation successful!" on success
   - "✗ Compilation failed!" on failure
 
+## [2025-01-09] - Version 2.0.5
+
+### Added
+
+**Platform Compatibility Validation**
+- Added platform-specific build flag compatibility checking across the application
+- New `DisabledOnPlatforms` property in `BuildFlagItem` class to define platform restrictions
+- **Automatic validation on board selection**:
+  - When user selects a board manually (e.g., ESP32-C6), incompatible flags are automatically disabled
+  - Shows notification listing all flags that were disabled
+  - Prevents accidental selection of incompatible configurations
+- **Real-time validation when enabling flags**:
+  - When user tries to enable a flag incompatible with selected platform, it's immediately prevented
+  - Checkbox is automatically unchecked
+  - Shows warning message explaining incompatibility
+  - Lists platforms where the flag is disabled
+- **Pre-compilation validation**:
+  - Validates all enabled flags before starting compilation
+  - Blocks compilation if incompatible flags are found
+  - Shows error message with list of incompatible flags
+  - Prevents wasted compilation time on invalid configurations
+- **Device detection integration**:
+  - When device is auto-detected via "Check Device" button, incompatible flags are disabled
+  - Platform chip type is normalized (e.g., "ESP32-C6" → "esp32-c6") for validation
+- **Configuration in builder.json**:
+  - Platform restrictions defined per-flag using lowercase chip identifiers
+  - Example: `"DisabledOnPlatforms": ["esp8266", "esp32-c3", "esp32-s2", "esp32-s3", "esp32-c6"]`
+  - First implementation: `SUPLA_WT32_ETH01_LAN8720` flag disabled on C3/C6/S2/S3/ESP8266
+- **Helper methods**:
+  - `DisableIncompatibleFlags(string platformTag)` - Disables incompatible flags for given platform
+  - `ValidatePlatformCompatibility(string platformTag, List<BuildFlagItem> enabledFlags)` - Returns list of incompatible flags
+- **Benefits**:
+  - Prevents compilation errors from platform-specific hardware limitations
+  - Guides users to valid configurations
+  - Clear feedback at every interaction point
+  - Reduces support burden from invalid configurations
+  - Better user experience with immediate validation
+
+### Changed
+
+**Board Selection Handler Simplified**
+- Simplified `boardSelector.SelectionChanged` event handler
+- Now uses `Content` property instead of complex tag-to-chip-type conversion
+- Direct conversion: "ESP32 (default)" → "esp32 (default)", then calls `DisableIncompatibleFlags`
+- Cleaner, more maintainable code
+- Consistent with chip type format used in `builder.json`
+
 ### Technical Details
 
-**Code Quality Improvements**:
-- Removed ~200 lines of obsolete/complex code
-- Eliminated progress bar, timer, and hash calculation logic
-- Simplified API surfaces across multiple classes
-- Better separation of concerns
-- Cleaner JSON serialization
-- More maintainable codebase
+**Implementation Details**:
+- Platform tags converted to lowercase chip identifiers for matching
+- Case-insensitive string comparison for platform names
+- Validation occurs at 4 points: board selection, device detection, flag enabling, pre-compilation
+- All validation actions are logged for debugging
+- User-friendly messages with bullet-point lists of affected flags
+- Thread-safe UI updates using proper WPF data binding
 
-**Breaking Changes**:
-- Old configuration files with hash-based filenames will need manual renaming
-- `LoadConfiguration(hash)` calls will not work (use `EncodedConfig` instead)
-- `DeleteConfiguration(hash)` now expects filename
-- Applications relying on `Hash` property in `SavedBuildConfiguration` will need updates
-- Applications relying on `HashOfOptions` in `CompileResponse` will need updates
+### Fixed
+
+**PlatformIO Handler - Exact Flag Matching**
+- Fixed bug in `CommentUnlistedFlagsBetweenMarkers` method where substring matching caused incorrect flag enabling
+- **Problem**: `SUPLA_DIRECT_LINK_TEMPERATURE_SENSOR` was being enabled when only `SUPLA_DIRECT_LINK` was in the allowed list
+- **Root cause**: Code used `Contains()` for flag matching, which matched partial strings
+- **Solution**: Implemented exact flag name matching with parameter validation
+- **New logic**:
+  - Extracts exact flag name from each line (format: `-D FLAG_NAME` or `-D FLAG_NAME=value`)
+  - Uses `Equals()` for exact string comparison instead of `Contains()`
+  - Properly identifies flag parameters by checking if suffix matches a defined parameter identifier
+  - Example: `SUPLA_MS5611_Altitude` is recognized as parameter of `SUPLA_MS5611` only if `Altitude` is in the Parameters list
+- **Benefits**:
+  - Prevents unintended flag enabling from partial name matches
+  - Correctly distinguishes between base flags and separate flags with similar names
+  - Maintains support for flag parameters (e.g., `SUPLA_INITIAL_CONFIG_MODE_Mode`)
+  - More predictable and reliable flag management
+- **Test coverage**: Added test `CommentUnlistedFlags_DirectLinkWithoutParameter_DoesNotEnableTemperatureSensor` to verify fix
+- All 21 PlatformIO handler unit tests passing
 
 

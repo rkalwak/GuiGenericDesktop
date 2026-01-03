@@ -923,5 +923,47 @@ namespace CompilationLib.Tests
                 try { File.Delete(temp); } catch { }
             }
         }
+
+        [Fact]
+        public void CommentUnlistedFlags_DirectLinkWithoutParameter_DoesNotEnableTemperatureSensor()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_DIRECT_LINK
+ -D SUPLA_DIRECT_LINK_TEMPERATURE_SENSOR
+                  -D SUPLA_DIRECT_LINK_TEMPERATURE_SENSOR
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_DIRECT_LINK"
+                        // No parameters specified
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    result.Should().Contain(" -D SUPLA_DIRECT_LINK");
+                    result.Should().Contain(";-D SUPLA_DIRECT_LINK_TEMPERATURE_SENSOR");
+                    result.Should().NotContain("\n -D SUPLA_DIRECT_LINK_TEMPERATURE_SENSOR");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
     }
 }

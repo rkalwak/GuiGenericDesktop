@@ -28,29 +28,29 @@ public class PlatformioCliHandler : ICompileHandler
 
         // PlatformIO uses 'run' command for compilation
         CommentUnlistedFlagsBetweenMarkers($"{request.ProjectDirectory}/platformio.ini", request.BuildFlags);
-        
+
         // Create backup before deployment if both deploying and backup are enabled
         if (request.ShouldDeploy && request.ShouldBackup && !string.IsNullOrEmpty(request.PortCom))
         {
             try
             {
                 Console.WriteLine("=== Creating Flash Backup ===");
-                
+
                 var backupDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backup");
                 var backupManager = new BackupManager(backupDir, new EsptoolWrapper());
-                
+
                 // Generate encoded config for this build
                 var encodedConfig = BuildConfigurationHasher.EncodeOptions(request.BuildFlags);
-                
+
                 // Determine chip type from platform
                 var chipType = request.Platform?.ToLowerInvariant() ?? "esp32";
-                
+
                 var backupPath = await backupManager.CreateBackupAsync(
                     request.PortCom,
                     chipType,
                     encodedConfig,
                     cancellationToken);
-                
+
                 if (!string.IsNullOrEmpty(backupPath))
                 {
                     Console.WriteLine($"? Backup saved to: {backupPath}");
@@ -73,23 +73,23 @@ public class PlatformioCliHandler : ICompileHandler
         {
             Console.WriteLine("? Backup skipped (Backup checkbox is unchecked)");
         }
-        
+
         // Build the arguments for PlatformIO run command
         string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.Platform}";
-        
+
         // Add erase target if enabled (before upload)
         if (request.ShouldDeploy && request.ShouldEraseFlash)
         {
             arguments += " --target erase";
             Console.WriteLine("? Flash will be erased before upload");
         }
-        
+
         // Add upload target if deploying
         if (request.ShouldDeploy)
         {
             arguments += $" --target upload --upload-port {request.PortCom}";
         }
-        
+
         // Add verbose flag
         arguments += " --verbose";
 
@@ -149,12 +149,13 @@ public class PlatformioCliHandler : ICompileHandler
         {
             string lineContent = lines[i];
             string lineContentWithoutComment = lineContent.Contains(";") ? lineContent.Substring(1) : lineContent;
+            lineContentWithoutComment = lineContentWithoutComment.Replace("-D ", "").Trim();
             bool isFlagEnabled = !lineContent.Contains(";");
             // flag already enabled, check if it should be enabled
             if (!string.IsNullOrWhiteSpace(lineContent) && isFlagEnabled)
             {
                 // lineContent has format -D but collection doesn't
-                if (!allowedFlags.Any(flag => !string.IsNullOrEmpty(flag?.Key) && lineContentWithoutComment.Contains(flag.Key)) && !_excludedBuildFlagsFromManipulation.Any(x => lineContentWithoutComment.Contains(x)))
+                if (!allowedFlags.Any(flag => !string.IsNullOrEmpty(flag?.Key) && lineContentWithoutComment == flag.Key) && !_excludedBuildFlagsFromManipulation.Any(x => lineContentWithoutComment.Contains(x)))
                 {
                     //comment out the line - remove one space
                     lines[i] = ";" + lines[i].Substring(1);
@@ -163,7 +164,7 @@ public class PlatformioCliHandler : ICompileHandler
             // flag is commented out, check if it should be enabled
             else
             {
-                if (allowedFlags.Any(flag => !string.IsNullOrEmpty(flag?.Key) && lineContentWithoutComment.Contains(flag.Key)))
+                if (allowedFlags.Any(flag => !string.IsNullOrEmpty(flag?.Key) && lineContentWithoutComment == flag.Key))
                 {
                     // Uncomment the line: replace first ';' with ' ' to preserve spacing
                     lines[i] = lines[i].Replace(';', ' ');
@@ -192,7 +193,7 @@ public class PlatformioCliHandler : ICompileHandler
 
                 // Check if parameter is optional and has no value
                 bool isOptionalWithoutValue = !p.IsRequired && string.IsNullOrEmpty(raw);
-                
+
                 var paramDefineName = $"{flag.Key}_{identifier}";
                 var indexOfExistingParameter = lines.FindIndex(line => line.Contains(paramDefineName));
 
@@ -228,7 +229,7 @@ public class PlatformioCliHandler : ICompileHandler
 
                 // define is FLAGNAME_ParamIdentifier=Value
                 var define = $" -D {paramDefineName}={value}";
-                
+
                 if (indexOfExistingParameter != -1)
                 {
                     lines[indexOfExistingParameter] = define;
@@ -257,7 +258,7 @@ public class PlatformioCliHandler : ICompileHandler
         Console.WriteLine(e.Data); // Log the output to the console
         Debug.WriteLine(e.Data);
         var line = e.Data ?? string.Empty;
-        logs += line+ "\r\n";
+        logs += line + "\r\n";
         OutputLine?.Invoke(this, line);
     }
 }

@@ -259,7 +259,7 @@ namespace CompilationLib.Tests
         }
 
         [Fact]
-        public void ProcessFlagEnabled_ErrorMessage_IncludesUserFriendlyNames()
+        public void ProcessFlagEnabled_ERROR_MESSAGE_IncludesUserFriendlyNames()
         {
             var relay = CreateFlag("SUPLA_RELAY", isEnabled: false);
             relay.FlagName = "Relays";
@@ -275,6 +275,28 @@ namespace CompilationLib.Tests
             Assert.NotNull(result);
             Assert.Contains("Relays", result);
             Assert.Contains("Roller shutters", result);
+        }
+
+        [Fact]
+        public void ProcessFlagEnabled_SUPLA_DIRECT_LINKS_EnablesRelayOnly()
+        {
+            var directLinks = CreateFlag("SUPLA_DIRECT_LINKS",
+                dependenciesToEnable: new List<string> { "SUPLA_RELAY" });
+            var relay = CreateFlag("SUPLA_RELAY");
+            var button = CreateFlag("SUPLA_BUTTON");
+            var rollershutter = CreateFlag("SUPLA_ROLLERSHUTTER");
+            var directLinkTemp = CreateFlag("SUPLA_DIRECT_LINK_TEMPERATURE_SENSOR");
+
+            var allFlags = new List<BuildFlagItem> { directLinks, relay, button, rollershutter, directLinkTemp };
+            
+            var result = DependencyResolver.ProcessFlagEnabled(directLinks, allFlags);
+            
+            Assert.Null(result);
+            Assert.True(directLinks.IsEnabled, "DIRECT_LINKS should be enabled");
+            Assert.True(relay.IsEnabled, "RELAY should be enabled");
+            Assert.False(button.IsEnabled, "BUTTON should remain disabled");
+            Assert.False(rollershutter.IsEnabled, "ROLLERSHUTTER should remain disabled");
+            Assert.False(directLinkTemp.IsEnabled, "DIRECT_LINK_TEMPERATURE_SENSOR should remain disabled");
         }
 
         #endregion
