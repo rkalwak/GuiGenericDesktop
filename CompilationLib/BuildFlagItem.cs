@@ -62,6 +62,8 @@ namespace CompilationLib
 
         [JsonProperty("parameters")]
         public List<Parameter> Parameters { get; set; } = new List<Parameter>();
+        [JsonProperty("disabledOnPlatforms")]
+        public List<string> DisabledOnPlatforms { get; set; } = new List<string>();
 
         public event PropertyChangedEventHandler PropertyChanged;
     }

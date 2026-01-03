@@ -19,6 +19,7 @@ namespace GuiGenericBuilderDesktop
         DeviceDetector _deviceDetector = new(new EsptoolWrapper());
         string _repositoryPath = string.Empty;
         string _port = string.Empty;
+        string _chip = string.Empty;
         BuildConfigurationManager _configManager;
         private ComboBox boardSelector;
         private ComboBox comPortSelector;
@@ -50,7 +51,7 @@ namespace GuiGenericBuilderDesktop
             AddParametersColumnDynamically();
 
             FlagsDataGrid.ItemsSource = AllBuildFlags;
-            if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("GGLocal"))) 
+            if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("GGLocal")))
             {
                 _repositoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo", "gg");
             }
@@ -173,6 +174,21 @@ namespace GuiGenericBuilderDesktop
             //boardSelector.Items.Add(new ComboBoxItem { Content = "ESP8266", Tag = "GUI_Generic_ESP8266" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C6", Tag = "GUI_Generic_ESP32C6" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-S3", Tag = "GUI_Generic_ESP32S3" });
+
+            // Add SelectionChanged handler to validate platform compatibility when user manually selects a board
+            boardSelector.SelectionChanged += (s, e) =>
+            {
+                if (boardSelector.SelectedItem is ComboBoxItem selectedItem)
+                {
+                    _chip = selectedItem.Content?.ToString()?.ToLower() ?? string.Empty;
+
+                    if (!string.IsNullOrEmpty(_chip))
+                    {
+                        DisableIncompatibleFlags(_chip);
+                    }
+                }
+            };
+
             var loadConfigButton = new Button
             {
                 Content = "Manage Configs...",
@@ -409,6 +425,23 @@ namespace GuiGenericBuilderDesktop
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Warning);
                         }
+                        
+                        // Check platform compatibility when user enables a flag
+                        if (item.IsEnabled && !string.IsNullOrEmpty(_chip))
+                        {
+                            if (item.DisabledOnPlatforms != null && 
+                                item.DisabledOnPlatforms.Any(p => string.Equals(p, _chip, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                // Flag is incompatible with current platform, disable it and show message
+                                item.IsEnabled = false;
+                                MessageBox.Show(
+                                    $"The flag '{item.FlagName ?? item.Key}' is not compatible with the selected platform ({_chip}).\n\n" +
+                                    $"This flag is disabled on: {string.Join(", ", item.DisabledOnPlatforms)}",
+                                    "Platform Incompatibility",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Warning);
+                            }
+                        }
                     };
                     chk.Unchecked += (s, e) =>
                     {
@@ -609,6 +642,42 @@ namespace GuiGenericBuilderDesktop
                 return;
             }
 
+            // Get selected platform
+            var selectedPlatform = (boardSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+
+            // Validate platform is selected
+            if (string.IsNullOrEmpty(selectedPlatform) || selectedPlatform.Equals("None", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show(
+                    "Please select a target platform (board) before compiling.\n\n" +
+                    "Use '2. Check Device' to auto-detect, or manually select a platform from the Board dropdown.\n\n" +
+                    "Available platforms:\n" +
+                    "• ESP32 (default)\n" +
+                    "• ESP32-C3\n" +
+                    "• ESP32-C6\n" +
+                    "• ESP32-S3",
+                    "Platform Required",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            // Validate platform compatibility
+            var incompatibleFlags = ValidatePlatformCompatibility(_chip, selectedFlags);
+            if (incompatibleFlags.Any())
+            {
+                var message = $"The following flags are not compatible with the selected platform ({selectedPlatform}):\n\n" +
+                              string.Join("\n", incompatibleFlags.Select(f => $"• {f}")) +
+                              "\n\nPlease disable these flags or select a different platform before compiling.";
+
+                MessageBox.Show(
+                    message,
+                    "Platform Compatibility Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
+
             // Get deploy and backup checkbox states
             bool shouldDeploy = deployCheckBox?.IsChecked ?? true;
             bool shouldBackup = backupCheckBox?.IsChecked ?? true;
@@ -653,7 +722,7 @@ namespace GuiGenericBuilderDesktop
                     while (!timerCancellation.Token.IsCancellationRequested)
                     {
                         await Task.Delay(100, timerCancellation.Token); // Update every 100ms for smooth display
-                        
+
                         var elapsed = compilationStopwatch.Elapsed.TotalSeconds;
                         Dispatcher.Invoke(() =>
                         {
@@ -672,7 +741,7 @@ namespace GuiGenericBuilderDesktop
                 var ggRequest = new CompileRequest
                 {
                     BuildFlags = selectedFlags,
-                    Platform = (boardSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
+                    Platform = selectedPlatform,
                     ProjectPath = Path.Combine(_repositoryPath, "src"),
                     ProjectDirectory = _repositoryPath,
                     LibrariesPath = Path.Combine(_repositoryPath, "lib"),
@@ -713,7 +782,7 @@ namespace GuiGenericBuilderDesktop
                     // Save configuration with hash
                     try
                     {
-                        var platform = (boardSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+                        var platform = selectedPlatform;
                         var comPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
                         _configManager.SaveConfiguration(
                             selectedFlags,
@@ -829,10 +898,11 @@ namespace GuiGenericBuilderDesktop
 
                             // If we detected a device model, try to select matching board in the selector
 
-                            var chip = deviceModel?.ChipType ?? string.Empty;
-                            if (!string.IsNullOrWhiteSpace(chip) && boardSelector != null)
+                            _chip = deviceModel?.ChipType ?? string.Empty;
+                            _chip = _chip.ToLowerInvariant();
+                            if (!string.IsNullOrWhiteSpace(_chip) && boardSelector != null)
                             {
-                                string chipLower = chip.ToLowerInvariant();
+                                string chipLower = _chip;
                                 string selectedTag = null;
                                 if (chipLower.Contains("c6") || chipLower.Contains("c-6"))
                                     selectedTag = "GUI_Generic_ESP32C6";
@@ -852,6 +922,9 @@ namespace GuiGenericBuilderDesktop
                                     {
                                         boardSelector.SelectedItem = match;
                                         _logger.Information("Board selector updated to: {BoardTag}", selectedTag);
+
+                                        // Disable incompatible flags for this platform
+                                        DisableIncompatibleFlags(_chip);
                                     }
                                 }
 
@@ -874,7 +947,7 @@ namespace GuiGenericBuilderDesktop
                             }
 
                             // Success status
-                            statusText.Text = $"✓ Device detected: {chip} on {port}";
+                            statusText.Text = $"✓ Device detected: {_chip} on {port}";
                             statusText.Foreground = System.Windows.Media.Brushes.Green;
 
                             // Hide status after 3 seconds
@@ -1096,7 +1169,7 @@ namespace GuiGenericBuilderDesktop
             {
                 // Get SuplaDevice version
                 var suplaVersion = LibraryVersionExtractor.GetSuplaDeviceVersion(_repositoryPath);
-                
+
                 if (!string.IsNullOrEmpty(suplaVersion))
                 {
                     _logger.Information("SuplaDevice version detected: {Version}", suplaVersion);
@@ -1108,7 +1181,7 @@ namespace GuiGenericBuilderDesktop
 
                 // Get GUI-Generic version
                 var ggVersion = LibraryVersionExtractor.GetGuiGenericVersion(_repositoryPath);
-                
+
                 if (!string.IsNullOrEmpty(ggVersion))
                 {
                     _logger.Information("GUI-Generic version detected: {Version}", ggVersion);
@@ -1124,7 +1197,7 @@ namespace GuiGenericBuilderDesktop
             catch (Exception ex)
             {
                 _logger.Warning(ex, "Failed to extract library versions");
-                
+
                 // Update window title even if version extraction fails
                 UpdateWindowTitle(null, null);
             }
@@ -1157,6 +1230,70 @@ namespace GuiGenericBuilderDesktop
             }
             
             _logger.Debug("Window title updated to: {Title}", Title);
+        }
+
+        /// <summary>
+        /// Disables flags that are incompatible with the specified platform
+        /// </summary>
+        private void DisableIncompatibleFlags(string platformTag)
+        {
+            if (string.IsNullOrEmpty(platformTag))
+                return;
+
+            var disabledFlags = new List<string>();
+
+            foreach (var flag in AllBuildFlags)
+            {
+                if (flag.DisabledOnPlatforms != null && 
+                    flag.DisabledOnPlatforms.Any(p => string.Equals(p, platformTag, StringComparison.OrdinalIgnoreCase)))
+                {
+                    if (flag.IsEnabled)
+                    {
+                        flag.IsEnabled = false;
+                        disabledFlags.Add(flag.FlagName ?? flag.Key);
+                        _logger.Information("Disabled flag {Flag} - incompatible with platform {Platform}", flag.Key, platformTag);
+                    }
+                }
+            }
+
+            // Notify user if any flags were disabled
+            if (disabledFlags.Any())
+            {
+                var message = $"The following flags are not compatible with the selected platform ({platformTag}) and have been disabled:\n\n" +
+                              string.Join("\n", disabledFlags.Select(f => $"• {f}"));
+
+                MessageBox.Show(
+                    message,
+                    "Platform Compatibility",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+        }
+
+        /// <summary>
+        /// Validates that all enabled flags are compatible with the selected platform
+        /// </summary>
+        private List<string> ValidatePlatformCompatibility(string platformTag, List<BuildFlagItem> enabledFlags)
+        {
+            var incompatibleFlags = new List<string>();
+
+            if (string.IsNullOrEmpty(platformTag) || platformTag.Equals("None", StringComparison.OrdinalIgnoreCase))
+            {
+                // No platform selected, skip validation
+                return incompatibleFlags;
+            }
+
+            foreach (var flag in enabledFlags)
+            {
+                if (flag.DisabledOnPlatforms != null && 
+                    flag.DisabledOnPlatforms.Any(p => string.Equals(p, platformTag, StringComparison.OrdinalIgnoreCase)))
+                {
+                    incompatibleFlags.Add($"{flag.FlagName ?? flag.Key} (disabled on {platformTag})");
+                    _logger.Warning("Flag {Flag} is incompatible with platform {Platform}", flag.Key, platformTag);
+                }
+            }
+
+            return incompatibleFlags;
         }
     }
 }

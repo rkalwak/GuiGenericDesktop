@@ -237,6 +237,13 @@
           },
           "Parameters": [
 
+          ],
+          "DisabledOnPlatforms": [
+            "esp8266",
+            "esp32-c3",
+            "esp32-s2",
+            "esp32-s3", 
+            "esp32-c6"
           ]
         },
         "SUPLA_ETH01_LAN8720": {
@@ -263,6 +270,13 @@
           },
           "Parameters": [
 
+          ],
+          "DisabledOnPlatforms": [
+            "esp8266",
+            "esp32-c3",
+            "esp32-s2",
+            "esp32-s3",
+            "esp32-c6"
           ]
         },
         "SUPLA_INITIAL_CONFIG_MODE": {
