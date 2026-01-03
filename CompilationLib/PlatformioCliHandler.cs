@@ -149,7 +149,7 @@ public class PlatformioCliHandler : ICompileHandler
         {
             string lineContent = lines[i];
             string lineContentWithoutComment = lineContent.Contains(";") ? lineContent.Substring(1) : lineContent;
-            lineContentWithoutComment = lineContentWithoutComment.Replace("-D ", "").Trim();
+            lineContentWithoutComment = lineContentWithoutComment.Replace("-D ", "").Replace(";","").Trim();
             bool isFlagEnabled = !lineContent.Contains(";");
             // flag already enabled, check if it should be enabled
             if (!string.IsNullOrWhiteSpace(lineContent) && isFlagEnabled)
