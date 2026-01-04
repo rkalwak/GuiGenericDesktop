@@ -271,8 +271,8 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
   - Platform chip type is normalized (e.g., "ESP32-C6" → "esp32-c6") for validation
 - **Configuration in builder.json**:
   - Platform restrictions defined per-flag using lowercase chip identifiers
-  - Example: `"DisabledOnPlatforms": ["esp8266", "esp32-c3", "esp32-s2", "esp32-s3", "esp32-c6"]`
-  - First implementation: `SUPLA_WT32_ETH01_LAN8720` flag disabled on C3/C6/S2/S3/ESP8266
+  - Example: `"DisabledOnPlatforms": ["esp32-c3", "esp32-s2", "esp32-s3", "esp32-c6"]`
+  - First implementation: `SUPLA_WT32_ETH01_LAN8720` flag disabled on C3/C6/S2/S3
 - **Helper methods**:
   - `DisableIncompatibleFlags(string platformTag)` - Disables incompatible flags for given platform
   - `ValidatePlatformCompatibility(string platformTag, List<BuildFlagItem> enabledFlags)` - Returns list of incompatible flags

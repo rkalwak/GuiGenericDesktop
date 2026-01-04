@@ -171,7 +171,6 @@ namespace GuiGenericBuilderDesktop
             boardSelector.Items.Add(new ComboBoxItem { Content = "None", Tag = "None", IsSelected = true });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32 (default)", Tag = "GUI_Generic_ESP32" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C3", Tag = "GUI_Generic_ESP32C3" });
-            //boardSelector.Items.Add(new ComboBoxItem { Content = "ESP8266", Tag = "GUI_Generic_ESP8266" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C6", Tag = "GUI_Generic_ESP32C6" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-S3", Tag = "GUI_Generic_ESP32S3" });
 
@@ -910,8 +909,6 @@ namespace GuiGenericBuilderDesktop
                                     selectedTag = "GUI_Generic_ESP32C3";
                                 else if (chipLower.Contains("s3") || chipLower.Contains("s-3"))
                                     selectedTag = "GUI_Generic_ESP32S3";
-                                else if (chipLower.Contains("8266") || chipLower.Contains("esp8266"))
-                                    selectedTag = "GUI_Generic_ESP8266";
                                 else if (chipLower.Contains("esp32") || chipLower.Contains("esp32"))
                                     selectedTag = "GUI_Generic_ESP32";
 

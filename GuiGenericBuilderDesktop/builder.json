@@ -239,10 +239,9 @@
 
           ],
           "DisabledOnPlatforms": [
-            "esp8266",
             "esp32-c3",
             "esp32-s2",
-            "esp32-s3", 
+            "esp32-s3",
             "esp32-c6"
           ]
         },
@@ -272,7 +271,6 @@
 
           ],
           "DisabledOnPlatforms": [
-            "esp8266",
             "esp32-c3",
             "esp32-s2",
             "esp32-s3",
@@ -1987,7 +1985,7 @@
         },
         "SUPLA_DIRECT_LINKS_MULTI_SENSOR": {
           "name": "Linki bezpośrednie - odczyt wartości kanału",
-          "desc": "Umożliwia odczytywanie temperatury za pomocą linków bezpośrednich.",
+          "desc": "Umożliwia odczytywanie wartości kanału za pomocą linków bezpośrednich.",
           "defOn": false,
           "depRel": [
             "SUPLA_DIRECT_LINKS_SENSOR_THERMOMETR"
