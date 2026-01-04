@@ -1,4 +1,5 @@
 using System.IO;
+using System.IO.Compression;
 using Newtonsoft.Json;
 
 namespace CompilationLib
@@ -23,7 +24,7 @@ namespace CompilationLib
         /// <summary>
         /// Saves a build configuration
         /// </summary>
-        public void SaveConfiguration(IEnumerable<BuildFlagItem> enabledFlags, string configName = null, string platform = null, string comPort = null)
+        public void SaveConfiguration(IEnumerable<BuildFlagItem> enabledFlags, string configName = null, string platform = null, string comPort = null, string firmwareFilePath = null, string buildOutputDirectory = null)
         {
             if (enabledFlags == null)
                 return;
@@ -61,10 +62,11 @@ namespace CompilationLib
 
             // Use configName for filename if provided, otherwise use timestamp
             string fileName;
+            string sanitizedName;
             if (!string.IsNullOrEmpty(configName))
             {
                 // Manual save: use custom name, sanitize it
-                var sanitizedName = configName;
+                sanitizedName = configName;
                 var invalidChars = Path.GetInvalidFileNameChars();
                 foreach (var c in invalidChars)
                 {
@@ -75,12 +77,43 @@ namespace CompilationLib
             else
             {
                 // Auto-save: use timestamp as filename
-                fileName = $"Config_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+                sanitizedName = $"Config_{DateTime.Now:yyyyMMdd_HHmmss}";
+                fileName = $"{sanitizedName}.json";
             }
              
             var filePath = Path.Combine(_configurationsDirectory, fileName);
             var json = JsonConvert.SerializeObject(config, Formatting.Indented);
             File.WriteAllText(filePath, json);
+            
+            // Copy firmware files if provided
+            if (!string.IsNullOrEmpty(firmwareFilePath) && File.Exists(firmwareFilePath))
+            {
+                try
+                {
+                    // Copy main firmware.bin
+                    var firmwareFileName = $"{sanitizedName}.bin";
+                    var firmwareDestPath = Path.Combine(_configurationsDirectory, firmwareFileName);
+                    File.Copy(firmwareFilePath, firmwareDestPath, overwrite: true);
+                    
+                    // Create merged ZIP file with all necessary files
+                    string mergedZipPath = null;
+                    if (!string.IsNullOrEmpty(buildOutputDirectory) && Directory.Exists(buildOutputDirectory))
+                    {
+                        mergedZipPath = CreateMergedZipFile(sanitizedName, buildOutputDirectory);
+                    }
+                    
+                    // Update config with firmware file references
+                    config.FirmwareFileName = firmwareFileName;
+                    config.MergedZipFileName = mergedZipPath != null ? Path.GetFileName(mergedZipPath) : string.Empty;
+                    json = JsonConvert.SerializeObject(config, Formatting.Indented);
+                    File.WriteAllText(filePath, json);
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't fail the entire save operation
+                    Console.WriteLine($"Failed to copy firmware files: {ex.Message}");
+                }
+            }
         }
 
         /// <summary>
@@ -152,6 +185,57 @@ namespace CompilationLib
              
             return false;
         }
+
+        /// <summary>
+        /// Creates a merged ZIP file containing firmware.bin, bootloader.bin, and partitions.bin
+        /// </summary>
+        private string CreateMergedZipFile(string sanitizedName, string buildOutputDirectory)
+        {
+            try
+            {
+                var zipFileName = $"{sanitizedName}_merged.zip";
+                var zipFilePath = Path.Combine(_configurationsDirectory, zipFileName);
+
+                // Delete existing zip if it exists
+                if (File.Exists(zipFilePath))
+                {
+                    File.Delete(zipFilePath);
+                }
+
+                // Create ZIP file
+                using (var zip = ZipFile.Open(zipFilePath, ZipArchiveMode.Create))
+                {
+                    // Add firmware.bin
+                    var firmwarePath = Path.Combine(buildOutputDirectory, "firmware.bin");
+                    if (File.Exists(firmwarePath))
+                    {
+                        zip.CreateEntryFromFile(firmwarePath, "firmware.bin", CompressionLevel.Optimal);
+                    }
+
+                    // Add bootloader.bin
+                    var bootloaderPath = Path.Combine(buildOutputDirectory, "bootloader.bin");
+                    if (File.Exists(bootloaderPath))
+                    {
+                        zip.CreateEntryFromFile(bootloaderPath, "bootloader.bin", CompressionLevel.Optimal);
+                    }
+
+                    // Add partitions.bin
+                    var partitionsPath = Path.Combine(buildOutputDirectory, "partitions.bin");
+                    if (File.Exists(partitionsPath))
+                    {
+                        zip.CreateEntryFromFile(partitionsPath, "partitions.bin", CompressionLevel.Optimal);
+                    }
+                }
+
+                Console.WriteLine($"? Created merged firmware ZIP: {zipFileName}");
+                return zipFilePath;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to create merged ZIP file: {ex.Message}");
+                return null;
+            }
+        }
     }
 
     /// <summary>
@@ -168,6 +252,17 @@ namespace CompilationLib
         public DateTime SavedDate { get; set; }
         public string Platform { get; set; } = string.Empty;
         public string ComPort { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// Filename of the associated firmware binary (if available)
+        /// </summary>
+        public string FirmwareFileName { get; set; } = string.Empty;
+        
+        /// <summary>
+        /// Filename of the merged ZIP file containing firmware.bin, bootloader.bin, and partitions.bin (if available)
+        /// </summary>
+        public string MergedZipFileName { get; set; } = string.Empty;
+        
         [JsonIgnore]
         public string FileName { get; set; }
         

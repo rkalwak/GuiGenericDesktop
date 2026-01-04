@@ -12,6 +12,7 @@ namespace GuiGenericBuilderDesktop
         private string _encodedConfig;
         private string _logs;
         private string _backupFilePath;
+        private string _firmwareFilePath;
         private bool _isSuccess;
 
         /// <summary>
@@ -47,6 +48,19 @@ namespace GuiGenericBuilderDesktop
             _backupFilePath = backupFilePath;
             ConfigureForSuccess();
         }
+        
+        /// <summary>
+        /// Constructor for showing compilation success with encoded configuration, backup path, and firmware path
+        /// </summary>
+        public CompilationResultsWindow(string encodedConfig, bool isSuccess, string backupFilePath, string firmwareFilePath)
+        {
+            InitializeComponent();
+            _encodedConfig = encodedConfig;
+            _isSuccess = isSuccess;
+            _backupFilePath = backupFilePath;
+            _firmwareFilePath = firmwareFilePath;
+            ConfigureForSuccess();
+        }
 
         /// <summary>
         /// Constructor for showing both encoded configuration and logs (comprehensive view)
@@ -79,6 +93,14 @@ namespace GuiGenericBuilderDesktop
                 BackupSection.Visibility = Visibility.Visible;
                 BackupFileNameText.Text = Path.GetFileName(_backupFilePath);
                 BackupPathText.Text = _backupFilePath;
+            }
+            
+            // Show firmware section if firmware file path is available
+            if (!string.IsNullOrEmpty(_firmwareFilePath) && File.Exists(_firmwareFilePath))
+            {
+                FirmwareSection.Visibility = Visibility.Visible;
+                FirmwareFileNameText.Text = Path.GetFileName(_firmwareFilePath);
+                FirmwarePathText.Text = _firmwareFilePath;
             }
             
             // Hide or minimize log section if no logs
@@ -239,6 +261,58 @@ namespace GuiGenericBuilderDesktop
             {
                 MessageBox.Show(
                     $"Failed to open backup folder: {ex.Message}", 
+                    "Open Folder Error", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Error);
+            }
+        }
+        
+        private void CopyFirmwarePathButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_firmwareFilePath))
+                {
+                    Clipboard.SetText(_firmwareFilePath);
+                    MessageBox.Show(
+                        $"Firmware file path copied to clipboard!\n\n{_firmwareFilePath}", 
+                        "Copy Success", 
+                        MessageBoxButton.OK, 
+                        MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Failed to copy firmware path to clipboard: {ex.Message}", 
+                    "Copy Error", 
+                    MessageBoxButton.OK, 
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private void OpenFirmwareFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_firmwareFilePath) && File.Exists(_firmwareFilePath))
+                {
+                    // Open folder in Windows Explorer and select the file
+                    System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{_firmwareFilePath}\"");
+                }
+                else
+                {
+                    MessageBox.Show(
+                        "Firmware file not found.", 
+                        "File Not Found", 
+                        MessageBoxButton.OK, 
+                        MessageBoxImage.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Failed to open firmware folder: {ex.Message}", 
                     "Open Folder Error", 
                     MessageBoxButton.OK, 
                     MessageBoxImage.Error);

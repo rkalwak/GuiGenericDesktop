@@ -207,15 +207,23 @@
                                                  VerticalScrollBarVisibility="Auto"
                                                  Padding="4"/>
 
-                                        <Button Grid.Column="1"
-                                                x:Name="CopyEncodedButton"
-                                                Content="Copy"
-                                                Width="60"
-                                                Height="24"
-                                                Margin="4,0,0,0"
-                                                VerticalAlignment="Top"
-                                                Click="CopyEncodedButton_Click"
-                                                ToolTip="Copy encoded configuration to clipboard"/>
+                                        <StackPanel Grid.Column="1" Margin="4,0,0,0" VerticalAlignment="Top">
+                                            <Button x:Name="CopyEncodedButton"
+                                                    Content="Copy"
+                                                    Width="60"
+                                                    Height="24"
+                                                    Margin="0,0,0,4"
+                                                    Click="CopyEncodedButton_Click"
+                                                    ToolTip="Copy encoded configuration to clipboard"/>
+                                            
+                                            <Button x:Name="OpenFirmwareFolderButton"
+                                                    Content="&#128193; Firmware"
+                                                    Width="60"
+                                                    Height="24"
+                                                    Click="OpenFirmwareFolderButton_Click"
+                                                    ToolTip="Open folder containing firmware file"
+                                                    Visibility="Collapsed"/>
+                                        </StackPanel>
                                     </Grid>
                                 </Grid>
                             </StackPanel>

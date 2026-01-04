@@ -1,4 +1,4 @@
-# Gui-Generic Builder Desktop
+ï»¿# Gui-Generic Builder Desktop
 
 ## Overview
 
@@ -55,15 +55,20 @@ When implementing features or fixes:
 
 ## To do
 
+- GPIO of diod for different esp modules 
+- GPIOS in general Jak juÅ¼ opanujesz diody dla rÃ³Å¼nych ukÅ‚adÃ³w (C3 - GPIO8, C6 - GIO8 ale tu jest RGB, S3 - GIO2 to zwykÅ‚y LED, 
+mogÄ… byÄ‡ jeszcze inne kombinacje w SuperMini czy Xiao dla C3, S3 i C6), to trzeba siÄ™ bÄ™dzie wziÄ…Ä‡ za pozostaÅ‚e GPIO (opis). 
+- zaluzje rs->addTiltFunctions();
+- merged bin https://github.com/platformio/platform-espressif32/issues/1078
 - sound when compilation is done
-- Niestety ca³kowicie wirtualny termostat (oparty na linkach bezpoœrednich) nie dzia³a. To znaczy dzia³a odczyt temperatury, ale jeœli dodamy linki bezpoœrednie do przekaŸnika (w³¹cznika) to modu³ odmawia wspó³pracy. 
-Zawiesza siê, nie loguje do cloud i trzeba go przeflashowaæ na nowo, bo nawet w tryb config wejœæ nie chce. Krystian nie da³ z tym rady, ale mia³em nadziejê, ¿e siê "cudownie" naprawi³o. Niestety nie ;-)
+- Niestety caÅ‚kowicie wirtualny termostat (oparty na linkach bezpoÅ›rednich) nie dziaÅ‚a. To znaczy dziaÅ‚a odczyt temperatury, ale jeÅ›li dodamy linki bezpoÅ›rednie do przekaÅºnika (wÅ‚Ä…cznika) to moduÅ‚ odmawia wspÃ³Å‚pracy. 
+Zawiesza siÄ™, nie loguje do cloud i trzeba go przeflashowaÄ‡ na nowo, bo nawet w tryb config wejÅ›Ä‡ nie chce. Krystian nie daÅ‚ z tym rady, ale miaÅ‚em nadziejÄ™, Å¼e siÄ™ "cudownie" naprawiÅ‚o. Niestety nie ;-)
 - Languages support
 - json settings
 - partition selection
 - building Zigbee Gateway?
 - CC1101 given version downloading
-- Modbus control
+- Modbus control?
 	- New build flag: SUPLA_MODBUS
 	- New configuration window for Modbus settings
 	- New class for holding Modbus settings, considering input registers, coils, holding registers and discrete inputs

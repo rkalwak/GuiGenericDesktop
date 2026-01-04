@@ -11,6 +11,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
@@ -108,7 +110,7 @@
                     <Button x:Name="OpenBackupFolderButton"
                             Grid.Row="0"
                             Grid.Column="2"
-                            Content="Open Folder"
+                            Content="&#128193; Open Folder"
                             Width="110"
                             Height="26"
                             Margin="4,0,0,4"
@@ -122,9 +124,81 @@
                        Margin="0,4,0,0"/>
         </StackPanel>
 
+        <!-- Firmware Section (for successful compilation) -->
+        <StackPanel x:Name="FirmwareSection" 
+                    Grid.Row="3" 
+                    Visibility="Collapsed"
+                    Margin="0,0,0,12">
+            <TextBlock Text="Compiled Firmware:" 
+                       FontWeight="SemiBold" 
+                       Margin="0,0,0,4"/>
+            <Border BorderBrush="#2196F3" 
+                    BorderThickness="1" 
+                    CornerRadius="4"
+                    Background="#E3F2FD"
+                    Padding="8">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock x:Name="FirmwareFileNameText"
+                               Grid.Row="0"
+                               Grid.Column="0"
+                               Text="firmware.bin"
+                               FontFamily="Consolas"
+                               FontSize="12"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Margin="0,0,8,4"/>
+                    
+                    <TextBlock x:Name="FirmwarePathText"
+                               Grid.Row="1"
+                               Grid.Column="0"
+                               Grid.ColumnSpan="3"
+                               Text="C:\path\to\firmware"
+                               FontFamily="Consolas"
+                               FontSize="10"
+                               Foreground="#666666"
+                               TextWrapping="Wrap"
+                               VerticalAlignment="Center"/>
+                    
+                    <Button x:Name="CopyFirmwarePathButton"
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            Content="Copy Path"
+                            Width="100"
+                            Height="26"
+                            Margin="4,0,4,4"
+                            ToolTip="Copy firmware file path to clipboard"
+                            Click="CopyFirmwarePathButton_Click"/>
+                    
+                    <Button x:Name="OpenFirmwareFolderButton"
+                            Grid.Row="0"
+                            Grid.Column="2"
+                            Content="&#128193; Open Folder"
+                            Width="110"
+                            Height="26"
+                            Margin="4,0,0,4"
+                            ToolTip="Open firmware folder in File Explorer"
+                            Click="OpenFirmwareFolderButton_Click"/>
+                </Grid>
+            </Border>
+            <TextBlock Text="✓ Firmware binary ready for deployment or manual flashing." 
+                       FontSize="10"
+                       Foreground="#1976D2"
+                       Margin="0,4,0,0"/>
+        </StackPanel>
+
         <!-- Log Display -->
         <Border x:Name="LogSection"
-                Grid.Row="3" 
+                Grid.Row="4" 
                 BorderBrush="#CCCCCC" 
                 BorderThickness="1" 
                 CornerRadius="4"
@@ -157,7 +231,7 @@
         </Border>
 
         <!-- Buttons -->
-        <StackPanel Grid.Row="4" 
+        <StackPanel Grid.Row="5"
                     Orientation="Horizontal" 
                     HorizontalAlignment="Right" 
                     Margin="0,12,0,0">

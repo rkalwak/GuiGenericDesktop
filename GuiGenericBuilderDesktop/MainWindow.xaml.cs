@@ -820,11 +820,15 @@ namespace GuiGenericBuilderDesktop
                     {
                         var platform = selectedPlatform;
                         var comPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+                        var compiledFirmwarePath = Path.Combine(result.OutputDirectory, result.OutputFile);
+                        
                         _configManager.SaveConfiguration(
                             selectedFlags,
                             configName: null,
                             platform: platform,
-                            comPort: comPort);
+                            comPort: comPort,
+                            firmwareFilePath: compiledFirmwarePath,
+                            buildOutputDirectory: result.OutputDirectory);
                     }
                     catch (Exception ex)
                     {
@@ -832,10 +836,17 @@ namespace GuiGenericBuilderDesktop
                     }
 
                     // Show success results with encoded configuration string and backup path
+                    // Use the copy in configurations directory instead of the build directory
+                    var configurationsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "configurations");
+                    var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                    var configBaseName = $"Config_{timestamp}";
+                    var firmwareInConfigsPath = Path.Combine(configurationsDir, $"{configBaseName}.bin");
+                    
                     var resultsWindow = new CompilationResultsWindow(
                         encodedConfig,
                         true,
-                        result.BackupFilePath)
+                        result.BackupFilePath,
+                        firmwareInConfigsPath)
                     {
                         Owner = this
                     };

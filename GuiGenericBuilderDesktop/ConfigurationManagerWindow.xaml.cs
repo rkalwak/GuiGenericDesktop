@@ -147,6 +147,27 @@ namespace GuiGenericBuilderDesktop
             DetailSavedDateText.Text = config.SavedDate.ToString("yyyy-MM-dd HH:mm:ss");
             DetailEncodedText.Text = config.EncodedConfig ?? "N/A";
             
+            // Show or hide firmware folder button based on whether firmware file exists
+            if (!string.IsNullOrEmpty(config.FirmwareFileName))
+            {
+                var firmwarePath = Path.Combine(
+                    Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "configurations"),
+                    config.FirmwareFileName);
+                
+                if (File.Exists(firmwarePath))
+                {
+                    OpenFirmwareFolderButton.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    OpenFirmwareFolderButton.Visibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                OpenFirmwareFolderButton.Visibility = Visibility.Collapsed;
+            }
+            
             if (config.EnabledFlagKeys != null && config.EnabledFlagKeys.Any())
             {
                 FlagsCountText.Text = $"Enabled Flags ({config.EnabledFlagKeys.Count})";
@@ -199,6 +220,44 @@ namespace GuiGenericBuilderDesktop
                 MessageBox.Show(
                     $"Failed to copy to clipboard: {ex.Message}",
                     "Copy Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private void OpenFirmwareFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (ConfigurationsListBox.SelectedItem is SavedBuildConfiguration config)
+                {
+                    if (!string.IsNullOrEmpty(config.FirmwareFileName))
+                    {
+                        var configurationsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "configurations");
+                        var firmwarePath = Path.Combine(configurationsDir, config.FirmwareFileName);
+                        
+                        if (File.Exists(firmwarePath))
+                        {
+                            // Open Windows Explorer and select the firmware file
+                            System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{firmwarePath}\"");
+                        }
+                        else
+                        {
+                            MessageBox.Show(
+                                $"Firmware file not found:\n\n{config.FirmwareFileName}\n\n" +
+                                "The firmware file may have been deleted or moved.",
+                                "File Not Found",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"Failed to open firmware folder: {ex.Message}",
+                    "Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }

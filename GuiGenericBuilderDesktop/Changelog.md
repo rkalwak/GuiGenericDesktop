@@ -41,7 +41,7 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 - Uses `Directory.EnumerateFileSystemEntries()` for efficient empty directory detection
 
 **CI/CD GitHub Actions Workflows**
-- Added comprehensive CI/CD pipeline using GitHub Actions
+- Added comprehensive CI/CDB pipeline using GitHub Actions
 - Three workflows for different purposes:
   - **CI Workflow**: Runs on every push, validates build and tests
   - **Build and Publish**: Creates artifacts for master/main branches, handles nightly builds
@@ -324,4 +324,108 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 
 **Stop Compilation Feature**
 - Added ability to stop ongoing compilation process
+
+**PlatformIO Process Cancellation**
+- Implemented proper process cancellation in `PlatformioCliHandler`
+- **Process termination**:
+  - Registers cancellation callback using `cancellationToken.Register()`
+  - Kills PlatformIO process and entire process tree when cancellation is requested
+  - Uses `process.Kill(entireProcessTree: true)` to ensure all child processes are terminated
+- **Cancellation detection**:
+  - Checks `cancellationToken.IsCancellationRequested` after process exits
+  - Sets `IsSuccessful = false` when compilation is cancelled
+  - Updates logs with "Compilation cancelled by user" message
+- **Error handling**:
+  - Catches exceptions during process termination to prevent crashes
+  - Logs all cancellation events for debugging
+- **Benefits**:
+  - Immediate process termination when user clicks "Stop"
+  - No orphaned processes left running in background
+  - Clean resource cleanup
+  - Proper error state when compilation is cancelled
+
+### Added
+
+**Automatic Firmware Backup with Configuration**
+- Firmware binary is now automatically copied to configurations directory when compilation succeeds
+- Firmware file is named using the sanitized configuration name (e.g., `MyConfig.bin`)
+- Firmware path is stored in the configuration JSON as `FirmwareFileName` property
+- **Benefits**:
+  - Keep firmware binaries organized with their configurations
+  - Easy access to previously built firmware
+  - No need to recompile to get firmware for a specific configuration
+  - Firmware and configuration are kept together
+
+**Open Firmware Folder Button in Configuration Manager**
+- Added "&#128193; Firmware" button in configuration details panel
+- Button only appears when firmware file exists for the selected configuration
+- Clicking the button opens Windows Explorer and selects the firmware file
+- **Features**:
+  - Direct access to firmware binary from configuration manager
+  - Automatically checks if firmware file exists before showing button
+  - Shows user-friendly error if firmware file was deleted or moved
+  - Uses Windows Explorer's `/select` parameter to highlight the file
+  - Uses Unicode character (&#128193;) for folder icon for consistent display
+- **Benefits**:
+  - Quick access to firmware files for deployment
+  - No need to navigate file system manually
+  - Visual confirmation of firmware file location
+  - Easy to copy/share firmware files
+
+**Open Firmware Folder Button in Compilation Results Window**
+- Added "Compiled Firmware" section to successful compilation results
+- Section displays firmware file name and full path
+- **Buttons**:
+  - "Copy Path" - Copies firmware file path to clipboard
+  - "&#128193; Open Folder" - Opens Windows Explorer and selects the firmware file
+- Section appears automatically when compilation succeeds
+- Blue-themed visual design (matches backup section's green theme)
+- **Updated behavior**:
+  - Shows path to firmware copy in configurations directory (not build directory)
+  - Firmware is automatically copied with configuration name
+  - Merged ZIP file created with firmware.bin, bootloader.bin, partitions.bin
+- **Features**:
+  - Immediate access to compiled firmware after successful build
+  - No need to navigate build directories
+  - Both backup and firmware files easily accessible from one window
+  - Uses Unicode character (&#128193;) for folder icon for consistent display across Windows versions
+- **Benefits**:
+  - Streamlined workflow - compile and access firmware in one place
+  - Easy manual deployment to other devices
+  - Quick access for sharing firmware files
+  - Visual confirmation of where firmware was built
+  - Professional UI with clear visual hierarchy
+  - Firmware persists in configurations directory (not lost when rebuilding)
+
+**Merged Firmware ZIP Files**
+- Automatically creates merged ZIP file during compilation
+- ZIP file contains all necessary files for manual flashing:
+  - `firmware.bin` - Main firmware binary
+  - `bootloader.bin` - ESP32 bootloader
+  - `partitions.bin` - Partition table
+- ZIP filename format: `{ConfigName}_merged.zip`
+- Stored alongside configuration in configurations directory
+- **Benefits**:
+  - Complete firmware package in one file
+  - Easy sharing and distribution
+  - All files needed for manual esptool flashing
+  - No missing dependencies when flashing manually
+  - Convenient for offline deployment
+
+**Firmware Management in Configurations Directory**
+- All firmware files now stored in configurations directory
+- Firmware persists between rebuilds
+- Files organized with configuration names
+- **Stored files**:
+  - `{ConfigName}.bin` - Main firmware binary
+  - `{ConfigName}_merged.zip` - Complete firmware package
+- **Configuration JSON tracking**:
+  - `FirmwareFileName` property tracks main firmware
+  - `MergedZipFileName` property tracks ZIP package
+- **Benefits**:
+  - Firmware associated with specific configurations
+  - Easy to find and reuse previous builds
+  - No accidental deletion during rebuilds
+  - Organized file structure
+  - Complete firmware history
 
