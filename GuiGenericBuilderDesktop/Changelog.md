@@ -322,4 +322,6 @@ Added "Backup" checkbox next to "Deploy" checkbox in the UI to allow users to cr
 - **Test coverage**: Added test `CommentUnlistedFlags_DirectLinkWithoutParameter_DoesNotEnableTemperatureSensor` to verify fix
 - All 21 PlatformIO handler unit tests passing
 
+**Stop Compilation Feature**
+- Added ability to stop ongoing compilation process
 

@@ -32,6 +32,7 @@ namespace GuiGenericBuilderDesktop
         private Button checkDeviceButton;
         private Button compileButton;
         private TextBlock statusText;
+        private CancellationTokenSource _compilationCancellation;
 
         public MainWindow()
         {
@@ -593,6 +594,24 @@ namespace GuiGenericBuilderDesktop
 
         private async void CompileSelected_Click(object sender, RoutedEventArgs e)
         {
+            // Check if we're stopping an ongoing compilation
+            if (_compilationCancellation != null && !_compilationCancellation.IsCancellationRequested)
+            {
+                _logger.Information("User requested compilation cancellation");
+                
+                // Request cancellation
+                _compilationCancellation.Cancel();
+                
+                // Update button text
+                compileButton.Content = "3. Compile";
+                
+                // Update status
+                statusText.Text = "⏳ Stopping compilation...";
+                statusText.Foreground = System.Windows.Media.Brushes.Orange;
+                
+                return;
+            }
+            
             // Check if GUI-Generic repository exists and is not empty
             if (string.IsNullOrEmpty(_repositoryPath) || !Directory.Exists(_repositoryPath))
             {
@@ -700,8 +719,11 @@ namespace GuiGenericBuilderDesktop
                 }
             }
 
-            // Disable compile button
-            compileButton.IsEnabled = false;
+            // Create new cancellation token source for this compilation
+            _compilationCancellation = new CancellationTokenSource();
+
+            // Change button text to "Stop"
+            compileButton.Content = "3. Stop compilation";
 
             // Track compilation time
             var compilationStopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -751,7 +773,7 @@ namespace GuiGenericBuilderDesktop
                 };
                 var handler = new PlatformioCliHandler();
                 ICompileHandler compiler = new PlatformioCliHandler();
-                var result = await compiler.Handle(ggRequest, CancellationToken.None);
+                var result = await compiler.Handle(ggRequest, _compilationCancellation.Token);
 
                 // Stop the timer and stopwatch
                 timerCancellation.Cancel();
@@ -767,7 +789,22 @@ namespace GuiGenericBuilderDesktop
 
                 var compilationTime = compilationStopwatch.Elapsed;
 
-                if (result.IsSuccessful)
+                // Check if compilation was cancelled
+                if (_compilationCancellation.IsCancellationRequested)
+                {
+                    _logger.Information("Compilation cancelled by user");
+                    
+                    statusText.Text = $"⏹ Compilation stopped by user. Time: {compilationTime.TotalSeconds:F1}s";
+                    statusText.Foreground = System.Windows.Media.Brushes.Black;
+                    statusText.FontStyle = FontStyles.Oblique;
+
+                    MessageBox.Show(
+                        $"Compilation stopped by user.\n\nElapsed time: {compilationTime.TotalSeconds:F1}s",
+                        "Compilation Stopped",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+                else if (result.IsSuccessful)
                 {
                     // Success status with compilation time - KEEP IT VISIBLE
                     statusText.Text = $"✓ Compilation successful! Time: {compilationTime.TotalSeconds:F1}s";
@@ -820,6 +857,31 @@ namespace GuiGenericBuilderDesktop
                     resultsWindow.ShowDialog();
                 }
             }
+            catch (OperationCanceledException)
+            {
+                // Stop the timer and stopwatch
+                timerCancellation.Cancel();
+                compilationStopwatch.Stop();
+                try
+                {
+                    await timerTask;
+                }
+                catch (TaskCanceledException)
+                {
+                    // Expected
+                }
+
+                _logger.Information("Compilation cancelled (OperationCanceledException caught)");
+                
+                statusText.Text = $"⏹ Compilation stopped. Time: {compilationStopwatch.Elapsed.TotalSeconds:F1}s";
+                statusText.Foreground = System.Windows.Media.Brushes.Orange;
+                
+                MessageBox.Show(
+                    $"Compilation was stopped.\n\nElapsed time: {compilationStopwatch.Elapsed.TotalSeconds:F1}s",
+                    "Compilation Stopped",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
             catch (Exception ex)
             {
                 // Stop the timer and stopwatch
@@ -843,8 +905,12 @@ namespace GuiGenericBuilderDesktop
             }
             finally
             {
-                // Re-enable compile button
-                compileButton.IsEnabled = true;
+                // Restore button text to "3. Compile"
+                compileButton.Content = "3. Compile";
+                
+                // Clean up cancellation token source
+                _compilationCancellation?.Dispose();
+                _compilationCancellation = null;
             }
 
         }

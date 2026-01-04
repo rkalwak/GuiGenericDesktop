@@ -122,7 +122,7 @@ public class PlatformioCliHandler : ICompileHandler
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
-            await process.WaitForExitAsync();
+            await process.WaitForExitAsync(cancellationToken);
             stopwatch.Stop();
             compileResponse.IsSuccessful = process.ExitCode == 0;
             compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
