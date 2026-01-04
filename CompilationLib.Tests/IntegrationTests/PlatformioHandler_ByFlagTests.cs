@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace CompilationLib.Tests
+namespace CompilationLib.Tests.IntegrationTests
 {
     public static class PlatformProviders
     {
@@ -31,9 +31,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_CONFIG" }
+                    new BuildFlagItem { Key = "SUPLA_CONFIG" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -51,9 +51,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_DEEP_SLEEP" }
+                    new BuildFlagItem { Key = "SUPLA_DEEP_SLEEP" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -71,9 +71,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_OLED" }
+                    new BuildFlagItem { Key = "SUPLA_OLED" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -91,9 +91,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_WAKE_ON_LAN" }
+                    new BuildFlagItem { Key = "SUPLA_WAKE_ON_LAN" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -111,9 +111,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_WT32_ETH01_LAN8720" }
+                    new BuildFlagItem { Key = "SUPLA_WT32_ETH01_LAN8720" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -131,9 +131,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_ETH01_LAN8720" }
+                    new BuildFlagItem { Key = "SUPLA_ETH01_LAN8720" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -151,9 +151,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_MS5611" }
+                    new BuildFlagItem { Key = "SUPLA_MS5611" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -171,7 +171,7 @@ namespace CompilationLib.Tests
                     {
                         new BuildFlagItem
                         {
-                            FlagName = "SUPLA_MS5611",
+                            Key = "SUPLA_MS5611",
                             Parameters=new List<Parameter>
                             {
                                 new Parameter
@@ -184,7 +184,7 @@ namespace CompilationLib.Tests
                         }
                     },
                 temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -202,9 +202,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_THERMOSTAT" }
+                    new BuildFlagItem { Key = "SUPLA_THERMOSTAT" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -222,9 +222,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_ROLLERSHUTTER" }
+                    new BuildFlagItem { Key = "SUPLA_ROLLERSHUTTER" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -242,9 +242,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_LED" }
+                    new BuildFlagItem { Key = "SUPLA_LED" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -262,9 +262,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_PUSHOVER" }
+                    new BuildFlagItem { Key = "SUPLA_PUSHOVER" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -282,9 +282,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_DIRECT_LINKS" }
+                    new BuildFlagItem { Key = "SUPLA_DIRECT_LINKS" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -302,9 +302,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_MODBUS_SDM_ONE_PHASE" }
+                    new BuildFlagItem { Key = "SUPLA_MODBUS_SDM_ONE_PHASE" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -322,9 +322,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_MODBUS_SDM" }
+                    new BuildFlagItem { Key = "SUPLA_MODBUS_SDM" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -342,9 +342,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_RGBW" }
+                    new BuildFlagItem { Key = "SUPLA_RGBW" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -362,9 +362,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_HC_SR04" }
+                    new BuildFlagItem { Key = "SUPLA_HC_SR04" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -382,9 +382,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_IMPULSE_COUNTER" }
+                    new BuildFlagItem { Key = "SUPLA_IMPULSE_COUNTER" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -402,9 +402,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_DIRECT_LINKS_SENSOR_THERMOMETR" }
+                    new BuildFlagItem { Key = "SUPLA_DIRECT_LINKS_SENSOR_THERMOMETR" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -422,9 +422,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_DIRECT_LINKS_MULTI_SENSOR" }
+                    new BuildFlagItem { Key = "SUPLA_DIRECT_LINKS_MULTI_SENSOR" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -442,9 +442,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_VINDRIKTNING_IKEA_KPOP" }
+                    new BuildFlagItem { Key = "SUPLA_VINDRIKTNING_IKEA_KPOP" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -462,9 +462,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_PMSX003_KPOP" }
+                    new BuildFlagItem { Key = "SUPLA_PMSX003_KPOP" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -482,9 +482,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_BONEIO_32x10A" }
+                    new BuildFlagItem { Key = "SUPLA_BONEIO_32x10A" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -502,9 +502,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_BONEIO_24x16A" }
+                    new BuildFlagItem { Key = "SUPLA_BONEIO_24x16A" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -522,9 +522,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_SPS30_KPOP" }
+                    new BuildFlagItem { Key = "SUPLA_SPS30_KPOP" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -542,9 +542,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_MAX6675" }
+                    new BuildFlagItem { Key = "SUPLA_MAX6675" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -562,9 +562,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_MAX31855" }
+                    new BuildFlagItem { Key = "SUPLA_MAX31855" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -582,9 +582,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_ANALOG_READING_KPOP" }
+                    new BuildFlagItem { Key = "SUPLA_ANALOG_READING_KPOP" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -602,9 +602,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_NTC_10K" }
+                    new BuildFlagItem { Key = "SUPLA_NTC_10K" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -622,9 +622,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_MPX_5XXX" }
+                    new BuildFlagItem { Key = "SUPLA_MPX_5XXX" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -642,9 +642,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_HLW8012" }
+                    new BuildFlagItem { Key = "SUPLA_HLW8012" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -662,13 +662,15 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_PZEM_V_3" }
+                    new BuildFlagItem { Key = "SUPLA_PZEM_V_3" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
     }
+
+    
 
     public class SUPLA_CSE7766_Tests : PlatformioTestBase
     {
@@ -682,9 +684,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_CSE7766" }
+                    new BuildFlagItem { Key = "SUPLA_CSE7766" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -702,9 +704,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_ADE7953" }
+                    new BuildFlagItem { Key = "SUPLA_ADE7953" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -722,7 +724,7 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_MCP23017" }
+                    new BuildFlagItem { Key = "SUPLA_MCP23017" }
                 }, temp);
                 using (new AssertionScope())
                 {
@@ -750,9 +752,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_PCF8575" }
+                    new BuildFlagItem { Key = "SUPLA_PCF8575" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -770,9 +772,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_PCF8574" }
+                    new BuildFlagItem { Key = "SUPLA_PCF8574" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -790,9 +792,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_DS18B20" }
+                    new BuildFlagItem { Key = "SUPLA_DS18B20" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -810,9 +812,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_DHT11" }
+                    new BuildFlagItem { Key = "SUPLA_DHT11" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -830,9 +832,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_DHT22" }
+                    new BuildFlagItem { Key = "SUPLA_DHT22" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -850,9 +852,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_SI7021_SONOFF" }
+                    new BuildFlagItem { Key = "SUPLA_SI7021_SONOFF" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -870,9 +872,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_BME280" }
+                    new BuildFlagItem { Key = "SUPLA_BME280" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -890,9 +892,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_BMP280" }
+                    new BuildFlagItem { Key = "SUPLA_BMP280" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -910,9 +912,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_SHT3x" }
+                    new BuildFlagItem { Key = "SUPLA_SHT3x" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -933,7 +935,7 @@ namespace CompilationLib.Tests
                     {
                         new BuildFlagItem
                         {
-                            FlagName = "SUPLA_INITIAL_CONFIG_MODE",
+                            Key = "SUPLA_INITIAL_CONFIG_MODE",
                             Parameters = new List<Parameter>
                             {
                                 new Parameter
@@ -969,7 +971,7 @@ namespace CompilationLib.Tests
                     {
                         new BuildFlagItem
                         {
-                            FlagName = "SUPLA_INITIAL_CONFIG_MODE",
+                            Key = "SUPLA_INITIAL_CONFIG_MODE",
                             Parameters = new List<Parameter>
                             {
                                 new Parameter
@@ -982,7 +984,7 @@ namespace CompilationLib.Tests
                         }
                     },
                     temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -1000,7 +1002,7 @@ namespace CompilationLib.Tests
                     {
                         new BuildFlagItem
                         {
-                            FlagName = "SUPLA_INITIAL_CONFIG_MODE",
+                            Key = "SUPLA_INITIAL_CONFIG_MODE",
                             Parameters = new List<Parameter>
                             {
                                 new Parameter
@@ -1013,7 +1015,7 @@ namespace CompilationLib.Tests
                         }
                     },
                     temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -1031,7 +1033,7 @@ namespace CompilationLib.Tests
                     {
                         new BuildFlagItem
                         {
-                            FlagName = "SUPLA_INITIAL_CONFIG_MODE",
+                            Key = "SUPLA_INITIAL_CONFIG_MODE",
                             Parameters = new List<Parameter>
                             {
                                 new Parameter
@@ -1044,7 +1046,7 @@ namespace CompilationLib.Tests
                         }
                     },
                     temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -1059,9 +1061,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_INITIAL_CONFIG_MODE" }
+                    new BuildFlagItem { Key = "SUPLA_INITIAL_CONFIG_MODE" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -1079,9 +1081,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_INA219" }
+                    new BuildFlagItem { Key = "SUPLA_INA219" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -1099,9 +1101,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_INA226" }
+                    new BuildFlagItem { Key = "SUPLA_INA226" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -1119,9 +1121,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_INA228" }
+                    new BuildFlagItem { Key = "SUPLA_INA228" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -1139,9 +1141,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_INA229" }
+                    new BuildFlagItem { Key = "SUPLA_INA229" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -1159,9 +1161,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_INA236" }
+                    new BuildFlagItem { Key = "SUPLA_INA236" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -1179,9 +1181,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_INA238" }
+                    new BuildFlagItem { Key = "SUPLA_INA238" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -1199,9 +1201,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_INA239" }
+                    new BuildFlagItem { Key = "SUPLA_INA239" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }
@@ -1219,9 +1221,9 @@ namespace CompilationLib.Tests
             {
                 var res = await RunHandlerAsync(p, new List<BuildFlagItem>
                 {
-                    new BuildFlagItem { FlagName = "SUPLA_INA260" }
+                    new BuildFlagItem { Key = "SUPLA_INA260" }
                 }, temp);
-                Assert.True(res.IsSuccessful);
+                AssertBuildSuccessful(res);
             }
             finally { CleanupTempRepo(temp); }
         }

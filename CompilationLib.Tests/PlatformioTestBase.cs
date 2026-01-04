@@ -1,4 +1,6 @@
 using CompilationLib;
+using FluentAssertions;
+using FluentAssertions.Execution;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -74,6 +76,16 @@ namespace CompilationLib.Tests
                 var dirName = Path.GetFileName(dirPath);
                 var destSubDir = Path.Combine(destinationDir, dirName);
                 CopyAll(dirPath, destSubDir);
+            }
+        }
+
+        protected void AssertBuildSuccessful(CompileResponse res)
+        {
+            using (new AssertionScope())
+            {
+                res.IsSuccessful.Should().BeTrue();
+                if (!res.IsSuccessful)
+                    res.Logs.Should().Be("");
             }
         }
     }

@@ -10,6 +10,7 @@ namespace CompilationLib.Tests
     public class PlatformioCliHandlerUnitTests
     {
         private string _tempIniPath = "initestfile.ini";
+
         [Fact]
         public void CommentUnlistedFlags_BehavesAsExpected()
         {
@@ -34,7 +35,8 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                // Don't use global settings for this test to avoid affecting line positions
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllLines(temp);
 
@@ -90,7 +92,7 @@ namespace CompilationLib.Tests
                     new BuildFlagItem { FlagName = "SUPLA_X" }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var after = File.ReadAllText(temp);
 
@@ -128,7 +130,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -170,7 +172,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -212,7 +214,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -250,7 +252,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -288,7 +290,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -327,7 +329,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -371,7 +373,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -409,10 +411,10 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_INITIAL_CONFIG_MODE",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter 
-                            { 
+                            new Parameter
+                            {
                                 Key = "Mode",
-                                Name = "Tryb", 
+                                Name = "Tryb",
                                 Value = "",
                                 DefaultValue = "3",
                                 Type = "enum",
@@ -422,7 +424,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -457,19 +459,19 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_INITIAL_CONFIG_MODE",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter 
-                            { 
+                            new Parameter
+                            {
                                 Key = "Mode",
-                                Name = "Tryb", 
+                                Name = "Tryb",
                                 Value = "3",  // Value initialized from DefaultValue
                                 DefaultValue = "3",
-                                Type = "enum" 
+                                Type = "enum"
                             }
                         }
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -502,18 +504,18 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_TEST_FLAG",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter 
+                            new Parameter
                             { 
                                 // No Key set - should fall back to Name
-                                Name = "OldParamName", 
+                                Name = "OldParamName",
                                 Value = "123",
-                                Type = "number" 
+                                Type = "number"
                             }
                         }
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -546,19 +548,19 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_FLAG",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter 
-                            { 
+                            new Parameter
+                            {
                                 Key = "OptionalParam",
-                                Name = "Optional Parameter", 
+                                Name = "Optional Parameter",
                                 Value = "",
                                 IsRequired = false,
-                                Type = "number" 
+                                Type = "number"
                             }
                         }
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -595,19 +597,19 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_FLAG",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter 
-                            { 
+                            new Parameter
+                            {
                                 Key = "OptionalParam",
-                                Name = "Optional Parameter", 
+                                Name = "Optional Parameter",
                                 Value = "42",
                                 IsRequired = false,
-                                Type = "number" 
+                                Type = "number"
                             }
                         }
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -644,19 +646,19 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_FLAG",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter 
-                            { 
+                            new Parameter
+                            {
                                 Key = "RequiredParam",
-                                Name = "Required Parameter", 
+                                Name = "Required Parameter",
                                 Value = "",
                                 IsRequired = true,
-                                Type = "number" 
+                                Type = "number"
                             }
                         }
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -694,19 +696,19 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_FLAG",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter 
-                            { 
+                            new Parameter
+                            {
                                 Key = "OptionalParam",
-                                Name = "Optional Parameter", 
+                                Name = "Optional Parameter",
                                 Value = "",  // No value provided
                                 IsRequired = false,
-                                Type = "number" 
+                                Type = "number"
                             }
                         }
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -745,19 +747,19 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_FLAG",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter 
-                            { 
+                            new Parameter
+                            {
                                 Key = "OptionalParam",
-                                Name = "Optional Parameter", 
+                                Name = "Optional Parameter",
                                 Value = "",  // No value provided
                                 IsRequired = false,
-                                Type = "number" 
+                                Type = "number"
                             }
                         }
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -794,32 +796,32 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_COMPLEX",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter 
-                            { 
+                            new Parameter
+                            {
                                 Key = "RequiredMode",
                                 Value = "1",
                                 IsRequired = true,
-                                Type = "enum" 
+                                Type = "enum"
                             },
-                            new Parameter 
-                            { 
+                            new Parameter
+                            {
                                 Key = "OptionalTimeout",
                                 Value = "",  // No value
                                 IsRequired = false,
-                                Type = "number" 
+                                Type = "number"
                             },
-                            new Parameter 
-                            { 
+                            new Parameter
+                            {
                                 Key = "OptionalName",
                                 Value = "MyName",  // Has value
                                 IsRequired = false,
-                                Type = "text" 
+                                Type = "text"
                             }
                         }
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -857,18 +859,18 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_FLAG",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter 
-                            { 
+                            new Parameter
+                            {
                                 Key = "OptionalMode",
                                 Value = null,
                                 IsRequired = false,
-                                Type = "enum" 
+                                Type = "enum"
                             }
                         }
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -901,18 +903,18 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_FLAG",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter 
-                            { 
+                            new Parameter
+                            {
                                 Key = "OptionalText",
                                 Value = "",
                                 IsRequired = false,
-                                Type = "text" 
+                                Type = "text"
                             }
                         }
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -949,7 +951,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed);
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -958,6 +960,528 @@ namespace CompilationLib.Tests
                     result.Should().Contain(" -D SUPLA_DIRECT_LINK");
                     result.Should().Contain(";-D SUPLA_DIRECT_LINK_TEMPERATURE_SENSOR");
                     result.Should().NotContain("\n -D SUPLA_DIRECT_LINK_TEMPERATURE_SENSOR");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_GlobalParameters_HaveCorrectNamingFormat()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_BME280
+ -D SUPLA_SHT3x
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var globalSettings = new GlobalSettings
+                {
+                    Parameters = new List<Parameter>
+                    {
+                        new Parameter { Key = "SCL", Name = "I2C SCL Pin", Value = "22", Type = "number" },
+                        new Parameter { Key = "SDA", Name = "I2C SDA Pin", Value = "21", Type = "number" }
+                    }
+                };
+
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_BME280",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                            new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                        }
+                    },
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_SHT3x",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                            new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, globalSettings);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    // Global parameters SHOULD be written with GlobalParameter_ prefix when I2C flags are present
+                    result.Should().Contain(" -D GlobalParameter_SCL=22", "global SCL parameter should use GlobalParameter_ prefix when I2C flags are present");
+                    result.Should().Contain(" -D GlobalParameter_SDA=21", "global SDA parameter should use GlobalParameter_ prefix when I2C flags are present");
+
+                    // Individual flag parameters should NOT be written (deduplicated)
+                    result.Should().NotContain("SUPLA_BME280_SCL", "SCL is a global parameter and should not be duplicated per flag");
+                    result.Should().NotContain("SUPLA_BME280_SDA", "SDA is a global parameter and should not be duplicated per flag");
+                    result.Should().NotContain("SUPLA_SHT3x_SCL", "SCL is a global parameter and should not be duplicated per flag");
+                    result.Should().NotContain("SUPLA_SHT3x_SDA", "SDA is a global parameter and should not be duplicated per flag");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_GlobalParameters_NotWrittenWhenNoI2CFlagsPresent()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_RELAY
+ -D SUPLA_BUTTON
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var globalSettings = new GlobalSettings
+                {
+                    Parameters = new List<Parameter>
+                    {
+                        new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                        new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                    }
+                };
+
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem { Key = "SUPLA_RELAY" },
+                    new BuildFlagItem { Key = "SUPLA_BUTTON" }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, globalSettings);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    // Global parameters should still be written (they're in globalSettings)
+                    result.Should().Contain(" -D GlobalParameter_SCL=22", "global parameters should be written when defined in globalSettings");
+                    result.Should().Contain(" -D GlobalParameter_SDA=21", "global parameters should be written when defined in globalSettings");
+
+                    // Non-I2C flags should not have SCL/SDA parameters
+                    result.Should().NotContain("SUPLA_RELAY_SCL");
+                    result.Should().NotContain("SUPLA_RELAY_SDA");
+                    result.Should().NotContain("SUPLA_BUTTON_SCL");
+                    result.Should().NotContain("SUPLA_BUTTON_SDA");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_GlobalParameters_OnlyI2CDevicesUseThem()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_BME280
+ -D SUPLA_RELAY
+ -D SUPLA_SHT3x
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var globalSettings = new GlobalSettings
+                {
+                    Parameters = new List<Parameter>
+                    {
+                        new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                        new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                    }
+                };
+
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_BME280",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                            new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                        }
+                    },
+                    new BuildFlagItem { Key = "SUPLA_RELAY" },
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_SHT3x",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                            new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, globalSettings);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    // Global parameters written once
+                    result.Should().Contain(" -D GlobalParameter_SCL=22");
+                    result.Should().Contain(" -D GlobalParameter_SDA=21");
+
+                    // I2C devices should NOT have individual SCL/SDA (they use global)
+                    result.Should().NotContain("SUPLA_BME280_SCL");
+                    result.Should().NotContain("SUPLA_BME280_SDA");
+                    result.Should().NotContain("SUPLA_SHT3x_SCL");
+                    result.Should().NotContain("SUPLA_SHT3x_SDA");
+
+                    // Non-I2C device should NOT have SCL/SDA parameters at all
+                    result.Should().NotContain("SUPLA_RELAY_SCL");
+                    result.Should().NotContain("SUPLA_RELAY_SDA");
+
+                    // Verify only one occurrence of each global parameter
+                    var sclCount = System.Text.RegularExpressions.Regex.Matches(result, @"-D GlobalParameter_SCL=").Count;
+                    var sdaCount = System.Text.RegularExpressions.Regex.Matches(result, @"-D GlobalParameter_SDA=").Count;
+                    sclCount.Should().Be(1);
+                    sdaCount.Should().Be(1);
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_NoGlobalSettings_I2CDevicesWriteOwnParameters()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_BME280
+ -D SUPLA_SHT3x
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_BME280",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                            new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                        }
+                    },
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_SHT3x",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                            new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                        }
+                    }
+                };
+
+                // No global settings provided
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    // Without global settings, each I2C device should write its own parameters
+                    result.Should().Contain(" -D SUPLA_BME280_SCL=22", "without global settings, flags should write own SCL parameter");
+                    result.Should().Contain(" -D SUPLA_BME280_SDA=21", "without global settings, flags should write own SDA parameter");
+                    result.Should().Contain(" -D SUPLA_SHT3x_SCL=22", "without global settings, flags should write own SCL parameter");
+                    result.Should().Contain(" -D SUPLA_SHT3x_SDA=21", "without global settings, flags should write own SDA parameter");
+
+                    // Global parameters should NOT be written
+                    result.Should().NotContain("GlobalParameter_SCL", "no global parameters without global settings");
+                    result.Should().NotContain("GlobalParameter_SDA", "no global parameters without global settings");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_EmptyGlobalSettings_I2CDevicesWriteOwnParameters()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_BME280
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var emptyGlobalSettings = new GlobalSettings
+                {
+                    Parameters = new List<Parameter> () // Empty list
+                };
+
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_BME280",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                            new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, emptyGlobalSettings);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    // With empty global settings, flag should write its own parameters
+                    result.Should().Contain(" -D SUPLA_BME280_SCL=22", "with empty global settings, flag should write own parameters");
+                    result.Should().Contain(" -D SUPLA_BME280_SDA=21", "with empty global settings, flag should write own parameters");
+
+                    // No global parameters should be written
+                    result.Should().NotContain("GlobalParameter_", "no global parameters with empty settings");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_GlobalParameters_UseValueFromBuildFlags()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_BME280
+ -D SUPLA_SHT3x
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var globalSettings = new GlobalSettings
+                {
+                    Parameters = new List<Parameter>
+                    {
+                        new Parameter { Key = "SCL", Name = "I2C SCL Pin", DefaultValue = "99", Type = "number" },
+                        new Parameter { Key = "SDA", Name = "I2C SDA Pin", DefaultValue = "88", Type = "number" }
+                    }
+                };
+
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_BME280",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                            new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                        }
+                    },
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_SHT3x",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                            new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, globalSettings);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    // Global parameters should use values from BuildFlags (22, 21), not DefaultValue (99, 88)
+                    result.Should().Contain(" -D GlobalParameter_SCL=22", "should use value from BuildFlag, not DefaultValue");
+                    result.Should().Contain(" -D GlobalParameter_SDA=21", "should use value from BuildFlag, not DefaultValue");
+                    
+                    // Should not use the default values
+                    result.Should().NotContain("GlobalParameter_SCL=99", "should not use DefaultValue from GlobalSettings");
+                    result.Should().NotContain("GlobalParameter_SDA=88", "should not use DefaultValue from GlobalSettings");
+
+                    // Individual flag parameters should NOT be written
+                    result.Should().NotContain("SUPLA_BME280_SCL");
+                    result.Should().NotContain("SUPLA_BME280_SDA");
+                    result.Should().NotContain("SUPLA_SHT3x_SCL");
+                    result.Should().NotContain("SUPLA_SHT3x_SDA");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_GlobalParameters_FallbackToGlobalSettingsWhenNoBuildFlagValue()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_RELAY
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var globalSettings = new GlobalSettings
+                {
+                    Parameters = new List<Parameter>
+                    {
+                        new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                        new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                    }
+                };
+
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem { Key = "SUPLA_RELAY" } // No SCL/SDA parameters
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, globalSettings);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    // Global parameters should use values from GlobalSettings since no BuildFlag provides them
+                    result.Should().Contain(" -D GlobalParameter_SCL=22", "should fallback to GlobalSettings.Value");
+                    result.Should().Contain(" -D GlobalParameter_SDA=21", "should fallback to GlobalSettings.Value");
+
+                    // Non-I2C flag should not have SCL/SDA
+                    result.Should().NotContain("SUPLA_RELAY_SCL");
+                    result.Should().NotContain("SUPLA_RELAY_SDA");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_GlobalParameters_UseFirstMatchingBuildFlagValue()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_BME280
+ -D SUPLA_SHT3x
+ -D SUPLA_HDC1080
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var globalSettings = new GlobalSettings
+                {
+                    Parameters = new List<Parameter>
+                    {
+                        new Parameter { Key = "SCL", DefaultValue = "99", Type = "number" },
+                        new Parameter { Key = "SDA", DefaultValue = "88", Type = "number" }
+                    }
+                };
+
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_BME280",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                            new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                        }
+                    },
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_SHT3x",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "SCL", Value = "33", Type = "number" }, // Different value
+                            new Parameter { Key = "SDA", Value = "44", Type = "number" }  // Different value
+                        }
+                    },
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_HDC1080",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "SCL", Value = "22", Type = "number" },
+                            new Parameter { Key = "SDA", Value = "21", Type = "number" }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, globalSettings);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    // Should use the first matching BuildFlag value (from SUPLA_BME280)
+                    result.Should().Contain(" -D GlobalParameter_SCL=22", "should use first BuildFlag value found");
+                    result.Should().Contain(" -D GlobalParameter_SDA=21", "should use first BuildFlag value found");
+
+                    // Should not use values from second flag or defaults
+                    result.Should().NotContain("GlobalParameter_SCL=33");
+                    result.Should().NotContain("GlobalParameter_SDA=44");
+                    result.Should().NotContain("GlobalParameter_SCL=99");
+                    result.Should().NotContain("GlobalParameter_SDA=88");
+
+                    // No flag-specific parameters should be written
+                    result.Should().NotContain("SUPLA_BME280_SCL");
+                    result.Should().NotContain("SUPLA_SHT3x_SCL");
+                    result.Should().NotContain("SUPLA_HDC1080_SCL");
                 }
             }
             finally

@@ -1,6 +1,6 @@
 ﻿public static class BuildFlags
 {
-    public readonly static List<string> Platforms = new List<string>() { "GUI_Generic_ESP32", "GUI_Generic_ESP32C3", "GUI_Generic_ESP32C6" };
+    public readonly static List<string> Platforms = new List<string>() { "GUI_Generic_ESP32", "GUI_Generic_ESP32C3", "GUI_Generic_ESP32C6", "GUI_Generic_ESP32S3" };
     public readonly static List<string> List = new List<string>() { "SUPLA_DEBUG_MODE"
 ,"SUPLA_OTA"
 ,"SUPLA_MDNS"

@@ -25,9 +25,10 @@ public class PlatformioCliHandler : ICompileHandler
     public async Task<CompileResponse> Handle(CompileRequest request, CancellationToken cancellationToken)
     {
         var compileResponse = new CompileResponse();
-
+        // Deduplicate before processing
+      
         // PlatformIO uses 'run' command for compilation
-        CommentUnlistedFlagsBetweenMarkers($"{request.ProjectDirectory}/platformio.ini", request.BuildFlags);
+        CommentUnlistedFlagsBetweenMarkers($"{request.ProjectDirectory}/platformio.ini", request.BuildFlags, request.GlobalSettings);
 
         // Create backup before deployment if both deploying and backup are enabled
         if (request.ShouldDeploy && request.ShouldBackup && !string.IsNullOrEmpty(request.PortCom))
@@ -139,7 +140,8 @@ public class PlatformioCliHandler : ICompileHandler
     /// </summary>
     /// <param name="iniPath">Path to platformio.ini file.</param>
     /// <param name="allowedFlags">List of allowed build flag strings (e.g., "-D SUPLA_AHTX0").</param>
-    public void CommentUnlistedFlagsBetweenMarkers(string iniPath, List<BuildFlagItem> allowedFlags)
+    /// <param name="globalSettings">Global settings containing globally defined parameters (e.g., SCL/SDA for I2C devices).</param>
+    public void CommentUnlistedFlagsBetweenMarkers(string iniPath, List<BuildFlagItem> allowedFlags, GlobalSettings globalSettings)
     {
         var lines = File.ReadAllLines(iniPath).ToList();
         var startIndex = lines.FindIndex(line => line.Trim().Equals(";flagsstart", StringComparison.OrdinalIgnoreCase));
@@ -171,6 +173,78 @@ public class PlatformioCliHandler : ICompileHandler
                 }
             }
         }
+
+        // Process global parameters first (only once)
+        // Collect values from BuildFlags for parameters that match global parameter definitions
+        var globalParametersWritten = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (globalSettings?.Parameters != null && globalSettings.Parameters.Any())
+        {
+            foreach (var globalParam in globalSettings.Parameters)
+            {
+                if (globalParam == null || string.IsNullOrEmpty(globalParam.Identifier))
+                    continue;
+
+                var identifier = globalParam.Identifier.Trim();
+                
+                // Try to find the value from any BuildFlag that has this parameter
+                string valueToUse = null;
+                Parameter matchingFlagParameter = null;
+                
+                // Search through all enabled flags to find a parameter with matching identifier
+                foreach (var flag in allowedFlags)
+                {
+                    if (flag.Parameters != null)
+                    {
+                        matchingFlagParameter = flag.Parameters.FirstOrDefault(p => 
+                            p != null && 
+                            !string.IsNullOrEmpty(p.Identifier) &&
+                            string.Equals(p.Identifier, identifier, StringComparison.OrdinalIgnoreCase));
+                        
+                        if (matchingFlagParameter != null && !string.IsNullOrEmpty(matchingFlagParameter.Value))
+                        {
+                            valueToUse = matchingFlagParameter.Value.Trim();
+                            break; // Use the first matching value found
+                        }
+                    }
+                }
+                
+                // If no value found in BuildFlags, fall back to GlobalSettings value
+                if (string.IsNullOrEmpty(valueToUse))
+                {
+                    valueToUse = (globalParam.Value ?? string.Empty).Trim();
+                }
+
+                // Skip optional global parameters without values
+                if (!globalParam.IsRequired && string.IsNullOrEmpty(valueToUse))
+                    continue;
+
+                // Format value based on type (use matchingFlagParameter type if found, otherwise globalParam type)
+                var paramType = matchingFlagParameter?.Type ?? globalParam.Type;
+                string value;
+                if (string.Equals(paramType, "number", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(paramType, "enum", StringComparison.OrdinalIgnoreCase))
+                    value = string.IsNullOrEmpty(valueToUse) ? "0" : valueToUse;
+                else
+                    value = $"'\"{valueToUse}\"'";// Global parameters use GlobalParameter_ prefix
+                var paramDefineName = $"GlobalParameter_{identifier}";
+                var indexOfExistingParameter = lines.FindIndex(line => line.Contains(paramDefineName));
+                var define = $" -D {paramDefineName}={value}";
+
+                if (indexOfExistingParameter != -1)
+                {
+                    lines[indexOfExistingParameter] = define;
+                }
+                else
+                {
+                    lines.Insert(endIndex, define);
+                    endIndex++; // Adjust endIndex since we inserted a line
+                }
+
+                globalParametersWritten.Add(identifier);
+            }
+        }
+
+        // Process flag-specific parameters (skip global ones)
         foreach (var flag in allowedFlags)
         {
             if (flag.Parameters is null || flag.Parameters.Count == 0)
@@ -186,6 +260,10 @@ public class PlatformioCliHandler : ICompileHandler
                 // Use Identifier property which prefers Key over Name
                 var identifier = (p.Identifier ?? string.Empty).Trim();
                 if (string.IsNullOrEmpty(identifier))
+                    continue;
+
+                // Skip this parameter if it's defined as a global parameter
+                if (globalParametersWritten.Contains(identifier))
                     continue;
 
                 // Convert value to string safely
@@ -237,6 +315,7 @@ public class PlatformioCliHandler : ICompileHandler
                 else
                 {
                     lines.Insert(endIndex, define);
+                    endIndex++; // Adjust endIndex since we inserted a line
                 }
             }
         }

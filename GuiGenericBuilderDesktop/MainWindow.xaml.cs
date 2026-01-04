@@ -33,6 +33,7 @@ namespace GuiGenericBuilderDesktop
         private Button compileButton;
         private TextBlock statusText;
         private CancellationTokenSource _compilationCancellation;
+        private BuilderConfig _builderConfig = new BuilderConfig();
 
         public MainWindow()
         {
@@ -110,9 +111,9 @@ namespace GuiGenericBuilderDesktop
                 string jsonContent = File.ReadAllText(jsonPath);
 
                 // Use Newtonsoft.Json for deserialization
-                var deserialized = JsonConvert.DeserializeObject<BuilderConfig>(jsonContent);
+                _builderConfig = JsonConvert.DeserializeObject<BuilderConfig>(jsonContent);
 
-                if (deserialized?.Sections == null)
+                if (_builderConfig?.Sections == null)
                 {
                     MessageBox.Show($"builder.json does not contain valid Sections", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
@@ -120,7 +121,7 @@ namespace GuiGenericBuilderDesktop
 
 
                 // First pass: populate AllBuildFlags with metadata but keep IsEnabled as the deserialized default
-                foreach (var sectionItem in deserialized.Sections.OrderBy(X => X.Value.Order))
+                foreach (var sectionItem in _builderConfig.Sections.OrderBy(X => X.Value.Order))
                 {
                     foreach (var flagItem in sectionItem.Value.Flags)
                     {
@@ -425,11 +426,11 @@ namespace GuiGenericBuilderDesktop
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Warning);
                         }
-                        
+
                         // Check platform compatibility when user enables a flag
                         if (item.IsEnabled && !string.IsNullOrEmpty(_chip))
                         {
-                            if (item.DisabledOnPlatforms != null && 
+                            if (item.DisabledOnPlatforms != null &&
                                 item.DisabledOnPlatforms.Any(p => string.Equals(p, _chip, StringComparison.OrdinalIgnoreCase)))
                             {
                                 // Flag is incompatible with current platform, disable it and show message
@@ -459,6 +460,7 @@ namespace GuiGenericBuilderDesktop
                         if ((s as Button)?.Tag is BuildFlagItem bf)
                         {
                             if (bf.Parameters == null || !bf.Parameters.Any()) return;
+
                             var editor = new ParametersEditorWindow(bf.Parameters, bf.FlagName ?? bf.Key);
                             editor.ShowDialog();
                         }
@@ -598,20 +600,20 @@ namespace GuiGenericBuilderDesktop
             if (_compilationCancellation != null && !_compilationCancellation.IsCancellationRequested)
             {
                 _logger.Information("User requested compilation cancellation");
-                
+
                 // Request cancellation
                 _compilationCancellation.Cancel();
-                
+
                 // Update button text
                 compileButton.Content = "3. Compile";
-                
+
                 // Update status
                 statusText.Text = "⏳ Stopping compilation...";
                 statusText.Foreground = System.Windows.Media.Brushes.Orange;
-                
+
                 return;
             }
-            
+
             // Check if GUI-Generic repository exists and is not empty
             if (string.IsNullOrEmpty(_repositoryPath) || !Directory.Exists(_repositoryPath))
             {
@@ -696,6 +698,18 @@ namespace GuiGenericBuilderDesktop
                 return;
             }
 
+            // Validate I2C devices have consistent SCL and SDA values
+            var i2cValidationError = ValidateI2CParameters(selectedFlags);
+            if (!string.IsNullOrEmpty(i2cValidationError))
+            {
+                MessageBox.Show(
+                    i2cValidationError,
+                    "I2C Configuration Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
+
             // Get deploy and backup checkbox states
             bool shouldDeploy = deployCheckBox?.IsChecked ?? true;
             bool shouldBackup = backupCheckBox?.IsChecked ?? true;
@@ -769,7 +783,8 @@ namespace GuiGenericBuilderDesktop
                     PortCom = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
                     ShouldDeploy = shouldDeploy,
                     ShouldBackup = shouldBackup,
-                    ShouldEraseFlash = shouldEraseFlash
+                    ShouldEraseFlash = shouldEraseFlash,
+                    GlobalSettings = _builderConfig.GlobalSettings
                 };
                 var handler = new PlatformioCliHandler();
                 ICompileHandler compiler = new PlatformioCliHandler();
@@ -793,7 +808,7 @@ namespace GuiGenericBuilderDesktop
                 if (_compilationCancellation.IsCancellationRequested)
                 {
                     _logger.Information("Compilation cancelled by user");
-                    
+
                     statusText.Text = $"⏹ Compilation stopped by user. Time: {compilationTime.TotalSeconds:F1}s";
                     statusText.Foreground = System.Windows.Media.Brushes.Black;
                     statusText.FontStyle = FontStyles.Oblique;
@@ -821,7 +836,7 @@ namespace GuiGenericBuilderDesktop
                         var platform = selectedPlatform;
                         var comPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
                         var compiledFirmwarePath = Path.Combine(result.OutputDirectory, result.OutputFile);
-                        
+
                         _configManager.SaveConfiguration(
                             selectedFlags,
                             configName: null,
@@ -841,7 +856,7 @@ namespace GuiGenericBuilderDesktop
                     var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
                     var configBaseName = $"Config_{timestamp}";
                     var firmwareInConfigsPath = Path.Combine(configurationsDir, $"{configBaseName}.bin");
-                    
+
                     var resultsWindow = new CompilationResultsWindow(
                         encodedConfig,
                         true,
@@ -883,10 +898,10 @@ namespace GuiGenericBuilderDesktop
                 }
 
                 _logger.Information("Compilation cancelled (OperationCanceledException caught)");
-                
+
                 statusText.Text = $"⏹ Compilation stopped. Time: {compilationStopwatch.Elapsed.TotalSeconds:F1}s";
                 statusText.Foreground = System.Windows.Media.Brushes.Orange;
-                
+
                 MessageBox.Show(
                     $"Compilation was stopped.\n\nElapsed time: {compilationStopwatch.Elapsed.TotalSeconds:F1}s",
                     "Compilation Stopped",
@@ -918,7 +933,7 @@ namespace GuiGenericBuilderDesktop
             {
                 // Restore button text to "3. Compile"
                 compileButton.Content = "3. Compile";
-                
+
                 // Clean up cancellation token source
                 _compilationCancellation?.Dispose();
                 _compilationCancellation = null;
@@ -1280,19 +1295,19 @@ namespace GuiGenericBuilderDesktop
         private void UpdateWindowTitle(string suplaVersion, string ggVersion)
         {
             const string baseTitle = "GUI-Generic Builder";
-            
+
             var titleParts = new List<string> { baseTitle };
-            
+
             if (!string.IsNullOrEmpty(ggVersion))
             {
                 titleParts.Add($"GG v{ggVersion}");
             }
-            
+
             if (!string.IsNullOrEmpty(suplaVersion))
             {
                 titleParts.Add($"SD v{suplaVersion}");
             }
-            
+
             // If no versions found, just show base title
             if (titleParts.Count == 1)
             {
@@ -1302,7 +1317,7 @@ namespace GuiGenericBuilderDesktop
             {
                 Title = string.Join(" - ", titleParts);
             }
-            
+
             _logger.Debug("Window title updated to: {Title}", Title);
         }
 
@@ -1318,7 +1333,7 @@ namespace GuiGenericBuilderDesktop
 
             foreach (var flag in AllBuildFlags)
             {
-                if (flag.DisabledOnPlatforms != null && 
+                if (flag.DisabledOnPlatforms != null &&
                     flag.DisabledOnPlatforms.Any(p => string.Equals(p, platformTag, StringComparison.OrdinalIgnoreCase)))
                 {
                     if (flag.IsEnabled)
@@ -1359,7 +1374,7 @@ namespace GuiGenericBuilderDesktop
 
             foreach (var flag in enabledFlags)
             {
-                if (flag.DisabledOnPlatforms != null && 
+                if (flag.DisabledOnPlatforms != null &&
                     flag.DisabledOnPlatforms.Any(p => string.Equals(p, platformTag, StringComparison.OrdinalIgnoreCase)))
                 {
                     incompatibleFlags.Add($"{flag.FlagName ?? flag.Key} (disabled on {platformTag})");
@@ -1368,6 +1383,79 @@ namespace GuiGenericBuilderDesktop
             }
 
             return incompatibleFlags;
+        }
+
+        /// <summary>
+        /// Validates that all I2C devices have the same SCL and SDA parameter values
+        /// </summary>
+        private string ValidateI2CParameters(List<BuildFlagItem> enabledFlags)
+        {
+            string expectedScl = null;
+            string expectedSda = null;
+            var i2cDevices = new List<string>();
+
+            foreach (var flag in enabledFlags)
+            {
+                if (flag.Parameters == null || !flag.Parameters.Any())
+                    continue;
+
+                // Check if this flag has SCL and SDA parameters (I2C device)
+                var sclParam = flag.Parameters.FirstOrDefault(p =>
+                    string.Equals(p.Identifier, "SCL", StringComparison.OrdinalIgnoreCase));
+                var sdaParam = flag.Parameters.FirstOrDefault(p =>
+                    string.Equals(p.Identifier, "SDA", StringComparison.OrdinalIgnoreCase));
+
+                if (sclParam != null && sdaParam != null)
+                {
+                    // This is an I2C device
+                    var currentScl = sclParam.Value?.Trim();
+                    var currentSda = sdaParam.Value?.Trim();
+
+                    // Skip if values are not set
+                    if (string.IsNullOrEmpty(currentScl) || string.IsNullOrEmpty(currentSda))
+                        continue;
+
+                    if (expectedScl == null && expectedSda == null)
+                    {
+                        // First I2C device found - set expected values
+                        expectedScl = currentScl;
+                        expectedSda = currentSda;
+                        i2cDevices.Add($"{flag.FlagName ?? flag.Key} (SCL={currentScl}, SDA={currentSda})");
+                    }
+                    else
+                    {
+                        // Validate against expected values
+                        if (!string.Equals(currentScl, expectedScl, StringComparison.OrdinalIgnoreCase) ||
+                            !string.Equals(currentSda, expectedSda, StringComparison.OrdinalIgnoreCase))
+                        {
+                            i2cDevices.Add($"{flag.FlagName ?? flag.Key} (SCL={currentScl}, SDA={currentSda})");
+
+                            // Build error message
+                            var errorMessage = "All I2C devices must use the same SCL and SDA pins.\n\n" +
+                                             "Conflicting configurations detected:\n\n" +
+                                             string.Join("\n", i2cDevices.Select(d => $"• {d}")) +
+                                             "\n\nPlease ensure all I2C devices have matching SCL and SDA values.";
+
+
+                            _logger.Warning("I2C parameter mismatch detected: {Devices}", string.Join(", ", i2cDevices));
+                            return errorMessage;
+                        }
+                        else
+                        {
+                            i2cDevices.Add($"{flag.FlagName ?? flag.Key} (SCL={currentScl}, SDA={currentSda})");
+                        }
+                    }
+                }
+            }
+
+            // All I2C devices have consistent parameters (or no I2C devices found)
+            if (i2cDevices.Any())
+            {
+                _logger.Information("I2C validation passed: {Count} devices with SCL={SCL}, SDA={SDA}",
+                    i2cDevices.Count, expectedScl, expectedSda);
+            }
+
+            return null; // No errors
         }
     }
 }

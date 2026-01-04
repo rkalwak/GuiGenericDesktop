@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using CompilationLib;
+using Newtonsoft.Json;
 
 namespace GuiGenericBuilderDesktop
 {
@@ -10,6 +11,9 @@ namespace GuiGenericBuilderDesktop
 
         [JsonProperty("version")]
         public string Version { get; set; }
+
+        [JsonProperty("GlobalSettings")]
+        public GlobalSettings GlobalSettings { get; set; } = new GlobalSettings();
     }
 
 }

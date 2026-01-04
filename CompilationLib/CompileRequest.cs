@@ -14,4 +14,6 @@ public class CompileRequest
     public bool ShouldDeploy { get; set; }
     public bool ShouldBackup { get; set; }
     public bool ShouldEraseFlash { get; set; }
+
+    public GlobalSettings GlobalSettings { get; set; } = new GlobalSettings();
 }
