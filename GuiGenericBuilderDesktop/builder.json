@@ -250,6 +250,30 @@
               }
             },
             {
+              "Key": "UseBuildConfiguration",
+              "Name": "Użyj ustawień z kompilacji",
+              "Type": "enum",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "1",
+                  "Name": "Tak",
+                  "Description": "Używa ustawień z kompilacji."
+                },
+                {
+                  "Value": "0",
+                  "Name": "Nie",
+                  "Description": "Nie używa ustawień z kompilacji."
+                }
+              ],
+              "Translations": {
+                "en": {
+                  "Name": "Use Build Configuration"
+                }
+              }
+            },
+            {
               "Key": "TimeoutInMin",
               "Name": "Timeout trybu konfiguracji",
               "Type": "number",
