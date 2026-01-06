@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Globalization;
+using System.Windows;
 
 namespace GuiGenericBuilderDesktop.Localization
 {
@@ -10,11 +11,9 @@ namespace GuiGenericBuilderDesktop.Localization
     public static class LocalizationManager
     {
         private static string _currentLanguage = "pl"; // Polish as default (SHORT CODE to match builder.json)
-        private static Dictionary<string, Dictionary<string, string>> _translations;
 
         static LocalizationManager()
         {
-            InitializeTranslations();
             SetLanguage("pl");
         }
 
@@ -35,48 +34,49 @@ namespace GuiGenericBuilderDesktop.Localization
                 shortCode = languageCode.Split('-')[0]; // "pl-PL" -> "pl", "en-US" -> "en"
             }
             
-            if (_translations.ContainsKey(shortCode))
+            _currentLanguage = shortCode;
+            
+            // Load corresponding resource dictionary
+            ResourceDictionaryManager.LoadLanguageResources(shortCode);
+            
+            try
             {
-                _currentLanguage = shortCode;
-                
-                try
-                {
-                    // Try to set culture with full code if available, otherwise use short code
-                    CultureInfo culture;
-                    if (shortCode == "pl")
-                        culture = new CultureInfo("pl-PL");
-                    else if (shortCode == "en")
-                        culture = new CultureInfo("en-US");
-                    else
-                        culture = new CultureInfo(shortCode);
-                        
-                    CultureInfo.CurrentUICulture = culture;
-                    CultureInfo.CurrentCulture = culture;
-                }
-                catch
-                {
-                    // Fallback to default Polish
-                    _currentLanguage = "pl";
-                }
+                // Try to set culture with full code if available, otherwise use short code
+                CultureInfo culture;
+                if (shortCode == "pl")
+                    culture = new CultureInfo("pl-PL");
+                else if (shortCode == "en")
+                    culture = new CultureInfo("en-US");
+                else
+                    culture = new CultureInfo(shortCode);
+                    
+                CultureInfo.CurrentUICulture = culture;
+                CultureInfo.CurrentCulture = culture;
+            }
+            catch
+            {
+                // Fallback to default Polish
+                _currentLanguage = "pl";
+                ResourceDictionaryManager.LoadLanguageResources("pl");
             }
         }
 
         /// <summary>
-        /// Gets a localized string by key
+        /// Gets a localized string by key from Application Resources
         /// </summary>
         public static string Get(string key)
         {
-            if (_translations.ContainsKey(_currentLanguage) && 
-                _translations[_currentLanguage].ContainsKey(key))
+            try
             {
-                return _translations[_currentLanguage][key];
+                var app = Application.Current;
+                if (app != null && app.TryFindResource(key) is string value)
+                {
+                    return value;
+                }
             }
-            
-            // Fallback to Polish
-            if (_translations.ContainsKey("pl") && 
-                _translations["pl"].ContainsKey(key))
+            catch
             {
-                return _translations["pl"][key];
+                // Resource not found, return key in brackets
             }
             
             return $"[{key}]"; // Return key in brackets if not found
@@ -88,6 +88,13 @@ namespace GuiGenericBuilderDesktop.Localization
         public static string GetFormat(string key, params object[] args)
         {
             var format = Get(key);
+            
+            // Don't try to format if key wasn't found (starts with '[')
+            if (format.StartsWith("[") && format.EndsWith("]"))
+            {
+                return format;
+            }
+            
             try
             {
                 return string.Format(format, args);
@@ -107,15 +114,6 @@ namespace GuiGenericBuilderDesktop.Localization
             {
                 new LanguageOption { Code = "pl", Name = "Polski", NativeName = "Polski" },
                 new LanguageOption { Code = "en", Name = "English", NativeName = "English" }
-            };
-        }
-
-        private static void InitializeTranslations()
-        {
-            _translations = new Dictionary<string, Dictionary<string, string>>
-            {
-                ["pl"] = PolishTranslations.GetTranslations(),
-                ["en"] = EnglishTranslations.GetTranslations()
             };
         }
     }

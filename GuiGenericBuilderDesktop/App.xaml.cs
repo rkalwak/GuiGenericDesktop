@@ -3,6 +3,7 @@ using System.Data;
 using System.Windows;
 using Serilog;
 using System.IO;
+using GuiGenericBuilderDesktop.Localization;
 
 namespace GuiGenericBuilderDesktop
 {
@@ -14,6 +15,9 @@ namespace GuiGenericBuilderDesktop
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            
+            // Initialize resource dictionaries for localization
+            ResourceDictionaryManager.Initialize();
 
             // Configure Serilog
             var logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
@@ -33,6 +37,7 @@ namespace GuiGenericBuilderDesktop
             Log.Information("=== GUI Generic Builder Desktop Started ===");
             Log.Information("Application version: {Version}", typeof(App).Assembly.GetName().Version);
             Log.Information("Base directory: {BaseDirectory}", AppDomain.CurrentDomain.BaseDirectory);
+            Log.Information("Current language: {Language}", LocalizationManager.CurrentLanguage);
         }
 
         protected override void OnExit(ExitEventArgs e)

@@ -1,0 +1,319 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    
+    <!-- Polish (Polski) translations - Complete set -->
+    
+    <!-- Main Window -->
+    <system:String x:Key="AppTitle">GUI-Generic Builder</system:String>
+    <system:String x:Key="Board">Płytka:</system:String>
+    <system:String x:Key="Port">Port:</system:String>
+    <system:String x:Key="Flash">Pamięć:</system:String>
+    <system:String x:Key="None">Brak</system:String>
+    <system:String x:Key="ManageConfigs">Zarządzaj Konfiguracjami...</system:String>
+    <system:String x:Key="UpdateGuiGeneric">1. Aktualizuj Gui-Generic</system:String>
+    <system:String x:Key="CheckDevice">2. Sprawdź Urządzenie</system:String>
+    <system:String x:Key="Compile">3. Kompiluj</system:String>
+    <system:String x:Key="StopCompilation">3. Zatrzymaj kompilację</system:String>
+    <system:String x:Key="Deploy">Wgraj</system:String>
+    <system:String x:Key="Backup">Kopia zapasowa</system:String>
+    <system:String x:Key="EraseFlash">Wymaż pamięć</system:String>
+    <system:String x:Key="EraseFlashTooltip">Wymaż pamięć flash przed wgraniem firmware (zalecane dla czystej instalacji)</system:String>
+    <system:String x:Key="BackupTooltip">Utwórz kopię zapasową przed wgraniem firmware</system:String>
+    
+    <!-- Column Headers -->
+    <system:String x:Key="Enabled">Włączone</system:String>
+    <system:String x:Key="Key">Klucz</system:String>
+    <system:String x:Key="Name">Nazwa</system:String>
+    <system:String x:Key="Description">Opis</system:String>
+    <system:String x:Key="Parameters">Parametry</system:String>
+    <system:String x:Key="ParamsButton">Param...</system:String>
+    
+    <!-- Status Messages -->
+    <system:String x:Key="DownloadingRepository">⏳ Pobieranie repozytorium GUI-Generic...</system:String>
+    <system:String x:Key="RepositoryUpdatedSuccess">✓ Repozytorium zaktualizowane pomyślnie!</system:String>
+    <system:String x:Key="RepositoryUpdateFailed">✗ Aktualizacja repozytorium nie powiodła się</system:String>
+    <system:String x:Key="DetectingDevice">⏳ Wykrywanie urządzenia...</system:String>
+    <system:String x:Key="DeviceDetected">✓ Wykryto urządzenie: {0} na {1}</system:String>
+    <system:String x:Key="NoDeviceDetected">✗ Nie wykryto urządzenia</system:String>
+    <system:String x:Key="DeviceDetectionError">✗ Błąd wykrywania urządzenia</system:String>
+    <system:String x:Key="CompilingFirmware">⏳ Kompilowanie firmware... Upłynęło: {0:F1}s</system:String>
+    <system:String x:Key="CompilationSuccessful">✓ Kompilacja zakończona sukcesem! Czas: {0:F1}s</system:String>
+    <system:String x:Key="CompilationFailed">✗ Kompilacja nie powiodła się! Czas: {0:F1}s</system:String>
+    <system:String x:Key="CompilationError">✗ Błąd kompilacji! Czas: {0:F1}s</system:String>
+    <system:String x:Key="StoppingCompilation">⏳ Zatrzymywanie kompilacji...</system:String>
+    <system:String x:Key="CompilationStopped">⏹ Kompilacja zatrzymana. Czas: {0:F1}s</system:String>
+    
+    <!-- Message Box Titles -->
+    <system:String x:Key="UpdateComplete">Aktualizacja Zakończona</system:String>
+    <system:String x:Key="UpdateFailed">Aktualizacja Nie Powiodła Się</system:String>
+    <system:String x:Key="DeviceNotFound">Nie Znaleziono Urządzenia</system:String>
+    <system:String x:Key="DetectionError">Błąd Wykrywania</system:String>
+    <system:String x:Key="Error">Błąd</system:String>
+    <system:String x:Key="Warning">Ostrzeżenie</system:String>
+    <system:String x:Key="Information">Informacja</system:String>
+    <system:String x:Key="Success">Sukces</system:String>
+    
+    <!-- Message Box Messages -->
+    <system:String x:Key="RepositoryUpdatedMessage">Repozytorium zaktualizowane pomyślnie!</system:String>
+    <system:String x:Key="ErrorUpdatingRepository">Błąd aktualizacji repozytorium: {0}</system:String>
+    <system:String x:Key="NoDeviceDetectedMessage">Nie wykryto urządzenia ESP.
+
+Upewnij się, że:
+• Urządzenie jest podłączone przez USB
+• Sterowniki USB są zainstalowane
+• Urządzenie jest włączone</system:String>
+    <system:String x:Key="DeviceDetectionErrorMessage">Błąd wykrywania urządzenia: {0}
+
+Sprawdź logi, aby uzyskać więcej szczegółów.</system:String>
+    <system:String x:Key="RepositoryNotFound">Nie znaleziono repozytorium GUI-Generic!
+
+Najpierw kliknij przycisk '1. Aktualizuj Gui-Generic', aby pobrać repozytorium.
+
+Repozytorium jest wymagane do kompilacji firmware.</system:String>
+    <system:String x:Key="RepositoryNotFoundTitle">Nie Znaleziono Repozytorium</system:String>
+    <system:String x:Key="EmptyRepository">Katalog repozytorium GUI-Generic jest pusty!
+
+Ścieżka repozytorium: {0}
+
+Kliknij przycisk '1. Aktualizuj Gui-Generic', aby pobrać repozytorium.</system:String>
+    <system:String x:Key="EmptyRepositoryTitle">Puste Repozytorium</system:String>
+    <system:String x:Key="IncompleteRepository">Repozytorium GUI-Generic wydaje się być niekompletne lub uszkodzone.
+
+Brakujące plik: platformio.ini
+Ścieżka repozytorium: {0}
+
+Kliknij przycisk '1. Aktualizuj Gui-Generic', aby ponownie pobrać repozytorium.</system:String>
+    <system:String x:Key="IncompleteRepositoryTitle">Niekompletne Repozytorium</system:String>
+    <system:String x:Key="NoFlagsSelected">Nie wybrano flag. Włącz niektóre flagi przed kompilacją.</system:String>
+    <system:String x:Key="NoFlags">Brak Flag</system:String>
+    <system:String x:Key="PlatformRequired">Wybierz platformę docelową (płytkę) przed kompilacją.
+
+Użyj '2. Sprawdź Urządzenie' do automatycznego wykrycia lub ręcznie wybierz platformę z listy rozwijanej Płytka.
+
+Dostępne platformy:
+• ESP32 (domyślna)
+• ESP32-C3
+• ESP32-C6
+• ESP32-S3</system:String>
+    <system:String x:Key="PlatformRequiredTitle">Wymagana Platforma</system:String>
+    <system:String x:Key="PlatformCompatibilityError">Następujące flagi nie są kompatybilne z wybraną platformą ({0}):
+
+{1}
+
+Wyłącz te flagi lub wybierz inną platformę przed kompilacją.</system:String>
+    <system:String x:Key="PlatformCompatibilityErrorTitle">Błąd Kompatybilności Platformy</system:String>
+    <system:String x:Key="I2CConfigurationError">{0}</system:String>
+    <system:String x:Key="I2CConfigurationErrorTitle">Błąd Konfiguracji I2C</system:String>
+    <system:String x:Key="COMPortRequired">Wybierz port COM przed kompilacją z wgrywaniem.
+
+Firmware musi zostać przesłany do urządzenia podłączonego przez port COM.
+Użyj '2. Sprawdź Urządzenie' do automatycznego wykrycia lub ręcznie wybierz port COM.
+
+Alternatywnie odznacz 'Wgraj', aby tylko skompilować bez wgrywania.</system:String>
+    <system:String x:Key="COMPortRequiredTitle">Wymagany Port COM</system:String>
+    <system:String x:Key="CompilationStoppedMessage">Kompilacja zatrzymana przez użytkownika.
+
+Upłynął czas: {0:F1}s</system:String>
+    <system:String x:Key="CompilationStoppedTitle">Kompilacja Zatrzymana</system:String>
+    <system:String x:Key="CompilationErrorMessage">Błąd kompilacji: {0}</system:String>
+    <system:String x:Key="ErrorTitle">Błąd</system:String>
+    <system:String x:Key="PlatformCompatibility">Następujące flagi nie są kompatybilne z wybraną platformą ({0}) i zostały wyłączone:
+
+{1}</system:String>
+    <system:String x:Key="PlatformCompatibilityTitle">Kompatybilność Platformy</system:String>
+    <system:String x:Key="PlatformIncompatibility">Flaga '{0}' nie jest kompatybilna z wybraną platformą ({1}).
+
+Ta flaga jest wyłączona na: {2}</system:String>
+    <system:String x:Key="PlatformIncompatibilityTitle">Niekompatybilność Platformy</system:String>
+    <system:String x:Key="BlockingDependencies">Blokujące Zależności</system:String>
+    <system:String x:Key="NoParameters">Wybrana flaga nie ma parametrów.</system:String>
+    <system:String x:Key="NoParametersTitle">Brak Parametrów</system:String>
+    <system:String x:Key="NoSelection">Nie wybrano flagi. Wybierz flagę w siatce i spróbuj ponownie.</system:String>
+    <system:String x:Key="NoSelectionTitle">Brak Wyboru</system:String>
+    <system:String x:Key="ThisFlagHasNoParameters">Ta flaga nie ma parametrów.</system:String>
+    <system:String x:Key="ConfigurationLoaded">Konfiguracja '{0}' załadowana pomyślnie!
+
+Platforma: {1}
+Port COM: {2}
+Włączone flagi: {3}</system:String>
+    <system:String x:Key="ConfigurationLoadedTitle">Konfiguracja Załadowana</system:String>
+    <system:String x:Key="ManualConfigurationRequired">Konfiguracja '{0}' nie ma zapisanych flag.
+
+Wybierz flagi kompilacji ręcznie.</system:String>
+    <system:String x:Key="ManualConfigurationRequiredTitle">Wymagana Ręczna Konfiguracja</system:String>
+    <system:String x:Key="ErrorOpeningConfigManager">Błąd otwierania menedżera konfiguracji: {0}</system:String>
+    <system:String x:Key="FileNotFound">Nie Znaleziono Pliku</system:String>
+    <system:String x:Key="BuilderJsonNotFound">Nie znaleziono builder.json w: {0}</system:String>
+    <system:String x:Key="InvalidSections">builder.json nie zawiera prawidłowych Sekcji</system:String>
+    <system:String x:Key="ErrorLoadingBuilderJson">Błąd ładowania builder.json: {0}</system:String>
+    
+    <!-- Language -->
+    <system:String x:Key="Language">Język:</system:String>
+    <system:String x:Key="LanguageTooltip">Wybierz język aplikacji</system:String>
+    <system:String x:Key="LanguageChanged">Język zmieniony na: {0}</system:String>
+    
+    <!-- Common -->
+    <system:String x:Key="Close">Zamknij</system:String>
+    <system:String x:Key="Load">Załaduj</system:String>
+    <system:String x:Key="Delete">Usuń</system:String>
+    <system:String x:Key="Copy">Kopiuj</system:String>
+    <system:String x:Key="Save">Zapisz</system:String>
+    
+    <!-- Compilation Results Window -->
+    <system:String x:Key="CompilationSuccessTitle">Kompilacja Zakończona Sukcesem</system:String>
+    <system:String x:Key="CompilationFailedTitle">Kompilacja Nie Powiodła Się</system:String>
+    <system:String x:Key="BuildConfiguration">Konfiguracja Kompilacji:</system:String>
+    <system:String x:Key="BuildConfigurationDescription">Ten zakodowany ciąg zawiera Twoją pełną konfigurację kompilacji i może być udostępniony lub ponownie użyty.</system:String>
+    <system:String x:Key="BackupFile">Plik Kopii Zapasowej:</system:String>
+    <system:String x:Key="BackupCreatedMessage">✓ Pamięć flash urządzenia została zabezpieczona przed wdrożeniem.</system:String>
+    <system:String x:Key="FirmwareFile">Plik Firmware:</system:String>
+    <system:String x:Key="FirmwareReadyMessage">✓ Binarny plik firmware gotowy do wdrożenia lub ręcznego flashowania.</system:String>
+    <system:String x:Key="BuildOutput">Wynik Kompilacji:</system:String>
+    <system:String x:Key="ErrorLogs">Logi Błędów:</system:String>
+    <system:String x:Key="CopyConfig">Kopiuj Konfigurację</system:String>
+    <system:String x:Key="CopyOutput">Kopiuj Wynik</system:String>
+    <system:String x:Key="CopyLogs">Kopiuj Logi</system:String>
+    <system:String x:Key="SaveLogs">Zapisz do Pliku...</system:String>
+    <system:String x:Key="CopyPath">Kopiuj Ścieżkę</system:String>
+    <system:String x:Key="OpenFolder">Otwórz Folder</system:String>
+    <system:String x:Key="ConfigCopied">Ciąg konfiguracji skopiowany do schowka pomyślnie!</system:String>
+    <system:String x:Key="CopySuccess">Skopiowano Pomyślnie</system:String>
+    <system:String x:Key="CopyError">Błąd Kopiowania</system:String>
+    <system:String x:Key="FailedToCopy">Nie udało się skopiować do schowka: {0}</system:String>
+    <system:String x:Key="LogsSaved">Zawartość zapisana pomyślnie do:
+{0}</system:String>
+    <system:String x:Key="SaveSuccess">Zapisano Pomyślnie</system:String>
+    <system:String x:Key="SaveError">Błąd Zapisywania</system:String>
+    <system:String x:Key="FailedToSave">Nie udało się zapisać: {0}</system:String>
+    <system:String x:Key="PathCopied">Ścieżka do pliku skopiowana do schowka!
+
+{0}</system:String>
+    <system:String x:Key="FileNotFoundError">Nie znaleziono pliku.</system:String>
+    <system:String x:Key="DirectoryNotFound">Nie znaleziono katalogu:
+{0}</system:String>
+    <system:String x:Key="OpenFolderError">Nie udało się otworzyć folderu: {0}</system:String>
+    <system:String x:Key="NoConfigurationAvailable">Brak dostępnej konfiguracji.</system:String>
+    <system:String x:Key="NoLogsAvailable">Brak dostępnych logów.</system:String>
+    <system:String x:Key="OutputCopied">Wynik skopiowany do schowka pomyślnie!</system:String>
+    <system:String x:Key="LogsCopied">Logi skopiowane do schowka pomyślnie!</system:String>
+    <system:String x:Key="FailedToCopyConfig">Nie udało się skopiować ciągu konfiguracji do schowka: {0}</system:String>
+    <system:String x:Key="LogFilesFilter">Pliki logów (*.log)|*.log|Pliki tekstowe (*.txt)|*.txt|Wszystkie pliki (*.*)|*.*</system:String>
+    <system:String x:Key="SaveCompilationOutput">Zapisz Wynik Kompilacji</system:String>
+    <system:String x:Key="SaveCompilationLogs">Zapisz Logi Kompilacji</system:String>
+    <system:String x:Key="BuildConfigurationString">Ciąg Konfiguracji Kompilacji</system:String>
+    <system:String x:Key="BackupPathCopied">Ścieżka do pliku kopii zapasowej skopiowana do schowka!
+
+{0}</system:String>
+    <system:String x:Key="FailedToCopyBackupPath">Nie udało się skopiować ścieżki kopii zapasowej do schowka: {0}</system:String>
+    <system:String x:Key="BackupDirectoryNotFound">Nie znaleziono katalogu kopii zapasowej:
+{0}</system:String>
+    <system:String x:Key="BackupFileNotFound">Nie znaleziono pliku kopii zapasowej.</system:String>
+    <system:String x:Key="FirmwarePathCopied">Ścieżka do pliku firmware skopiowana do schowka!
+
+{0}</system:String>
+    <system:String x:Key="FailedToCopyFirmwarePath">Nie udało się skopiować ścieżki firmware do schowka: {0}</system:String>
+    <system:String x:Key="FirmwareFileNotFoundError">Nie znaleziono pliku firmware.</system:String>
+    <system:String x:Key="DirectoryNotFoundTitle">Nie Znaleziono Katalogu</system:String>
+    <system:String x:Key="OpenFolderErrorTitle">Błąd Otwierania Folderu</system:String>
+    
+    <!-- Configuration Manager Window -->
+    <system:String x:Key="ConfigurationManager">Menedżer Konfiguracji</system:String>
+    <system:String x:Key="SavedConfigurations">Zapisane Konfiguracje</system:String>
+    <system:String x:Key="LoadFromEncoded">Załaduj z Zakodowanego Ciągu</system:String>
+    <system:String x:Key="SaveCurrentConfig">Zapisz Bieżącą Konfigurację</system:String>
+    <system:String x:Key="Help">Pomoc</system:String>
+    <system:String x:Key="ConfigurationDetails">Szczegóły Konfiguracji</system:String>
+    <system:String x:Key="ConfigName">Nazwa:</system:String>
+    <system:String x:Key="Platform">Platforma:</system:String>
+    <system:String x:Key="COMPort">Port COM:</system:String>
+    <system:String x:Key="SavedDate">Data Zapisu:</system:String>
+    <system:String x:Key="EncodedConfig">Zakodowana Konfiguracja:</system:String>
+    <system:String x:Key="SelectConfiguration">Wybierz konfigurację, aby zobaczyć szczegóły</system:String>
+    <system:String x:Key="NoConfigurationsYet">Nie zapisano jeszcze żadnych konfiguracji.</system:String>
+    <system:String x:Key="DecodeAndPreview">Dekoduj i Podgląd</system:String>
+    <system:String x:Key="LoadDecoded">Załaduj Zdekodowaną Konfigurację</system:String>
+    <system:String x:Key="SaveDecoded">Zapisz Zdekodowaną Konfigurację</system:String>
+    <system:String x:Key="SaveCurrentConfigButton">Zapisz Bieżącą Konfigurację</system:String>
+    <system:String x:Key="LoadFromEncodedTitle">Załaduj Konfigurację z Zakodowanego Ciągu</system:String>
+    <system:String x:Key="LoadFromEncodedDescription">Wklej zakodowany ciąg konfiguracji, aby go zdekodować i załadować.</system:String>
+    <system:String x:Key="EncodedConfigString">Zakodowany Ciąg Konfiguracji:</system:String>
+    <system:String x:Key="DecodedConfiguration">Zdekodowana Konfiguracja</system:String>
+    <system:String x:Key="FlagsLabel">Flagi:</system:String>
+    <system:String x:Key="SaveCurrentConfigDescription">Zapisz aktualnie wybrane flagi kompilacji do biblioteki konfiguracji.</system:String>
+    <system:String x:Key="ConfigurationSavedTitle">Konfiguracja Zapisana</system:String>
+    <system:String x:Key="EncodedStringForSharing">Zakodowany Ciąg (do udostępnienia):</system:String>
+    <system:String x:Key="EnabledFlags">Włączone Flagi ({0})</system:String>
+    <system:String x:Key="ConfirmDelete">Czy na pewno chcesz usunąć konfigurację '{0}'?
+
+{1}</system:String>
+    <system:String x:Key="ConfirmDeleteTitle">Potwierdź Usunięcie</system:String>
+    <system:String x:Key="ConfigDeleted">Konfiguracja usunięta pomyślnie.</system:String>
+    <system:String x:Key="DeleteSuccess">Usunięto Pomyślnie</system:String>
+    <system:String x:Key="DeleteFailed">Nie udało się usunąć pliku konfiguracji.</system:String>
+    <system:String x:Key="DeleteFailedTitle">Usunięcie Nie Powiodło Się</system:String>
+    <system:String x:Key="FailedToDelete">Nie udało się usunąć konfiguracji: {0}</system:String>
+    <system:String x:Key="DeleteError">Błąd Usuwania</system:String>
+    <system:String x:Key="EncodedCopied">Zakodowana konfiguracja skopiowana do schowka!
+
+Możesz teraz udostępnić ten ciąg lub wkleić go w zakładce 'Załaduj z Zakodowanego Ciągu'.</system:String>
+    <system:String x:Key="NoEncodedValue">Ta konfiguracja nie ma wartości zakodowanej.
+
+Mogła zostać utworzona w starszej wersji.</system:String>
+    <system:String x:Key="NoEncodedValueTitle">Brak Wartości Zakodowanej</system:String>
+    <system:String x:Key="EnterEncodedString">Wprowadź zakodowany ciąg konfiguracji:</system:String>
+    <system:String x:Key="PasteFromClipboard">Wklej</system:String>
+    <system:String x:Key="NoInput">Wprowadź zakodowany ciąg konfiguracji.</system:String>
+    <system:String x:Key="NoInputTitle">Brak Danych</system:String>
+    <system:String x:Key="DecodingFailed">Nie udało się zdekodować konfiguracji.
+
+Sprawdź, czy zakodowany ciąg jest prawidłowy i nie jest uszkodzony.</system:String>
+    <system:String x:Key="DecodingFailedTitle">Dekodowanie Nie Powiodło Się</system:String>
+    <system:String x:Key="DecodingError">Błąd dekodowania: {0}</system:String>
+    <system:String x:Key="DecodingErrorTitle">Błąd Dekodowania</system:String>
+    <system:String x:Key="FlagsDecoded">Zdekodowano {0} flag</system:String>
+    <system:String x:Key="ClipboardEmpty">Schowek jest pusty.</system:String>
+    <system:String x:Key="NoContent">Brak Zawartości</system:String>
+    <system:String x:Key="ClipboardInvalid">Schowek nie zawiera tekstu.</system:String>
+    <system:String x:Key="InvalidContent">Nieprawidłowa Zawartość</system:String>
+    <system:String x:Key="ContentPasted">Zawartość wklejona pomyślnie!
+
+Kliknij 'Dekoduj i Podgląd', aby wyświetlić konfigurację.</system:String>
+    <system:String x:Key="PasteSuccess">Wklejono Pomyślnie</system:String>
+    <system:String x:Key="FailedToPaste">Nie udało się wkleić ze schowka: {0}</system:String>
+    <system:String x:Key="PasteError">Błąd Wklejania</system:String>
+    <system:String x:Key="DecodeConfigFirst">Najpierw zdekoduj konfigurację.</system:String>
+    <system:String x:Key="NoConfiguration">Brak Konfiguracji</system:String>
+    <system:String x:Key="NoFlagsEnabled">Obecnie nie ma włączonych flag.
+
+Włącz niektóre flagi przed zapisaniem konfiguracji.</system:String>
+    <system:String x:Key="NoFlagsSelectedTitle">Nie Wybrano Flag</system:String>
+    <system:String x:Key="ConfigurationSaved">Konfiguracja '{0}' zapisana pomyślnie!
+
+Będzie teraz widoczna w zakładce 'Zapisane Konfiguracje'.</system:String>
+    <system:String x:Key="SaveSuccessTitle">Zapisano Pomyślnie</system:String>
+    <system:String x:Key="ErrorSavingConfig">Błąd zapisywania konfiguracji: {0}</system:String>
+    <system:String x:Key="SaveErrorTitle">Błąd Zapisywania</system:String>
+    <system:String x:Key="ErrorLoadingConfig">Błąd ładowania konfiguracji: {0}</system:String>
+    <system:String x:Key="LoadError">Błąd Ładowania</system:String>
+    <system:String x:Key="FirmwareFileNotFound">Nie znaleziono pliku firmware:
+
+{0}
+
+Plik firmware mógł zostać usunięty lub przeniesiony.</system:String>
+    <system:String x:Key="EncodedConfigCopied">Zakodowana konfiguracja skopiowana do schowka!</system:String>
+    <system:String x:Key="NotSpecified">Nie określono</system:String>
+    <system:String x:Key="FlagsCount">{0} flag</system:String>
+    
+    <!-- ConfigurationNameInputWindow -->
+    <system:String x:Key="EnterConfigName">Wprowadź Nazwę Konfiguracji</system:String>
+    <system:String x:Key="ConfigurationNameLabel">Nazwa Konfiguracji:</system:String>
+    <system:String x:Key="InvalidName">Nazwa konfiguracji jest wymagana.</system:String>
+    <system:String x:Key="InvalidNameTitle">Nieprawidłowa Nazwa</system:String>
+    <system:String x:Key="InvalidCharacters">Nazwa zawiera niedozwolone znaki.</system:String>
+    <system:String x:Key="InvalidCharactersTitle">Nieprawidłowe Znaki</system:String>
+    <system:String x:Key="NameRequired">Nazwa konfiguracji jest wymagana.</system:String>
+    <system:String x:Key="NameRequiredTitle">Wymagana Nazwa</system:String>
+    
+</ResourceDictionary>

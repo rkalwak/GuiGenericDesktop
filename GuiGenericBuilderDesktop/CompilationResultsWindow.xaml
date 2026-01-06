@@ -1,7 +1,7 @@
 <Window x:Class="GuiGenericBuilderDesktop.CompilationResultsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Compilation Results" 
+        Title="{DynamicResource CompilationSuccessTitle}" 
         Height="600" 
         Width="900"
         WindowStartupLocation="CenterOwner"
@@ -20,7 +20,7 @@
         <!-- Header -->
         <TextBlock x:Name="TitleText"
                    Grid.Row="0" 
-                   Text="Compilation Results" 
+                   Text="{DynamicResource CompilationSuccessTitle}" 
                    FontSize="16" 
                    FontWeight="Bold" 
                    Margin="0,0,0,12"/>
@@ -30,7 +30,7 @@
                     Grid.Row="1" 
                     Visibility="Collapsed"
                     Margin="0,0,0,12">
-            <TextBlock Text="Build Configuration String:" 
+            <TextBlock Text="{DynamicResource BuildConfiguration}" 
                        FontWeight="SemiBold" 
                        Margin="0,0,0,4"/>
             <Border BorderBrush="#CCCCCC" 
@@ -46,7 +46,7 @@
                          BorderThickness="0"
                          TextWrapping="Wrap"/>
             </Border>
-            <TextBlock Text="This encoded string contains your complete build configuration and can be shared or reused." 
+            <TextBlock Text="{DynamicResource BuildConfigurationDescription}" 
                        FontSize="10"
                        Foreground="#666666"
                        Margin="0,4,0,0"/>
@@ -57,7 +57,7 @@
                     Grid.Row="2" 
                     Visibility="Collapsed"
                     Margin="0,0,0,12">
-            <TextBlock Text="Flash Backup Created:" 
+            <TextBlock Text="{DynamicResource BackupFile}" 
                        FontWeight="SemiBold" 
                        Margin="0,0,0,4"/>
             <Border BorderBrush="#4CAF50" 
@@ -118,7 +118,7 @@
                             Click="OpenBackupFolderButton_Click"/>
                 </Grid>
             </Border>
-            <TextBlock Text="✓ Device flash memory has been backed up before deployment." 
+            <TextBlock Text="{DynamicResource BackupCreatedMessage}" 
                        FontSize="10"
                        Foreground="#2E7D32"
                        Margin="0,4,0,0"/>
@@ -129,7 +129,7 @@
                     Grid.Row="3" 
                     Visibility="Collapsed"
                     Margin="0,0,0,12">
-            <TextBlock Text="Compiled Firmware:" 
+            <TextBlock Text="{DynamicResource FirmwareFile}" 
                        FontWeight="SemiBold" 
                        Margin="0,0,0,4"/>
             <Border BorderBrush="#2196F3" 
@@ -190,7 +190,7 @@
                             Click="OpenFirmwareFolderButton_Click"/>
                 </Grid>
             </Border>
-            <TextBlock Text="✓ Firmware binary ready for deployment or manual flashing." 
+            <TextBlock Text="{DynamicResource FirmwareReadyMessage}" 
                        FontSize="10"
                        Foreground="#1976D2"
                        Margin="0,4,0,0"/>
@@ -211,7 +211,7 @@
                 
                 <TextBlock x:Name="LogSectionTitle"
                            Grid.Row="0"
-                           Text="Error Logs:"
+                           Text="{DynamicResource ErrorLogs}"
                            FontWeight="SemiBold"
                            Margin="8,8,8,4"
                            Visibility="Collapsed"/>
@@ -236,28 +236,28 @@
                     HorizontalAlignment="Right" 
                     Margin="0,12,0,0">
             <Button x:Name="CopyHashButton"
-                    Content="Copy Configuration"
+                    Content="{DynamicResource CopyConfig}"
                     Width="140"
                     Height="32"
                     Margin="0,0,8,0"
                     Visibility="Collapsed"
                     Click="CopyHashButton_Click"/>
             <Button x:Name="CopyLogsButton"
-                    Content="Copy Logs"
+                    Content="{DynamicResource CopyLogs}"
                     Width="100"
                     Height="32"
                     Margin="0,0,8,0"
                     Visibility="Collapsed"
                     Click="CopyLogsButton_Click"/>
             <Button x:Name="SaveButton"
-                    Content="Save to File..."
+                    Content="{DynamicResource SaveLogs}"
                     Width="120"
                     Height="32"
                     Margin="0,0,8,0"
                     Visibility="Collapsed"
                     Click="SaveButton_Click"/>
             <Button x:Name="CloseButton"
-                    Content="Close"
+                    Content="{DynamicResource Close}"
                     Width="80"
                     Height="32"
                     IsDefault="True"

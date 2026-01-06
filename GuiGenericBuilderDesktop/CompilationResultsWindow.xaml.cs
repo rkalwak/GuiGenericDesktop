@@ -26,7 +26,6 @@ namespace GuiGenericBuilderDesktop
             _logs = logs;
             _isSuccess = false;
             ConfigureForErrorLogs();
-            LocalizeWindow();
         }
 
         /// <summary>
@@ -38,7 +37,6 @@ namespace GuiGenericBuilderDesktop
             _encodedConfig = encodedConfig;
             _isSuccess = isSuccess;
             ConfigureForSuccess();
-            LocalizeWindow();
         }
 
         /// <summary>
@@ -51,7 +49,6 @@ namespace GuiGenericBuilderDesktop
             _isSuccess = isSuccess;
             _backupFilePath = backupFilePath;
             ConfigureForSuccess();
-            LocalizeWindow();
         }
         
         /// <summary>
@@ -65,7 +62,6 @@ namespace GuiGenericBuilderDesktop
             _backupFilePath = backupFilePath;
             _firmwareFilePath = firmwareFilePath;
             ConfigureForSuccess();
-            LocalizeWindow();
         }
 
         /// <summary>
@@ -82,125 +78,13 @@ namespace GuiGenericBuilderDesktop
                 ConfigureForSuccess();
             else
                 ConfigureForErrorLogs();
-            
-            LocalizeWindow();
-        }
-
-        private void LocalizeWindow()
-        {
-            // Window title
-            Title = _isSuccess 
-                ? LocalizationManager.Get("CompilationSuccessTitle")
-                : LocalizationManager.Get("CompilationFailedTitle");
-            
-            // Localize all hardcoded text elements
-            LocalizeTextBlocksRecursively(this);
-            
-            // Localize buttons
-            if (CopyHashButton != null)
-            {
-                CopyHashButton.Content = LocalizationManager.Get("CopyConfig");
-            }
-            
-            if (CopyLogsButton != null)
-            {
-                var content = _isSuccess ? "CopyOutput" : "CopyLogs";
-                CopyLogsButton.Content = LocalizationManager.Get(content);
-            }
-            
-            if (SaveButton != null)
-            {
-                SaveButton.Content = LocalizationManager.Get("SaveLogs");
-            }
-            
-            if (CloseButton != null)
-            {
-                CloseButton.Content = LocalizationManager.Get("Close");
-            }
-            
-            if (CopyBackupPathButton != null)
-            {
-                CopyBackupPathButton.Content = LocalizationManager.Get("CopyPath");
-            }
-            
-            if (OpenBackupFolderButton != null)
-            {
-                // Keep the Unicode folder icon from XAML
-                OpenBackupFolderButton.Content = "?? " + LocalizationManager.Get("OpenFolder");
-            }
-            
-            if (CopyFirmwarePathButton != null)
-            {
-                CopyFirmwarePathButton.Content = LocalizationManager.Get("CopyPath");
-            }
-            
-            if (OpenFirmwareFolderButton != null)
-            {
-                // Keep the Unicode folder icon from XAML
-                OpenFirmwareFolderButton.Content = "?? " + LocalizationManager.Get("OpenFolder");
-            }
-        }
-
-        private void LocalizeTextBlocksRecursively(DependencyObject parent)
-        {
-            int childCount = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < childCount; i++)
-            {
-                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
-                
-                if (child is TextBlock textBlock && !string.IsNullOrEmpty(textBlock.Text))
-                {
-                    var text = textBlock.Text.Trim();
-                    
-                    // Map English text to localization keys - use exact matches
-                    if (text == "Compilation Results")
-                    {
-                        textBlock.Text = _isSuccess 
-                            ? LocalizationManager.Get("CompilationSuccessTitle")
-                            : LocalizationManager.Get("CompilationFailedTitle");
-                    }
-                    else if (text == "Build Configuration String:")
-                    {
-                        textBlock.Text = LocalizationManager.Get("BuildConfiguration");
-                    }
-                    else if (text == "This encoded string contains your complete build configuration and can be shared or reused.")
-                    {
-                        textBlock.Text = LocalizationManager.Get("BuildConfigurationDescription");
-                    }
-                    else if (text == "Flash Backup Created:")
-                    {
-                        textBlock.Text = LocalizationManager.Get("BackupFile");
-                    }
-                    else if (text == "? Device flash memory has been backed up before deployment.")
-                    {
-                        textBlock.Text = LocalizationManager.Get("BackupCreatedMessage");
-                    }
-                    else if (text == "Compiled Firmware:")
-                    {
-                        textBlock.Text = LocalizationManager.Get("FirmwareFile");
-                    }
-                    else if (text == "? Firmware binary ready for deployment or manual flashing.")
-                    {
-                        textBlock.Text = LocalizationManager.Get("FirmwareReadyMessage");
-                    }
-                    else if (text == "Error Logs:")
-                    {
-                        textBlock.Text = LocalizationManager.Get("ErrorLogs");
-                    }
-                    else if (text == "Build Output:")
-                    {
-                        textBlock.Text = LocalizationManager.Get("BuildOutput");
-                    }
-                }
-                
-                // Recursively process children
-                LocalizeTextBlocksRecursively(child);
-            }
         }
 
         private void ConfigureForSuccess()
         {
-            TitleText.Text = LocalizationManager.Get("CompilationSuccessTitle");
+            // Set window title dynamically based on success
+            Title = (string)FindResource("CompilationSuccessTitle");
+            TitleText.Text = (string)FindResource("CompilationSuccessTitle");
             
             // Show encoded configuration section
             HashSection.Visibility = Visibility.Visible;
@@ -230,10 +114,9 @@ namespace GuiGenericBuilderDesktop
             }
             else
             {
-                LogSectionTitle.Text = LocalizationManager.Get("BuildOutput");
+                LogSectionTitle.Text = (string)FindResource("BuildOutput");
                 LogSectionTitle.Visibility = Visibility.Visible;
                 LogTextBox.Text = _logs;
-                CopyLogsButton.Content = LocalizationManager.Get("CopyOutput");
                 CopyLogsButton.Visibility = Visibility.Visible;
                 SaveButton.Visibility = Visibility.Visible;
             }
@@ -241,13 +124,15 @@ namespace GuiGenericBuilderDesktop
 
         private void ConfigureForErrorLogs()
         {
-            TitleText.Text = LocalizationManager.Get("CompilationFailedTitle");
+            // Set window title dynamically based on failure
+            Title = (string)FindResource("CompilationFailedTitle");
+            TitleText.Text = (string)FindResource("CompilationFailedTitle");
             
             // Hide hash section
             HashSection.Visibility = Visibility.Collapsed;
             
             // Show log section
-            LogSectionTitle.Text = LocalizationManager.Get("ErrorLogs");
+            LogSectionTitle.Text = (string)FindResource("ErrorLogs");
             LogSectionTitle.Visibility = Visibility.Visible;
             LogTextBox.Text = _logs ?? LocalizationManager.Get("NoLogsAvailable");
             CopyLogsButton.Visibility = Visibility.Visible;

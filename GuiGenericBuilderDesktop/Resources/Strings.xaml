@@ -1,0 +1,319 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=mscorlib">
+    
+    <!-- English translations - Default/Fallback language -->
+    
+    <!-- Main Window -->
+    <system:String x:Key="AppTitle">GUI-Generic Builder</system:String>
+    <system:String x:Key="Board">Board:</system:String>
+    <system:String x:Key="Port">Port:</system:String>
+    <system:String x:Key="Flash">Flash:</system:String>
+    <system:String x:Key="None">None</system:String>
+    <system:String x:Key="ManageConfigs">Manage Configurations...</system:String>
+    <system:String x:Key="UpdateGuiGeneric">1. Update Gui-Generic</system:String>
+    <system:String x:Key="CheckDevice">2. Check Device</system:String>
+    <system:String x:Key="Compile">3. Compile</system:String>
+    <system:String x:Key="StopCompilation">3. Stop Compilation</system:String>
+    <system:String x:Key="Deploy">Deploy</system:String>
+    <system:String x:Key="Backup">Backup</system:String>
+    <system:String x:Key="EraseFlash">Erase Flash</system:String>
+    <system:String x:Key="EraseFlashTooltip">Erase flash memory before uploading firmware (recommended for clean installation)</system:String>
+    <system:String x:Key="BackupTooltip">Create backup before uploading firmware</system:String>
+    
+    <!-- Column Headers -->
+    <system:String x:Key="Enabled">Enabled</system:String>
+    <system:String x:Key="Key">Key</system:String>
+    <system:String x:Key="Name">Name</system:String>
+    <system:String x:Key="Description">Description</system:String>
+    <system:String x:Key="Parameters">Parameters</system:String>
+    <system:String x:Key="ParamsButton">Params...</system:String>
+    
+    <!-- Status Messages -->
+    <system:String x:Key="DownloadingRepository">? Downloading GUI-Generic repository...</system:String>
+    <system:String x:Key="RepositoryUpdatedSuccess">? Repository updated successfully!</system:String>
+    <system:String x:Key="RepositoryUpdateFailed">? Repository update failed</system:String>
+    <system:String x:Key="DetectingDevice">? Detecting device...</system:String>
+    <system:String x:Key="DeviceDetected">? Device detected: {0} on {1}</system:String>
+    <system:String x:Key="NoDeviceDetected">? No device detected</system:String>
+    <system:String x:Key="DeviceDetectionError">? Device detection error</system:String>
+    <system:String x:Key="CompilingFirmware">? Compiling firmware... Elapsed: {0:F1}s</system:String>
+    <system:String x:Key="CompilationSuccessful">? Compilation successful! Time: {0:F1}s</system:String>
+    <system:String x:Key="CompilationFailed">? Compilation failed! Time: {0:F1}s</system:String>
+    <system:String x:Key="CompilationError">? Compilation error! Time: {0:F1}s</system:String>
+    <system:String x:Key="StoppingCompilation">? Stopping compilation...</system:String>
+    <system:String x:Key="CompilationStopped">? Compilation stopped. Time: {0:F1}s</system:String>
+    
+    <!-- Message Box Titles -->
+    <system:String x:Key="UpdateComplete">Update Complete</system:String>
+    <system:String x:Key="UpdateFailed">Update Failed</system:String>
+    <system:String x:Key="DeviceNotFound">Device Not Found</system:String>
+    <system:String x:Key="DetectionError">Detection Error</system:String>
+    <system:String x:Key="Error">Error</system:String>
+    <system:String x:Key="Warning">Warning</system:String>
+    <system:String x:Key="Information">Information</system:String>
+    <system:String x:Key="Success">Success</system:String>
+    
+    <!-- Message Box Messages -->
+    <system:String x:Key="RepositoryUpdatedMessage">Repository updated successfully!</system:String>
+    <system:String x:Key="ErrorUpdatingRepository">Error updating repository: {0}</system:String>
+    <system:String x:Key="NoDeviceDetectedMessage">No ESP device detected.
+
+Make sure that:
+� Device is connected via USB
+� USB drivers are installed
+� Device is powered on</system:String>
+    <system:String x:Key="DeviceDetectionErrorMessage">Device detection error: {0}
+
+Check logs for more details.</system:String>
+    <system:String x:Key="RepositoryNotFound">GUI-Generic repository not found!
+
+First click '1. Update Gui-Generic' button to download the repository.
+
+Repository is required for firmware compilation.</system:String>
+    <system:String x:Key="RepositoryNotFoundTitle">Repository Not Found</system:String>
+    <system:String x:Key="EmptyRepository">GUI-Generic repository directory is empty!
+
+Repository path: {0}
+
+Click '1. Update Gui-Generic' button to download the repository.</system:String>
+    <system:String x:Key="EmptyRepositoryTitle">Empty Repository</system:String>
+    <system:String x:Key="IncompleteRepository">GUI-Generic repository appears to be incomplete or corrupted.
+
+Missing file: platformio.ini
+Repository path: {0}
+
+Click '1. Update Gui-Generic' button to re-download the repository.</system:String>
+    <system:String x:Key="IncompleteRepositoryTitle">Incomplete Repository</system:String>
+    <system:String x:Key="NoFlagsSelected">No flags selected. Enable some flags before compilation.</system:String>
+    <system:String x:Key="NoFlags">No Flags</system:String>
+    <system:String x:Key="PlatformRequired">Select target platform (board) before compilation.
+
+Use '2. Check Device' for automatic detection or manually select platform from Board dropdown.
+
+Available platforms:
+� ESP32 (default)
+� ESP32-C3
+� ESP32-C6
+� ESP32-S3</system:String>
+    <system:String x:Key="PlatformRequiredTitle">Platform Required</system:String>
+    <system:String x:Key="PlatformCompatibilityError">The following flags are not compatible with selected platform ({0}):
+
+{1}
+
+Disable these flags or select different platform before compilation.</system:String>
+    <system:String x:Key="PlatformCompatibilityErrorTitle">Platform Compatibility Error</system:String>
+    <system:String x:Key="I2CConfigurationError">{0}</system:String>
+    <system:String x:Key="I2CConfigurationErrorTitle">I2C Configuration Error</system:String>
+    <system:String x:Key="COMPortRequired">Select COM port before compilation with deployment.
+
+Firmware must be uploaded to device connected via COM port.
+Use '2. Check Device' for automatic detection or manually select COM port.
+
+Alternatively uncheck 'Deploy' to only compile without uploading.</system:String>
+    <system:String x:Key="COMPortRequiredTitle">COM Port Required</system:String>
+    <system:String x:Key="CompilationStoppedMessage">Compilation stopped by user.
+
+Elapsed time: {0:F1}s</system:String>
+    <system:String x:Key="CompilationStoppedTitle">Compilation Stopped</system:String>
+    <system:String x:Key="CompilationErrorMessage">Compilation error: {0}</system:String>
+    <system:String x:Key="ErrorTitle">Error</system:String>
+    <system:String x:Key="PlatformCompatibility">The following flags are not compatible with selected platform ({0}) and have been disabled:
+
+{1}</system:String>
+    <system:String x:Key="PlatformCompatibilityTitle">Platform Compatibility</system:String>
+    <system:String x:Key="PlatformIncompatibility">Flag '{0}' is not compatible with selected platform ({1}).
+
+This flag is disabled on: {2}</system:String>
+    <system:String x:Key="PlatformIncompatibilityTitle">Platform Incompatibility</system:String>
+    <system:String x:Key="BlockingDependencies">Blocking Dependencies</system:String>
+    <system:String x:Key="NoParameters">Selected flag has no parameters.</system:String>
+    <system:String x:Key="NoParametersTitle">No Parameters</system:String>
+    <system:String x:Key="NoSelection">No flag selected. Select a flag in grid and try again.</system:String>
+    <system:String x:Key="NoSelectionTitle">No Selection</system:String>
+    <system:String x:Key="ThisFlagHasNoParameters">This flag has no parameters.</system:String>
+    <system:String x:Key="ConfigurationLoaded">Configuration '{0}' loaded successfully!
+
+Platform: {1}
+COM Port: {2}
+Enabled flags: {3}</system:String>
+    <system:String x:Key="ConfigurationLoadedTitle">Configuration Loaded</system:String>
+    <system:String x:Key="ManualConfigurationRequired">Configuration '{0}' has no saved flags.
+
+Select compilation flags manually.</system:String>
+    <system:String x:Key="ManualConfigurationRequiredTitle">Manual Configuration Required</system:String>
+    <system:String x:Key="ErrorOpeningConfigManager">Error opening configuration manager: {0}</system:String>
+    <system:String x:Key="FileNotFound">File Not Found</system:String>
+    <system:String x:Key="BuilderJsonNotFound">builder.json not found at: {0}</system:String>
+    <system:String x:Key="InvalidSections">builder.json does not contain valid Sections</system:String>
+    <system:String x:Key="ErrorLoadingBuilderJson">Error loading builder.json: {0}</system:String>
+    
+    <!-- Language -->
+    <system:String x:Key="Language">Language:</system:String>
+    <system:String x:Key="LanguageTooltip">Select application language</system:String>
+    <system:String x:Key="LanguageChanged">Language changed to: {0}</system:String>
+    
+    <!-- Common -->
+    <system:String x:Key="Close">Close</system:String>
+    <system:String x:Key="Load">Load</system:String>
+    <system:String x:Key="Delete">Delete</system:String>
+    <system:String x:Key="Copy">Copy</system:String>
+    <system:String x:Key="Save">Save</system:String>
+    
+    <!-- Compilation Results Window -->
+    <system:String x:Key="CompilationSuccessTitle">Compilation Successful</system:String>
+    <system:String x:Key="CompilationFailedTitle">Compilation Failed</system:String>
+    <system:String x:Key="BuildConfiguration">Build Configuration:</system:String>
+    <system:String x:Key="BuildConfigurationDescription">This encoded string contains your complete build configuration and can be shared or reused.</system:String>
+    <system:String x:Key="BackupFile">Backup File:</system:String>
+    <system:String x:Key="BackupCreatedMessage">? Device flash memory has been backed up before deployment.</system:String>
+    <system:String x:Key="FirmwareFile">Firmware File:</system:String>
+    <system:String x:Key="FirmwareReadyMessage">? Firmware binary ready for deployment or manual flashing.</system:String>
+    <system:String x:Key="BuildOutput">Build Output:</system:String>
+    <system:String x:Key="ErrorLogs">Error Logs:</system:String>
+    <system:String x:Key="CopyConfig">Copy Configuration</system:String>
+    <system:String x:Key="CopyOutput">Copy Output</system:String>
+    <system:String x:Key="CopyLogs">Copy Logs</system:String>
+    <system:String x:Key="SaveLogs">Save to File...</system:String>
+    <system:String x:Key="CopyPath">Copy Path</system:String>
+    <system:String x:Key="OpenFolder">Open Folder</system:String>
+    <system:String x:Key="ConfigCopied">Configuration string copied to clipboard successfully!</system:String>
+    <system:String x:Key="CopySuccess">Copied Successfully</system:String>
+    <system:String x:Key="CopyError">Copy Error</system:String>
+    <system:String x:Key="FailedToCopy">Failed to copy to clipboard: {0}</system:String>
+    <system:String x:Key="LogsSaved">Content saved successfully to:
+{0}</system:String>
+    <system:String x:Key="SaveSuccess">Saved Successfully</system:String>
+    <system:String x:Key="SaveError">Save Error</system:String>
+    <system:String x:Key="FailedToSave">Failed to save: {0}</system:String>
+    <system:String x:Key="PathCopied">File path copied to clipboard!
+
+{0}</system:String>
+    <system:String x:Key="FileNotFoundError">File not found.</system:String>
+    <system:String x:Key="DirectoryNotFound">Directory not found:
+{0}</system:String>
+    <system:String x:Key="OpenFolderError">Failed to open folder: {0}</system:String>
+    <system:String x:Key="NoConfigurationAvailable">No configuration available.</system:String>
+    <system:String x:Key="NoLogsAvailable">No logs available.</system:String>
+    <system:String x:Key="OutputCopied">Output copied to clipboard successfully!</system:String>
+    <system:String x:Key="LogsCopied">Logs copied to clipboard successfully!</system:String>
+    <system:String x:Key="FailedToCopyConfig">Failed to copy configuration string to clipboard: {0}</system:String>
+    <system:String x:Key="LogFilesFilter">Log files (*.log)|*.log|Text files (*.txt)|*.txt|All files (*.*)|*.*</system:String>
+    <system:String x:Key="SaveCompilationOutput">Save Compilation Output</system:String>
+    <system:String x:Key="SaveCompilationLogs">Save Compilation Logs</system:String>
+    <system:String x:Key="BuildConfigurationString">Build Configuration String</system:String>
+    <system:String x:Key="BackupPathCopied">Backup file path copied to clipboard!
+
+{0}</system:String>
+    <system:String x:Key="FailedToCopyBackupPath">Failed to copy backup path to clipboard: {0}</system:String>
+    <system:String x:Key="BackupDirectoryNotFound">Backup directory not found:
+{0}</system:String>
+    <system:String x:Key="BackupFileNotFound">Backup file not found.</system:String>
+    <system:String x:Key="FirmwarePathCopied">Firmware file path copied to clipboard!
+
+{0}</system:String>
+    <system:String x:Key="FailedToCopyFirmwarePath">Failed to copy firmware path to clipboard: {0}</system:String>
+    <system:String x:Key="FirmwareFileNotFoundError">Firmware file not found.</system:String>
+    <system:String x:Key="DirectoryNotFoundTitle">Directory Not Found</system:String>
+    <system:String x:Key="OpenFolderErrorTitle">Open Folder Error</system:String>
+    
+    <!-- Configuration Manager Window -->
+    <system:String x:Key="ConfigurationManager">Configuration Manager</system:String>
+    <system:String x:Key="SavedConfigurations">Saved Configurations</system:String>
+    <system:String x:Key="LoadFromEncoded">Load from Encoded String</system:String>
+    <system:String x:Key="SaveCurrentConfig">Save Current Configuration</system:String>
+    <system:String x:Key="Help">Help</system:String>
+    <system:String x:Key="ConfigurationDetails">Configuration Details</system:String>
+    <system:String x:Key="ConfigName">Name:</system:String>
+    <system:String x:Key="Platform">Platform:</system:String>
+    <system:String x:Key="COMPort">COM Port:</system:String>
+    <system:String x:Key="SavedDate">Saved:</system:String>
+    <system:String x:Key="EncodedConfig">Encoded:</system:String>
+    <system:String x:Key="SelectConfiguration">Select a configuration to see details</system:String>
+    <system:String x:Key="NoConfigurationsYet">No saved configurations yet.</system:String>
+    <system:String x:Key="DecodeAndPreview">Decode and Preview</system:String>
+    <system:String x:Key="LoadDecoded">Load Decoded Configuration</system:String>
+    <system:String x:Key="SaveDecoded">Save Decoded Configuration</system:String>
+    <system:String x:Key="SaveCurrentConfigButton">Save Current Configuration</system:String>
+    <system:String x:Key="LoadFromEncodedTitle">Load Configuration from Encoded String</system:String>
+    <system:String x:Key="LoadFromEncodedDescription">Paste an encoded configuration string to decode and load it.</system:String>
+    <system:String x:Key="EncodedConfigString">Encoded Configuration String:</system:String>
+    <system:String x:Key="DecodedConfiguration">Decoded Configuration</system:String>
+    <system:String x:Key="FlagsLabel">Flags:</system:String>
+    <system:String x:Key="SaveCurrentConfigDescription">Save the currently selected build flags to your configuration library.</system:String>
+    <system:String x:Key="ConfigurationSavedTitle">Configuration Saved</system:String>
+    <system:String x:Key="EncodedStringForSharing">Encoded String (for sharing):</system:String>
+    <system:String x:Key="EnabledFlags">Enabled Flags ({0})</system:String>
+    <system:String x:Key="ConfirmDelete">Are you sure you want to delete configuration '{0}'?
+
+{1}</system:String>
+    <system:String x:Key="ConfirmDeleteTitle">Confirm Deletion</system:String>
+    <system:String x:Key="ConfigDeleted">Configuration deleted successfully.</system:String>
+    <system:String x:Key="DeleteSuccess">Deleted Successfully</system:String>
+    <system:String x:Key="DeleteFailed">Failed to delete configuration file.</system:String>
+    <system:String x:Key="DeleteFailedTitle">Deletion Failed</system:String>
+    <system:String x:Key="FailedToDelete">Failed to delete configuration: {0}</system:String>
+    <system:String x:Key="DeleteError">Delete Error</system:String>
+    <system:String x:Key="EncodedCopied">Encoded configuration copied to clipboard!
+
+You can now share this string or paste it in 'Load from Encoded String' tab.</system:String>
+    <system:String x:Key="NoEncodedValue">This configuration has no encoded value.
+
+It may have been created in older version.</system:String>
+    <system:String x:Key="NoEncodedValueTitle">No Encoded Value</system:String>
+    <system:String x:Key="EnterEncodedString">Enter encoded configuration string:</system:String>
+    <system:String x:Key="PasteFromClipboard">Paste</system:String>
+    <system:String x:Key="NoInput">Enter encoded configuration string.</system:String>
+    <system:String x:Key="NoInputTitle">No Input</system:String>
+    <system:String x:Key="DecodingFailed">Failed to decode configuration.
+
+Check if encoded string is valid and not corrupted.</system:String>
+    <system:String x:Key="DecodingFailedTitle">Decoding Failed</system:String>
+    <system:String x:Key="DecodingError">Decoding error: {0}</system:String>
+    <system:String x:Key="DecodingErrorTitle">Decoding Error</system:String>
+    <system:String x:Key="FlagsDecoded">Decoded {0} flags</system:String>
+    <system:String x:Key="ClipboardEmpty">Clipboard is empty.</system:String>
+    <system:String x:Key="NoContent">No Content</system:String>
+    <system:String x:Key="ClipboardInvalid">Clipboard does not contain text.</system:String>
+    <system:String x:Key="InvalidContent">Invalid Content</system:String>
+    <system:String x:Key="ContentPasted">Content pasted successfully!
+
+Click 'Decode and Preview' to view configuration.</system:String>
+    <system:String x:Key="PasteSuccess">Pasted Successfully</system:String>
+    <system:String x:Key="FailedToPaste">Failed to paste from clipboard: {0}</system:String>
+    <system:String x:Key="PasteError">Paste Error</system:String>
+    <system:String x:Key="DecodeConfigFirst">Decode configuration first.</system:String>
+    <system:String x:Key="NoConfiguration">No Configuration</system:String>
+    <system:String x:Key="NoFlagsEnabled">No flags are currently enabled.
+
+Enable some flags before saving configuration.</system:String>
+    <system:String x:Key="NoFlagsSelectedTitle">No Flags Selected</system:String>
+    <system:String x:Key="ConfigurationSaved">Configuration '{0}' saved successfully!
+
+It will now be visible in 'Saved Configurations' tab.</system:String>
+    <system:String x:Key="SaveSuccessTitle">Saved Successfully</system:String>
+    <system:String x:Key="ErrorSavingConfig">Error saving configuration: {0}</system:String>
+    <system:String x:Key="SaveErrorTitle">Save Error</system:String>
+    <system:String x:Key="ErrorLoadingConfig">Error loading configuration: {0}</system:String>
+    <system:String x:Key="LoadError">Load Error</system:String>
+    <system:String x:Key="FirmwareFileNotFound">Firmware file not found:
+
+{0}
+
+Firmware file may have been deleted or moved.</system:String>
+    <system:String x:Key="EncodedConfigCopied">Encoded configuration copied to clipboard!</system:String>
+    <system:String x:Key="NotSpecified">Not specified</system:String>
+    <system:String x:Key="FlagsCount">{0} flags</system:String>
+    
+    <!-- ConfigurationNameInputWindow -->
+    <system:String x:Key="EnterConfigName">Enter Configuration Name</system:String>
+    <system:String x:Key="ConfigurationNameLabel">Configuration Name:</system:String>
+    <system:String x:Key="InvalidName">Configuration name is required.</system:String>
+    <system:String x:Key="InvalidNameTitle">Invalid Name</system:String>
+    <system:String x:Key="InvalidCharacters">Name contains invalid characters.</system:String>
+    <system:String x:Key="InvalidCharactersTitle">Invalid Characters</system:String>
+    <system:String x:Key="NameRequired">Configuration name is required.</system:String>
+    <system:String x:Key="NameRequiredTitle">Name Required</system:String>
+    
+</ResourceDictionary>
