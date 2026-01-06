@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Globalization;
+using GuiGenericBuilderDesktop.Localization;
 
 namespace GuiGenericBuilderDesktop
 {
@@ -72,7 +73,7 @@ namespace GuiGenericBuilderDesktop
                 // Only validate if parameter is required
                 if (param.IsRequired && string.IsNullOrWhiteSpace(param.Value))
                 {
-                    var paramName = !string.IsNullOrEmpty(param.Name) ? param.Name : param.Key;
+                    var paramName = param.GetLocalizedName();
                     errors.Add($"• {paramName} (required)");
                 }
                 
@@ -84,7 +85,7 @@ namespace GuiGenericBuilderDesktop
                 {
                     if (!param.EnumValues.Any(ev => ev.Value == param.Value))
                     {
-                        var paramName = !string.IsNullOrEmpty(param.Name) ? param.Name : param.Key;
+                        var paramName = param.GetLocalizedName();
                         errors.Add($"• {paramName} (invalid value)");
                     }
                 }
@@ -162,6 +163,53 @@ namespace GuiGenericBuilderDesktop
         }
     }
 
+    /// <summary>
+    /// Converter to get localized parameter name
+    /// </summary>
+    public class ParameterNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is Parameter param)
+            {
+                return param.GetLocalizedName();
+            }
+            return value?.ToString() ?? string.Empty;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    /// <summary>
+    /// Converter to get localized enum value display (Name - Description)
+    /// </summary>
+    public class EnumValueDisplayConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Length >= 2 && values[0] is EnumValue enumValue && values[1] is Parameter param)
+            {
+                var localizedName = enumValue.GetLocalizedName(param);
+                var localizedDesc = enumValue.GetLocalizedDescription(param);
+                
+                if (!string.IsNullOrEmpty(localizedDesc))
+                {
+                    return $"{localizedName} - {localizedDesc}";
+                }
+                return localizedName;
+            }
+            return string.Empty;
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class EnumValueToNameConverter : IMultiValueConverter
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
@@ -175,7 +223,8 @@ namespace GuiGenericBuilderDesktop
                     var enumValue = param.EnumValues.FirstOrDefault(ev => ev.Value == currentValue);
                     if (enumValue != null)
                     {
-                        return $"{enumValue.Name} ({enumValue.Value})";
+                        var localizedName = enumValue.GetLocalizedName(param);
+                        return $"{localizedName} ({enumValue.Value})";
                     }
                 }
             }

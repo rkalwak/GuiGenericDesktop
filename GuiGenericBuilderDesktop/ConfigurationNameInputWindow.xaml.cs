@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
+using GuiGenericBuilderDesktop.Localization;
 
 namespace GuiGenericBuilderDesktop
 {
@@ -29,8 +30,8 @@ namespace GuiGenericBuilderDesktop
             if (string.IsNullOrWhiteSpace(name))
             {
                 MessageBox.Show(
-                    "Please enter a configuration name.",
-                    "Name Required",
+                    LocalizationManager.Get("NameRequired"),
+                    LocalizationManager.Get("NameRequiredTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 ConfigNameTextBox.Focus();
@@ -42,9 +43,8 @@ namespace GuiGenericBuilderDesktop
             if (name.Any(c => invalidChars.Contains(c)))
             {
                 MessageBox.Show(
-                    "Configuration name contains invalid characters.\n\n" +
-                    "Please avoid using: \\ / : * ? \" < > |",
-                    "Invalid Characters",
+                    LocalizationManager.Get("InvalidCharacters"),
+                    LocalizationManager.Get("InvalidCharactersTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 ConfigNameTextBox.Focus();

@@ -26,6 +26,11 @@ namespace CompilationLib.Tests
                 return Task.FromResult(string.Empty);
             }
 
+            public Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize)
+            {
+                throw new System.NotImplementedException();
+            }
+
             public Task<EsptoolResult> ReadChipId(string comPort, System.Threading.CancellationToken cancellation = default)
             => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = _chipStdOut, StdErr = _chipStdErr, Command = "esptool --chip-id" });
 

@@ -10,6 +10,8 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
         <local:EnumValueToNameConverter x:Key="EnumValueToNameConverter"/>
+        <local:ParameterNameConverter x:Key="ParameterNameConverter"/>
+        <local:EnumValueDisplayConverter x:Key="EnumValueDisplayConverter"/>
     </Window.Resources>
     <Grid Margin="8">
         <Grid.RowDefinitions>
@@ -40,9 +42,12 @@
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock>
-                                    <Run Text="{Binding Name, Mode=OneWay}" FontWeight="SemiBold"/>
-                                    <Run Text=" - " Foreground="Gray"/>
-                                    <Run Text="{Binding Description, Mode=OneWay}" Foreground="Gray"/>
+                                    <TextBlock.Text>
+                                        <MultiBinding Converter="{StaticResource EnumValueDisplayConverter}">
+                                            <Binding Path="." Mode="OneWay"/>
+                                            <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=ComboBox}" Mode="OneWay"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
                                 </TextBlock>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
@@ -57,12 +62,12 @@
             </DataGrid.Resources>
 
             <DataGrid.Columns>
-                <!-- Name column: read-only display with required indicator -->
+                <!-- Name column: read-only display with required indicator using localized name -->
                 <DataGridTemplateColumn Header="Name" Width="2*" IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding ., Converter={StaticResource ParameterNameConverter}}" FontWeight="SemiBold"/>
                                 <TextBlock Text=" *" Foreground="Red" FontWeight="Bold" 
                                           Visibility="{Binding IsRequired, Converter={StaticResource BooleanToVisibilityConverter}}"
                                           ToolTip="This parameter is required"/>

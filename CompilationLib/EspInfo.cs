@@ -21,7 +21,18 @@
 
         public override string ToString()
         {
-            return $"Model: {Model}, ChipType: {ChipType}, Chip: {ChipFullName} ({ChipRevision}), FlashSize: {FlashSize}, MAC: {Mac}, Features: {Features}";
+            var parts = new List<string>
+            {
+                $"Model: {Model}",
+                $"ChipType: {ChipType}",
+                $"Chip: {ChipFullName} ({ChipRevision})",
+                $"FlashSize: {FlashSize}"
+            };
+
+            parts.Add($"MAC: {Mac}");
+            parts.Add($"Features: {Features}");
+
+            return string.Join(", ", parts);
         }
     }
 }

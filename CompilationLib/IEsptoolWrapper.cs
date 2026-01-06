@@ -14,6 +14,6 @@ namespace CompilationLib
         /// <param name="outputFilePath">Path where the merged file should be saved</param>
         /// <param name="platform">Platform name (e.g., "GUI_Generic_ESP32")</param>
         /// <returns>Path to the merged file if successful, null otherwise</returns>
-        Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform);
+        Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize);
     }
 }

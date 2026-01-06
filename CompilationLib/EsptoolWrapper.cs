@@ -13,6 +13,7 @@ namespace CompilationLib
 
         public Task<EsptoolResult> ReadFlashId(string comPort, CancellationToken cancellation = default)
             => RunEsptoolAsync($"--port {EscapeArgument(comPort)} flash-id", cancellation);
+
         /// <summary>
         /// Runs esptool --chip esp32c6 --port {comPort} write-flash 0x000000 0x4000000 {binFile}
         /// </summary>
@@ -35,7 +36,7 @@ namespace CompilationLib
         /// <param name="outputFilePath">Path where the merged complete firmware file should be saved</param>
         /// <param name="platform">Platform name (e.g., "GUI_Generic_ESP32", "GUI_Generic_ESP32C6")</param>
         /// <returns>Path to the merged file if successful, null otherwise</returns>
-        public async Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform)
+        public async Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize)
         {
             try
             {
@@ -79,7 +80,7 @@ namespace CompilationLib
                 var arguments = $"--chip {chipType} merge_bin " +
                                $"-o {EscapeArgument(outputFilePath)} " +
                                $"--flash_mode dio " +
-                               $"--flash_size detect " +
+                               $"--flash_size {flashSize} " +
                                $"0x1000 {EscapeArgument(bootloaderPath)} " +
                                $"0x8000 {EscapeArgument(partitionsPath)} " +
                                $"0x10000 {EscapeArgument(firmwarePath)}";

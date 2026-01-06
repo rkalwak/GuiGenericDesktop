@@ -28,10 +28,31 @@ namespace CompilationLib
         public List<EnumValue> EnumValues { get; set; } = new List<EnumValue>();
         
         /// <summary>
+        /// Translations for this parameter. Key is language code (e.g., "en", "pl"), value is ParameterTranslation object.
+        /// </summary>
+        [JsonProperty("Translations")]
+        public Dictionary<string, ParameterTranslation> Translations { get; set; } = new Dictionary<string, ParameterTranslation>();
+        
+        /// <summary>
         /// Gets the identifier for this parameter. Prefers Key if set, falls back to Name for backward compatibility.
         /// </summary>
         [JsonIgnore]
         public string Identifier => !string.IsNullOrEmpty(Key) ? Key : Name;
+    }
+
+    /// <summary>
+    /// Represents translations for a single parameter in a specific language
+    /// </summary>
+    public class ParameterTranslation
+    {
+        [JsonProperty("Name")]
+        public string Name { get; set; }
+
+        [JsonProperty("Description")]
+        public string Description { get; set; }
+
+        [JsonProperty("EnumValues")]
+        public List<EnumValue> EnumValues { get; set; } = new List<EnumValue>();
     }
 
     public class EnumValue

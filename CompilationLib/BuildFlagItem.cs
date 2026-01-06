@@ -65,6 +65,30 @@ namespace CompilationLib
         [JsonProperty("disabledOnPlatforms")]
         public List<string> DisabledOnPlatforms { get; set; } = new List<string>();
 
+        /// <summary>
+        /// Translations for this flag. Key is language code (e.g., "en", "pl"), value is FlagTranslation object.
+        /// </summary>
+        [JsonProperty("translations")]
+        public Dictionary<string, FlagTranslation> Translations { get; set; } = new Dictionary<string, FlagTranslation>();
+
         public event PropertyChangedEventHandler PropertyChanged;
+    }
+
+    /// <summary>
+    /// Represents translations for a single flag in a specific language
+    /// </summary>
+    public class FlagTranslation
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+
+        [JsonProperty("desc")]
+        public string Description { get; set; }
+
+        [JsonProperty("alertOn")]
+        public string AlertOn { get; set; }
+
+        [JsonProperty("alertOff")]
+        public string AlertOff { get; set; }
     }
 }

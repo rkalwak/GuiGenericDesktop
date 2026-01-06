@@ -2,6 +2,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using CompilationLib;
+using GuiGenericBuilderDesktop.Localization;
 
 namespace GuiGenericBuilderDesktop
 {
@@ -35,6 +36,227 @@ namespace GuiGenericBuilderDesktop
             if (!_configurations.Any())
             {
                 EmptyStateText.Visibility = Visibility.Visible;
+            }
+            
+            // Localize the window
+            LocalizeWindow();
+        }
+
+        private void LocalizeWindow()
+        {
+            // Window title
+            Title = LocalizationManager.Get("ConfigurationManager");
+            
+            // Find the TabControl from the visual tree
+            var grid = Content as Grid;
+            if (grid != null)
+            {
+                // Find TabControl among grid children
+                TabControl tabControl = null;
+                foreach (var child in grid.Children)
+                {
+                    if (child is TabControl tc)
+                    {
+                        tabControl = tc;
+                        break;
+                    }
+                }
+                
+                if (tabControl != null && tabControl.Items.Count >= 4)
+                {
+                    // Tab 0: Saved Configurations
+                    if (tabControl.Items[0] is TabItem savedTab)
+                    {
+                        savedTab.Header = LocalizationManager.Get("SavedConfigurations");
+                        LocalizeSavedConfigurationsTab(savedTab);
+                    }
+                    
+                    // Tab 1: Load from Encoded String
+                    if (tabControl.Items[1] is TabItem loadTab)
+                    {
+                        loadTab.Header = LocalizationManager.Get("LoadFromEncoded");
+                        LocalizeLoadFromEncodedTab(loadTab);
+                    }
+                    
+                    // Tab 2: Save Current Configuration
+                    if (tabControl.Items[2] is TabItem saveTab)
+                    {
+                        saveTab.Header = LocalizationManager.Get("SaveCurrentConfig");
+                        LocalizeSaveCurrentConfigTab(saveTab);
+                    }
+                    
+                    // Tab 3: Help
+                    if (tabControl.Items[3] is TabItem helpTab)
+                    {
+                        helpTab.Header = LocalizationManager.Get("Help");
+                    }
+                }
+            }
+            
+            // Update button content
+            if (LoadButton != null)
+            {
+                LoadButton.Content = LocalizationManager.Get("Load");
+            }
+            
+            if (DeleteButton != null)
+            {
+                DeleteButton.Content = LocalizationManager.Get("Delete");
+            }
+            
+            // Update static text in XAML that we can access by name
+            if (EmptyStateText != null)
+            {
+                EmptyStateText.Text = LocalizationManager.Get("NoConfigurationsYet");
+            }
+            
+            if (EmptyFlagsText != null)
+            {
+                EmptyFlagsText.Text = LocalizationManager.Get("SelectConfiguration");
+            }
+            
+            // Find and update buttons in Load from Encoded String tab
+            if (FindName("DecodeButton") is Button decodeBtn)
+            {
+                decodeBtn.Content = LocalizationManager.Get("DecodeAndPreview");
+            }
+            
+            if (FindName("LoadDecodedButton") is Button loadDecodedBtn)
+            {
+                loadDecodedBtn.Content = LocalizationManager.Get("LoadDecoded");
+            }
+            
+            if (FindName("SaveDecodedButton") is Button saveDecodedBtn)
+            {
+                saveDecodedBtn.Content = LocalizationManager.Get("SaveDecoded");
+            }
+            
+            // Find and update button in Save Current Configuration tab
+            if (FindName("SaveCurrentButton") is Button saveCurrentBtn)
+            {
+                saveCurrentBtn.Content = LocalizationManager.Get("SaveCurrentConfigButton");
+            }
+            
+            // Find Close button (in bottom border)
+            LocalizeCloseButton();
+        }
+
+        private void LocalizeSavedConfigurationsTab(TabItem tab)
+        {
+            // Navigate to the content and find TextBlocks with hardcoded English text
+            if (tab.Content is ScrollViewer sv && sv.Content is Grid contentGrid)
+            {
+                LocalizeTextBlocksRecursively(contentGrid);
+            }
+            else if (tab.Content is Grid contentGrid2)
+            {
+                LocalizeTextBlocksRecursively(contentGrid2);
+            }
+        }
+
+        private void LocalizeLoadFromEncodedTab(TabItem tab)
+        {
+            if (tab.Content is ScrollViewer sv && sv.Content is StackPanel sp)
+            {
+                LocalizeTextBlocksRecursively(sp);
+            }
+        }
+
+        private void LocalizeSaveCurrentConfigTab(TabItem tab)
+        {
+            if (tab.Content is ScrollViewer sv && sv.Content is StackPanel sp)
+            {
+                LocalizeTextBlocksRecursively(sp);
+            }
+        }
+
+        private void LocalizeTextBlocksRecursively(DependencyObject parent)
+        {
+            int childCount = System.Windows.Media.VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < childCount; i++)
+            {
+                var child = System.Windows.Media.VisualTreeHelper.GetChild(parent, i);
+                
+                if (child is TextBlock textBlock && !string.IsNullOrEmpty(textBlock.Text))
+                {
+                    // Translate common hardcoded English texts
+                    var text = textBlock.Text.Trim();
+                    
+                    // Map English text to localization keys
+                    var translationMap = new Dictionary<string, string>
+                    {
+                        ["Saved Configurations"] = "SavedConfigurations",
+                        ["Configuration Details"] = "ConfigurationDetails",
+                        ["Name:"] = "ConfigName",
+                        ["Platform:"] = "Platform",
+                        ["COM Port:"] = "COMPort",
+                        ["Saved:"] = "SavedDate",
+                        ["Encoded:"] = "EncodedConfig",
+                        ["Copy"] = "CopyEncoded",
+                        ["Paste"] = "PasteFromClipboard",
+                        ["Load Configuration from Encoded String"] = "LoadFromEncodedTitle",
+                        ["Paste an encoded configuration string to decode and load it."] = "LoadFromEncodedDescription",
+                        ["Encoded Configuration String:"] = "EncodedConfigString",
+                        ["Decoded Configuration"] = "DecodedConfiguration",
+                        ["Flags:"] = "FlagsLabel",
+                        ["Save Current Configuration"] = "SaveCurrentConfig",
+                        ["Save the currently selected build flags to your configuration library."] = "SaveCurrentConfigDescription",
+                        ["Configuration Saved"] = "ConfigurationSavedTitle",
+                        ["Flags:"] = "FlagsLabel",
+                        ["Encoded String (for sharing):"] = "EncodedStringForSharing"
+                    };
+                    
+                    foreach (var mapping in translationMap)
+                    {
+                        if (text.Contains(mapping.Key))
+                        {
+                            textBlock.Text = textBlock.Text.Replace(mapping.Key, LocalizationManager.Get(mapping.Value));
+                            break;
+                        }
+                    }
+                }
+                
+                if (child is Button button && !string.IsNullOrEmpty(button.Content?.ToString()))
+                {
+                    var buttonText = button.Content.ToString().Trim();
+                    var buttonMap = new Dictionary<string, string>
+                    {
+                        ["Copy"] = "CopyEncoded",
+                        ["Paste"] = "PasteFromClipboard",
+                        ["Load Selected"] = "Load",
+                        ["Delete"] = "Delete"
+                    };
+                    
+                    foreach (var mapping in buttonMap)
+                    {
+                        if (buttonText == mapping.Key)
+                        {
+                            button.Content = LocalizationManager.Get(mapping.Value);
+                            break;
+                        }
+                    }
+                }
+                
+                // Recursively process children
+                LocalizeTextBlocksRecursively(child);
+            }
+        }
+
+        private void LocalizeCloseButton()
+        {
+            // Find the close button in the visual tree
+            var grid = Content as Grid;
+            if (grid != null)
+            {
+                // Find Border among grid children
+                foreach (var child in grid.Children)
+                {
+                    if (child is Border border && border.Child is Button closeBtn)
+                    {
+                        closeBtn.Content = LocalizationManager.Get("Close");
+                        break;
+                    }
+                }
             }
         }
 
@@ -85,9 +307,8 @@ namespace GuiGenericBuilderDesktop
                     : $"Configuration: {config.ConfigurationName}";
                 
                 var result = MessageBox.Show(
-                    $"Are you sure you want to delete configuration '{config.ConfigurationName}'?\n\n" +
-                    $"{identifierText}",
-                    "Confirm Delete",
+                    LocalizationManager.GetFormat("ConfirmDelete", config.ConfigurationName, identifierText),
+                    LocalizationManager.Get("ConfirmDeleteTitle"),
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
 
@@ -110,16 +331,16 @@ namespace GuiGenericBuilderDesktop
                             }
                             
                             MessageBox.Show(
-                                "Configuration deleted successfully.",
-                                "Delete Success",
+                                LocalizationManager.Get("ConfigDeleted"),
+                                LocalizationManager.Get("DeleteSuccess"),
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Information);
                         }
                         else
                         {
                             MessageBox.Show(
-                                "Failed to delete configuration file.",
-                                "Delete Failed",
+                                LocalizationManager.Get("DeleteFailed"),
+                                LocalizationManager.Get("DeleteFailedTitle"),
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Warning);
                         }
@@ -127,8 +348,8 @@ namespace GuiGenericBuilderDesktop
                     catch (Exception ex)
                     {
                         MessageBox.Show(
-                            $"Failed to delete configuration: {ex.Message}",
-                            "Delete Error",
+                            LocalizationManager.GetFormat("FailedToDelete", ex.Message),
+                            LocalizationManager.Get("DeleteError"),
                             MessageBoxButton.OK,
                             MessageBoxImage.Error);
                     }
@@ -170,12 +391,12 @@ namespace GuiGenericBuilderDesktop
             
             if (config.EnabledFlagKeys != null && config.EnabledFlagKeys.Any())
             {
-                FlagsCountText.Text = $"Enabled Flags ({config.EnabledFlagKeys.Count})";
+                FlagsCountText.Text = LocalizationManager.GetFormat("EnabledFlags", config.EnabledFlagKeys.Count);
                 FlagsListBox.ItemsSource = config.EnabledFlagKeys.OrderBy(f => f);
             }
             else
             {
-                FlagsCountText.Text = "Enabled Flags (0)";
+                FlagsCountText.Text = LocalizationManager.GetFormat("EnabledFlags", 0);
                 FlagsListBox.ItemsSource = null;
             }
         }
@@ -185,7 +406,7 @@ namespace GuiGenericBuilderDesktop
             ConfigDetailsPanel.Visibility = Visibility.Collapsed;
             EmptyFlagsText.Visibility = Visibility.Visible;
             FlagsListBox.ItemsSource = null;
-            FlagsCountText.Text = "Enabled Flags (0)";
+            FlagsCountText.Text = LocalizationManager.GetFormat("EnabledFlags", 0);
         }
 
         private void CopyEncodedButton_Click(object sender, RoutedEventArgs e)
@@ -198,18 +419,16 @@ namespace GuiGenericBuilderDesktop
                     {
                         Clipboard.SetText(config.EncodedConfig);
                         MessageBox.Show(
-                            "Encoded configuration copied to clipboard!\n\n" +
-                            "You can now share this string or paste it in the 'Load from Encoded String' tab.",
-                            "Copy Success",
+                            LocalizationManager.Get("EncodedCopied"),
+                            LocalizationManager.Get("CopySuccess"),
                             MessageBoxButton.OK,
                             MessageBoxImage.Information);
                     }
                     else
                     {
                         MessageBox.Show(
-                            "This configuration does not have an encoded value.\n\n" +
-                            "It may have been created with an older version.",
-                            "No Encoded Value",
+                            LocalizationManager.Get("NoEncodedValue"),
+                            LocalizationManager.Get("NoEncodedValueTitle"),
                             MessageBoxButton.OK,
                             MessageBoxImage.Warning);
                     }
@@ -218,8 +437,8 @@ namespace GuiGenericBuilderDesktop
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Failed to copy to clipboard: {ex.Message}",
-                    "Copy Error",
+                    LocalizationManager.GetFormat("FailedToCopy", ex.Message),
+                    LocalizationManager.Get("CopyError"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -244,9 +463,8 @@ namespace GuiGenericBuilderDesktop
                         else
                         {
                             MessageBox.Show(
-                                $"Firmware file not found:\n\n{config.FirmwareFileName}\n\n" +
-                                "The firmware file may have been deleted or moved.",
-                                "File Not Found",
+                                LocalizationManager.GetFormat("FirmwareFileNotFound", config.FirmwareFileName),
+                                LocalizationManager.Get("FileNotFound"),
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Warning);
                         }
@@ -256,8 +474,8 @@ namespace GuiGenericBuilderDesktop
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Failed to open firmware folder: {ex.Message}",
-                    "Error",
+                    LocalizationManager.GetFormat("OpenFolderError", ex.Message),
+                    LocalizationManager.Get("Error"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -279,17 +497,16 @@ namespace GuiGenericBuilderDesktop
                     {
                         EncodedInputTextBox.Text = clipboardText;
                         MessageBox.Show(
-                            "Content pasted successfully!\n\n" +
-                            "Click 'Decode and Preview' to view the configuration.",
-                            "Paste Success",
+                            LocalizationManager.Get("ContentPasted"),
+                            LocalizationManager.Get("PasteSuccess"),
                             MessageBoxButton.OK,
                             MessageBoxImage.Information);
                     }
                     else
                     {
                         MessageBox.Show(
-                            "Clipboard is empty.",
-                            "No Content",
+                            LocalizationManager.Get("ClipboardEmpty"),
+                            LocalizationManager.Get("NoContent"),
                             MessageBoxButton.OK,
                             MessageBoxImage.Information);
                     }
@@ -297,8 +514,8 @@ namespace GuiGenericBuilderDesktop
                 else
                 {
                     MessageBox.Show(
-                        "Clipboard does not contain text.",
-                        "Invalid Content",
+                        LocalizationManager.Get("ClipboardInvalid"),
+                        LocalizationManager.Get("InvalidContent"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                 }
@@ -306,8 +523,8 @@ namespace GuiGenericBuilderDesktop
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Failed to paste from clipboard: {ex.Message}",
-                    "Paste Error",
+                    LocalizationManager.GetFormat("FailedToPaste", ex.Message),
+                    LocalizationManager.Get("PasteError"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -322,8 +539,8 @@ namespace GuiGenericBuilderDesktop
                 if (string.IsNullOrWhiteSpace(encoded))
                 {
                     MessageBox.Show(
-                        "Please enter an encoded configuration string.",
-                        "No Input",
+                        LocalizationManager.Get("NoInput"),
+                        LocalizationManager.Get("NoInputTitle"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                     return;
@@ -334,9 +551,8 @@ namespace GuiGenericBuilderDesktop
                 if (decodedFlags == null || !decodedFlags.Any())
                 {
                     MessageBox.Show(
-                        "Failed to decode the configuration.\n\n" +
-                        "Please check that the encoded string is valid and not corrupted.",
-                        "Decoding Failed",
+                        LocalizationManager.Get("DecodingFailed"),
+                        LocalizationManager.Get("DecodingFailedTitle"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                     
@@ -347,7 +563,7 @@ namespace GuiGenericBuilderDesktop
                 }
 
                 DecodedFlagsListBox.ItemsSource = decodedFlags.OrderBy(f => f);
-                DecodedCountTextBlock.Text = $"{decodedFlags.Length} flags decoded";
+                DecodedCountTextBlock.Text = LocalizationManager.GetFormat("FlagsDecoded", decodedFlags.Length);
                 
                 DecodedResultsPanel.Visibility = Visibility.Visible;
                 
@@ -358,8 +574,8 @@ namespace GuiGenericBuilderDesktop
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Decoding error: {ex.Message}",
-                    "Decoding Error",
+                    LocalizationManager.GetFormat("DecodingError", ex.Message),
+                    LocalizationManager.Get("DecodingErrorTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 
@@ -404,8 +620,8 @@ namespace GuiGenericBuilderDesktop
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Error loading configuration: {ex.Message}",
-                    "Load Error",
+                    LocalizationManager.GetFormat("ErrorLoadingConfig", ex.Message),
+                    LocalizationManager.Get("LoadError"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -419,8 +635,8 @@ namespace GuiGenericBuilderDesktop
                 if (string.IsNullOrWhiteSpace(encoded))
                 {
                     MessageBox.Show(
-                        "Please decode a configuration first.",
-                        "No Configuration",
+                        LocalizationManager.Get("DecodeConfigFirst"),
+                        LocalizationManager.Get("NoConfiguration"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                     return;
@@ -430,8 +646,8 @@ namespace GuiGenericBuilderDesktop
                 if (decodedFlags == null || !decodedFlags.Any())
                 {
                     MessageBox.Show(
-                        "Failed to decode the configuration.",
-                        "Decoding Failed",
+                        LocalizationManager.Get("DecodingFailed"),
+                        LocalizationManager.Get("DecodingFailedTitle"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                     return;
@@ -450,8 +666,8 @@ namespace GuiGenericBuilderDesktop
                     if (string.IsNullOrWhiteSpace(configName))
                     {
                         MessageBox.Show(
-                            "Configuration name cannot be empty.",
-                            "Invalid Name",
+                            LocalizationManager.Get("InvalidName"),
+                            LocalizationManager.Get("InvalidNameTitle"),
                             MessageBoxButton.OK,
                             MessageBoxImage.Warning);
                         return;
@@ -468,9 +684,8 @@ namespace GuiGenericBuilderDesktop
                     _configManager.SaveConfiguration(enabledFlags, configName);
 
                     MessageBox.Show(
-                        $"Configuration '{configName}' saved successfully!\n\n" +
-                        $"It will now appear in the 'Saved Configurations' tab.",
-                        "Save Success",
+                        LocalizationManager.GetFormat("ConfigurationSaved", configName),
+                        LocalizationManager.Get("SaveSuccessTitle"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
 
@@ -490,8 +705,8 @@ namespace GuiGenericBuilderDesktop
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Error saving configuration: {ex.Message}",
-                    "Save Error",
+                    LocalizationManager.GetFormat("ErrorSavingConfig", ex.Message),
+                    LocalizationManager.Get("SaveErrorTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -510,9 +725,8 @@ namespace GuiGenericBuilderDesktop
                 if (!enabledFlags.Any())
                 {
                     MessageBox.Show(
-                        "No flags are currently enabled.\n\n" +
-                        "Please enable some flags before saving the configuration.",
-                        "No Flags Selected",
+                        LocalizationManager.Get("NoFlagsEnabled"),
+                        LocalizationManager.Get("NoFlagsSelectedTitle"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                     return;
@@ -531,8 +745,8 @@ namespace GuiGenericBuilderDesktop
                     if (string.IsNullOrWhiteSpace(configName))
                     {
                         MessageBox.Show(
-                            "Configuration name cannot be empty.",
-                            "Invalid Name",
+                            LocalizationManager.Get("InvalidName"),
+                            LocalizationManager.Get("InvalidNameTitle"),
                             MessageBoxButton.OK,
                             MessageBoxImage.Warning);
                         return;
@@ -554,9 +768,9 @@ namespace GuiGenericBuilderDesktop
 
                     // Update UI with success message
                     SavedNameText.Text = configName;
-                    SavedFlagCountText.Text = $"{enabledFlags.Count} flags";
-                    SavedPlatformText.Text = string.IsNullOrEmpty(platform) ? "Not specified" : platform;
-                    SavedComPortText.Text = string.IsNullOrEmpty(comPort) ? "Not specified" : comPort;
+                    SavedFlagCountText.Text = LocalizationManager.GetFormat("FlagsCount", enabledFlags.Count);
+                    SavedPlatformText.Text = string.IsNullOrEmpty(platform) ? LocalizationManager.Get("NotSpecified") : platform;
+                    SavedComPortText.Text = string.IsNullOrEmpty(comPort) ? LocalizationManager.Get("NotSpecified") : comPort;
                     SavedEncodedTextBox.Text = encoded;
 
                     SaveResultsPanel.Visibility = Visibility.Visible;
@@ -577,8 +791,8 @@ namespace GuiGenericBuilderDesktop
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Error saving configuration: {ex.Message}",
-                    "Save Error",
+                    LocalizationManager.GetFormat("ErrorSavingConfig", ex.Message),
+                    LocalizationManager.Get("SaveErrorTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }
@@ -593,8 +807,8 @@ namespace GuiGenericBuilderDesktop
                 {
                     Clipboard.SetText(text);
                     MessageBox.Show(
-                        "Encoded configuration copied to clipboard!",
-                        "Copied",
+                        LocalizationManager.Get("EncodedConfigCopied"),
+                        LocalizationManager.Get("CopySuccess"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                 }
@@ -602,8 +816,8 @@ namespace GuiGenericBuilderDesktop
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    $"Failed to copy to clipboard: {ex.Message}",
-                    "Copy Error",
+                    LocalizationManager.GetFormat("FailedToCopy", ex.Message),
+                    LocalizationManager.Get("CopyError"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }

@@ -6,6 +6,8 @@ using System.Windows.Documents;
 using Newtonsoft.Json;
 using CompilationLib;
 using Serilog;
+using GuiGenericBuilderDesktop.Localization;
+using GuiGenericBuilderDesktop.Services;
 
 namespace GuiGenericBuilderDesktop
 {
@@ -24,6 +26,7 @@ namespace GuiGenericBuilderDesktop
         private ComboBox boardSelector;
         private ComboBox comPortSelector;
         private ComboBox flashSizeSelector;
+        private ComboBox languageSelector;
         private CheckBox deployCheckBox;
         private CheckBox backupCheckBox;
         private CheckBox eraseFlashCheckBox;
@@ -34,6 +37,12 @@ namespace GuiGenericBuilderDesktop
         private TextBlock statusText;
         private CancellationTokenSource _compilationCancellation;
         private BuilderConfig _builderConfig = new BuilderConfig();
+        
+        // Service layer
+        private ValidationService _validationService;
+        private DeviceManagementService _deviceManagementService;
+        private VersionService _versionService;
+        private UIBuilderService _uiBuilderService;
 
         public MainWindow()
         {
@@ -62,8 +71,15 @@ namespace GuiGenericBuilderDesktop
                 _repositoryPath = @"c:\repozytoria\platformio\GUI-Generic";
             }
 
+            // Initialize services
+            _validationService = new ValidationService(_logger);
+            _deviceManagementService = new DeviceManagementService(_deviceDetector, _logger);
+            _versionService = new VersionService(_repositoryPath, _logger);
+            _uiBuilderService = new UIBuilderService(_builderConfig, _logger);
+
             // Update version display and window title on startup
-            UpdateVersionDisplay();
+            var (suplaVersion, ggVersion) = _versionService.GetVersions();
+            Title = _versionService.GenerateWindowTitle(suplaVersion, ggVersion);
 
             _logger.Information("MainWindow initialized successfully");
         }
@@ -104,7 +120,11 @@ namespace GuiGenericBuilderDesktop
 
                 if (!File.Exists(jsonPath))
                 {
-                    MessageBox.Show($"builder.json not found at: {jsonPath}", "File Not Found", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    MessageBox.Show(
+                        LocalizationManager.GetFormat("BuilderJsonNotFound", jsonPath),
+                        LocalizationManager.Get("FileNotFound"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
                     return;
                 }
 
@@ -115,7 +135,11 @@ namespace GuiGenericBuilderDesktop
 
                 if (_builderConfig?.Sections == null)
                 {
-                    MessageBox.Show($"builder.json does not contain valid Sections", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(
+                        LocalizationManager.Get("InvalidSections"),
+                        LocalizationManager.Get("Error"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
                     return;
                 }
 
@@ -140,8 +164,6 @@ namespace GuiGenericBuilderDesktop
                             }
                         }
 
-                        // SectionOrder has an internal setter in BuildFlagItem; cannot assign from this assembly.
-                        // Preserve existing SectionOrder value from deserialization instead of assigning here.
                         AllBuildFlags.Add(flagItem.Value);
                     }
                 }
@@ -150,7 +172,11 @@ namespace GuiGenericBuilderDesktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading builder.json: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    LocalizationManager.GetFormat("ErrorLoadingBuilderJson", ex.Message),
+                    LocalizationManager.Get("Error"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
@@ -168,9 +194,9 @@ namespace GuiGenericBuilderDesktop
             var devicePanel = new DockPanel { LastChildFill = false, Margin = new Thickness(12, 8, 12, 6) };
 
             // Board selector ComboBox
-            var boardLabel = new TextBlock(new Run("Board:")) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
+            var boardLabel = new TextBlock(new Run(LocalizationManager.Get("Board"))) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
             boardSelector = new ComboBox { Width = 220, Margin = new Thickness(12, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
-            boardSelector.Items.Add(new ComboBoxItem { Content = "None", Tag = "None", IsSelected = true });
+            boardSelector.Items.Add(new ComboBoxItem { Content = LocalizationManager.Get("None"), Tag = "None", IsSelected = true });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32 (default)", Tag = "GUI_Generic_ESP32" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C3", Tag = "GUI_Generic_ESP32C3" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C6", Tag = "GUI_Generic_ESP32C6" });
@@ -185,15 +211,28 @@ namespace GuiGenericBuilderDesktop
 
                     if (!string.IsNullOrEmpty(_chip))
                     {
-                        DisableIncompatibleFlags(_chip);
+                        var disabledFlags = _validationService.DisableIncompatibleFlags(_chip, AllBuildFlags);
+                        
+                        // Notify user if any flags were disabled
+                        if (disabledFlags.Any())
+                        {
+                            var flagsList = string.Join("\n", disabledFlags.Select(f => $"• {f}"));
+                            var message = LocalizationManager.GetFormat("PlatformCompatibility", _chip, flagsList);
+
+                            MessageBox.Show(
+                                message,
+                                LocalizationManager.Get("PlatformCompatibilityTitle"),
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Information);
+                        }
                     }
                 }
             };
 
             var loadConfigButton = new Button
             {
-                Content = "Manage Configs...",
-                Width = 130,
+                Content = LocalizationManager.Get("ManageConfigs"),
+                Width = 160,
                 Height = 28,
                 HorizontalAlignment = HorizontalAlignment.Right,
                 Margin = new Thickness(4)
@@ -202,8 +241,8 @@ namespace GuiGenericBuilderDesktop
 
             updateGGButton = new Button
             {
-                Content = "1. Update Gui-Generic",
-                Width = 140,
+                Content = LocalizationManager.Get("UpdateGuiGeneric"),
+                Width = 160,
                 Height = 28,
                 HorizontalAlignment = HorizontalAlignment.Right,
                 Margin = new Thickness(4)
@@ -215,7 +254,7 @@ namespace GuiGenericBuilderDesktop
 
 
 
-            checkDeviceButton = new Button { Content = "2. Check Device", Width = 120, Height = 28, Margin = new Thickness(8, 0, 0, 0) };
+            checkDeviceButton = new Button { Content = LocalizationManager.Get("CheckDevice"), Width = 140, Height = 28, Margin = new Thickness(8, 0, 0, 0) };
             checkDeviceButton.Click += CheckConnectedDevice_Click;
 
             // Status text for operations
@@ -231,7 +270,7 @@ namespace GuiGenericBuilderDesktop
 
             compileButton = new Button
             {
-                Content = "3. Compile",
+                Content = LocalizationManager.Get("Compile"),
                 Width = 140,
                 Height = 28,
                 HorizontalAlignment = HorizontalAlignment.Right,
@@ -241,9 +280,9 @@ namespace GuiGenericBuilderDesktop
             // right-align the button inside the DockPanel
 
             // COM port selector (COM1..COM10)
-            var portLabel = new TextBlock(new Run("Port:")) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
+            var portLabel = new TextBlock(new Run(LocalizationManager.Get("Port"))) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
             comPortSelector = new ComboBox { Width = 100, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
-            comPortSelector.Items.Add(new ComboBoxItem { Content = $"None", Tag = $"None", IsSelected = true });
+            comPortSelector.Items.Add(new ComboBoxItem { Content = LocalizationManager.Get("None"), Tag = "None", IsSelected = true });
             for (int i = 1; i <= 100; i++)
             {
                 var item = new ComboBoxItem { Content = $"COM{i}", Tag = $"COM{i}" };
@@ -263,9 +302,9 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(boardSelector);
 
             // Flash size selector
-            var flashSizeLabel = new TextBlock(new Run("Flash:")) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
+            var flashSizeLabel = new TextBlock(new Run(LocalizationManager.Get("Flash"))) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
             flashSizeSelector = new ComboBox { Width = 120, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
-            flashSizeSelector.Items.Add(new ComboBoxItem { Content = "None", Tag = "None", IsSelected = true });
+            flashSizeSelector.Items.Add(new ComboBoxItem { Content = LocalizationManager.Get("None"), Tag = "None", IsSelected = true });
             flashSizeSelector.Items.Add(new ComboBoxItem { Content = "4MB", Tag = "4MB" });
             flashSizeSelector.Items.Add(new ComboBoxItem { Content = "8MB", Tag = "8MB" });
             flashSizeSelector.Items.Add(new ComboBoxItem { Content = "16MB", Tag = "16MB" });
@@ -274,13 +313,97 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(flashSizeLabel);
             devicePanel.Children.Add(flashSizeSelector);
 
+            // Language selector
+            var languageLabel = new TextBlock(new Run(LocalizationManager.Get("Language"))) 
+            { 
+                FontWeight = FontWeights.SemiBold, 
+                Margin = new Thickness(12, 0, 4, 0), 
+                VerticalAlignment = VerticalAlignment.Center 
+            };
+            
+            // Remember current language before recreating selector
+            var currentLanguageCode = LocalizationManager.CurrentLanguage;
+            
+            languageSelector = new ComboBox 
+            { 
+                Width = 120, 
+                Margin = new Thickness(8, 0, 0, 0), 
+                VerticalAlignment = VerticalAlignment.Center,
+                ToolTip = LocalizationManager.Get("LanguageTooltip")
+            };
+            
+            var languages = LocalizationManager.GetAvailableLanguages();
+            languageSelector.ItemsSource = languages;
+            
+            // Set the previously selected language
+            var selectedLanguage = languages.FirstOrDefault(l => l.Code == currentLanguageCode);
+            if (selectedLanguage != null)
+            {
+                languageSelector.SelectedItem = selectedLanguage;
+            }
+            else
+            {
+                languageSelector.SelectedIndex = 0; // Fallback to Polish
+            }
+            
+            // Flag to prevent recursive calls during UI rebuild
+            bool isChangingLanguage = false;
+            
+            languageSelector.SelectionChanged += async (s, e) =>
+            {
+                if (isChangingLanguage) return;
+                
+                if (languageSelector.SelectedItem is LanguageOption option)
+                {
+                    // Skip if this is the same language (happens during rebuild)
+                    if (option.Code == currentLanguageCode) return;
+                    
+                    _logger.Information("Changing language to: {Language}", option.Code);
+                    
+                    isChangingLanguage = true;
+                    try
+                    {
+                        LocalizationManager.SetLanguage(option.Code);
+                        
+                        // Rebuild UI with new language
+                        BuildFlowDocument();
+                        
+                        // Show confirmation message
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            MessageBox.Show(
+                                LocalizationManager.GetFormat("LanguageChanged", option.NativeName),
+                                LocalizationManager.Get("Success"),
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Information);
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Error rebuilding UI after language change");
+                        MessageBox.Show(
+                            $"Error applying language change: {ex.Message}",
+                            "Error",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    }
+                    finally
+                    {
+                        isChangingLanguage = false;
+                    }
+                }
+            };
+            
+            devicePanel.Children.Add(languageLabel);
+            devicePanel.Children.Add(languageSelector);
+
             // Status text (hidden initially)
             devicePanel.Children.Add(statusText);
 
             // Deploy checkbox - positioned right before compile button
             deployCheckBox = new CheckBox
             {
-                Content = "Deploy",
+                Content = LocalizationManager.Get("Deploy"),
                 IsChecked = true,
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(12, 0, 4, 0),
@@ -290,23 +413,23 @@ namespace GuiGenericBuilderDesktop
             // Backup checkbox - positioned right before deploy checkbox
             backupCheckBox = new CheckBox
             {
-                Content = "Backup",
+                Content = LocalizationManager.Get("Backup"),
                 IsChecked = true,
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(12, 0, 4, 0),
                 FontWeight = FontWeights.SemiBold,
-                ToolTip = "Create backup before deploying firmware"
+                ToolTip = LocalizationManager.Get("BackupTooltip")
             };
 
             // Erase Flash checkbox - positioned right before backup checkbox
             eraseFlashCheckBox = new CheckBox
             {
-                Content = "Erase Flash",
+                Content = LocalizationManager.Get("EraseFlash"),
                 IsChecked = false,
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(12, 0, 4, 0),
                 FontWeight = FontWeights.SemiBold,
-                ToolTip = "Erase flash memory before deploying firmware (recommended for clean installation)"
+                ToolTip = LocalizationManager.Get("EraseFlashTooltip")
             };
 
 
@@ -338,6 +461,18 @@ namespace GuiGenericBuilderDesktop
 
             foreach (var group in grouped)
             {
+                // Get the section info from config to access translations
+                string sectionDisplayName = group.Key;
+                if (_builderConfig?.Sections != null && _builderConfig.Sections.TryGetValue(group.Key, out var sectionInfo))
+                {
+                    // Try to get translated section name
+                    var currentLang = LocalizationManager.CurrentLanguage;
+                    if (sectionInfo.Translations != null && sectionInfo.Translations.TryGetValue(currentLang, out var translatedName) && !string.IsNullOrEmpty(translatedName))
+                    {
+                        sectionDisplayName = translatedName;
+                    }
+                }
+
                 // Section header with a checkbox to toggle all flags in the section
                 var headerPanel = new DockPanel
                 {
@@ -358,7 +493,7 @@ namespace GuiGenericBuilderDesktop
                 groupCheckBox.Checked += (s, e) => SetGroupFlags(group, true, groupCheckBox);
                 groupCheckBox.Unchecked += (s, e) => SetGroupFlags(group, false, groupCheckBox);
 
-                var titleText = new TextBlock(new Run(group.Key + $" ({group.Count()})")) { FontWeight = FontWeights.Bold, FontSize = 14, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) };
+                var titleText = new TextBlock(new Run(sectionDisplayName + $" ({group.Count()})")) { FontWeight = FontWeights.Bold, FontSize = 14, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) };
 
                 headerPanel.Children.Add(groupCheckBox);
                 headerPanel.Children.Add(titleText);
@@ -397,13 +532,13 @@ namespace GuiGenericBuilderDesktop
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
                 grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(120) });
 
-                // header row
+                // header row - USE LOCALIZED STRINGS
                 grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                AddText(grid, 0, 0, "Enabled", FontWeights.SemiBold);
-                AddText(grid, 0, 1, "Key", FontWeights.SemiBold);
-                AddText(grid, 0, 2, "Name", FontWeights.SemiBold);
-                AddText(grid, 0, 3, "Description", FontWeights.SemiBold);
-                AddText(grid, 0, 4, "Parameters", FontWeights.SemiBold);
+                AddText(grid, 0, 0, LocalizationManager.Get("Enabled"), FontWeights.SemiBold);
+                AddText(grid, 0, 1, LocalizationManager.Get("Key"), FontWeights.SemiBold);
+                AddText(grid, 0, 2, LocalizationManager.Get("Name"), FontWeights.SemiBold);
+                AddText(grid, 0, 3, LocalizationManager.Get("Description"), FontWeights.SemiBold);
+                AddText(grid, 0, 4, LocalizationManager.Get("Parameters"), FontWeights.SemiBold);
 
                 int r = 1;
                 foreach (var item in group.OrderBy(i => i.SectionOrder).ThenBy(x => x.Key))
@@ -422,7 +557,7 @@ namespace GuiGenericBuilderDesktop
                         {
                             MessageBox.Show(
                                 errorMessage,
-                                "Blocking Dependencies",
+                                LocalizationManager.Get("BlockingDependencies"),
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Warning);
                         }
@@ -436,9 +571,8 @@ namespace GuiGenericBuilderDesktop
                                 // Flag is incompatible with current platform, disable it and show message
                                 item.IsEnabled = false;
                                 MessageBox.Show(
-                                    $"The flag '{item.FlagName ?? item.Key}' is not compatible with the selected platform ({_chip}).\n\n" +
-                                    $"This flag is disabled on: {string.Join(", ", item.DisabledOnPlatforms)}",
-                                    "Platform Incompatibility",
+                                    LocalizationManager.GetFormat("PlatformIncompatibility", item.GetLocalizedName(), _chip, string.Join(", ", item.DisabledOnPlatforms)),
+                                    LocalizationManager.Get("PlatformIncompatibilityTitle"),
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Warning);
                             }
@@ -451,17 +585,17 @@ namespace GuiGenericBuilderDesktop
                     Grid.SetRow(chk, r); Grid.SetColumn(chk, 0); grid.Children.Add(chk);
 
                     AddText(grid, r, 1, item.Key ?? string.Empty);
-                    AddText(grid, r, 2, item.FlagName ?? string.Empty);
-                    AddText(grid, r, 3, item.Description ?? string.Empty);
+                    AddText(grid, r, 2, item.GetLocalizedName());
+                    AddText(grid, r, 3, item.GetLocalizedDescription());
 
-                    var btn = new Button { Content = "Params...", Padding = new Thickness(6, 2, 6, 2), Margin = new Thickness(2), Tag = item };
+                    var btn = new Button { Content = LocalizationManager.Get("ParamsButton"), Padding = new Thickness(6, 2, 6, 2), Margin = new Thickness(2), Tag = item };
                     btn.Click += (s, e) =>
                     {
                         if ((s as Button)?.Tag is BuildFlagItem bf)
                         {
                             if (bf.Parameters == null || !bf.Parameters.Any()) return;
 
-                            var editor = new ParametersEditorWindow(bf.Parameters, bf.FlagName ?? bf.Key);
+                            var editor = new ParametersEditorWindow(bf.Parameters, bf.GetLocalizedName());
                             editor.ShowDialog();
                         }
                     };
@@ -502,7 +636,11 @@ namespace GuiGenericBuilderDesktop
             {
                 if (item.Parameters == null || !item.Parameters.Any())
                 {
-                    MessageBox.Show("Selected flag has no parameters.", "No Parameters", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(
+                        LocalizationManager.Get("NoParameters"),
+                        LocalizationManager.Get("NoParametersTitle"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
                     return;
                 }
 
@@ -515,7 +653,11 @@ namespace GuiGenericBuilderDesktop
             }
             else
             {
-                MessageBox.Show("No flag selected. Select a flag in the grid and try again.", "No Selection", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(
+                    LocalizationManager.Get("NoSelection"),
+                    LocalizationManager.Get("NoSelectionTitle"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
             }
         }
 
@@ -523,7 +665,7 @@ namespace GuiGenericBuilderDesktop
         {
             // Disable button and show status
             updateGGButton.IsEnabled = false;
-            statusText.Text = "⏳ Downloading GUI-Generic repository...";
+            statusText.Text = LocalizationManager.Get("DownloadingRepository");
             statusText.Visibility = Visibility.Visible;
 
             try
@@ -537,10 +679,11 @@ namespace GuiGenericBuilderDesktop
                     cancellationToken: CancellationToken.None);
 
                 // Update version display after successful download
-                UpdateVersionDisplay();
+                var (suplaVersion, ggVersion) = _versionService.GetVersions();
+                Title = _versionService.GenerateWindowTitle(suplaVersion, ggVersion);
 
                 // Success status
-                statusText.Text = "✓ Repository updated successfully!";
+                statusText.Text = LocalizationManager.Get("RepositoryUpdatedSuccess");
                 statusText.Foreground = System.Windows.Media.Brushes.Green;
 
                 // Hide status after 3 seconds
@@ -548,12 +691,16 @@ namespace GuiGenericBuilderDesktop
                 statusText.Visibility = Visibility.Collapsed;
                 statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
 
-                MessageBox.Show("Repository updated successfully!", "Update Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(
+                    LocalizationManager.Get("RepositoryUpdatedMessage"),
+                    LocalizationManager.Get("UpdateComplete"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 // Error status
-                statusText.Text = "✗ Repository update failed";
+                statusText.Text = LocalizationManager.Get("RepositoryUpdateFailed");
                 statusText.Foreground = System.Windows.Media.Brushes.Red;
 
                 // Hide status after 3 seconds
@@ -561,7 +708,11 @@ namespace GuiGenericBuilderDesktop
                 statusText.Visibility = Visibility.Collapsed;
                 statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
 
-                MessageBox.Show($"Error updating repository: {ex.Message}", "Update Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    LocalizationManager.GetFormat("ErrorUpdatingRepository", ex.Message),
+                    LocalizationManager.Get("UpdateFailed"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
             finally
             {
@@ -605,10 +756,10 @@ namespace GuiGenericBuilderDesktop
                 _compilationCancellation.Cancel();
 
                 // Update button text
-                compileButton.Content = "3. Compile";
+                compileButton.Content = LocalizationManager.Get("Compile");
 
                 // Update status
-                statusText.Text = "⏳ Stopping compilation...";
+                statusText.Text = LocalizationManager.Get("StoppingCompilation");
                 statusText.Foreground = System.Windows.Media.Brushes.Orange;
 
                 return;
@@ -618,10 +769,8 @@ namespace GuiGenericBuilderDesktop
             if (string.IsNullOrEmpty(_repositoryPath) || !Directory.Exists(_repositoryPath))
             {
                 MessageBox.Show(
-                    "GUI-Generic repository not found!\n\n" +
-                    "Please click '1. Update Gui-Generic' button first to download the repository.\n\n" +
-                    "The repository is required for firmware compilation.",
-                    "Repository Not Found",
+                    LocalizationManager.Get("RepositoryNotFound"),
+                    LocalizationManager.Get("RepositoryNotFoundTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
@@ -631,10 +780,8 @@ namespace GuiGenericBuilderDesktop
             if (!Directory.EnumerateFileSystemEntries(_repositoryPath).Any())
             {
                 MessageBox.Show(
-                    "GUI-Generic repository directory is empty!\n\n" +
-                    $"Repository path: {_repositoryPath}\n\n" +
-                    "Please click '1. Update Gui-Generic' button to download the repository.",
-                    "Empty Repository",
+                    LocalizationManager.GetFormat("EmptyRepository", _repositoryPath),
+                    LocalizationManager.Get("EmptyRepositoryTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
@@ -645,11 +792,8 @@ namespace GuiGenericBuilderDesktop
             if (!File.Exists(platformioIniPath))
             {
                 MessageBox.Show(
-                    "GUI-Generic repository appears to be incomplete or corrupted.\n\n" +
-                    $"Missing file: platformio.ini\n" +
-                    $"Repository path: {_repositoryPath}\n\n" +
-                    "Please click '1. Update Gui-Generic' button to re-download the repository.",
-                    "Incomplete Repository",
+                    LocalizationManager.GetFormat("IncompleteRepository", _repositoryPath),
+                    LocalizationManager.Get("IncompleteRepositoryTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
@@ -658,7 +802,11 @@ namespace GuiGenericBuilderDesktop
             List<BuildFlagItem> selectedFlags = AllBuildFlags.Where(f => f.IsEnabled).ToList();
             if (!selectedFlags.Any())
             {
-                MessageBox.Show("No flags selected. Enable some flags before compiling.", "No Flags", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(
+                    LocalizationManager.Get("NoFlagsSelected"),
+                    LocalizationManager.Get("NoFlags"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
                 return;
             }
 
@@ -669,42 +817,35 @@ namespace GuiGenericBuilderDesktop
             if (string.IsNullOrEmpty(selectedPlatform) || selectedPlatform.Equals("None", StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show(
-                    "Please select a target platform (board) before compiling.\n\n" +
-                    "Use '2. Check Device' to auto-detect, or manually select a platform from the Board dropdown.\n\n" +
-                    "Available platforms:\n" +
-                    "• ESP32 (default)\n" +
-                    "• ESP32-C3\n" +
-                    "• ESP32-C6\n" +
-                    "• ESP32-S3",
-                    "Platform Required",
+                    LocalizationManager.Get("PlatformRequired"),
+                    LocalizationManager.Get("PlatformRequiredTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
             }
 
             // Validate platform compatibility
-            var incompatibleFlags = ValidatePlatformCompatibility(_chip, selectedFlags);
+            var incompatibleFlags = _validationService.ValidatePlatformCompatibility(_chip, selectedFlags);
             if (incompatibleFlags.Any())
             {
-                var message = $"The following flags are not compatible with the selected platform ({selectedPlatform}):\n\n" +
-                              string.Join("\n", incompatibleFlags.Select(f => $"• {f}")) +
-                              "\n\nPlease disable these flags or select a different platform before compiling.";
+                var flagsList = string.Join("\n", incompatibleFlags.Select(f => $"• {f}"));
+                var message = LocalizationManager.GetFormat("PlatformCompatibilityError", selectedPlatform, flagsList);
 
                 MessageBox.Show(
                     message,
-                    "Platform Compatibility Error",
+                    LocalizationManager.Get("PlatformCompatibilityErrorTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 return;
             }
 
             // Validate I2C devices have consistent SCL and SDA values
-            var i2cValidationError = ValidateI2CParameters(selectedFlags);
+            var i2cValidationError = _validationService.ValidateI2CParameters(selectedFlags);
             if (!string.IsNullOrEmpty(i2cValidationError))
             {
                 MessageBox.Show(
                     i2cValidationError,
-                    "I2C Configuration Error",
+                    LocalizationManager.Get("I2CConfigurationErrorTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 return;
@@ -722,11 +863,8 @@ namespace GuiGenericBuilderDesktop
                 if (string.IsNullOrEmpty(selectedComPort) || selectedComPort.Equals("None", StringComparison.OrdinalIgnoreCase))
                 {
                     MessageBox.Show(
-                        "Please select a COM port before compiling with deployment.\n\n" +
-                        "The firmware needs to be uploaded to a device connected via COM port.\n" +
-                        "Use '2. Check Device' to auto-detect, or manually select a COM port.\n\n" +
-                        "Alternatively, uncheck 'Deploy to device' to compile only without uploading.",
-                        "COM Port Required",
+                        LocalizationManager.Get("COMPortRequired"),
+                        LocalizationManager.Get("COMPortRequiredTitle"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
                     return;
@@ -737,13 +875,13 @@ namespace GuiGenericBuilderDesktop
             _compilationCancellation = new CancellationTokenSource();
 
             // Change button text to "Stop"
-            compileButton.Content = "3. Stop compilation";
+            compileButton.Content = LocalizationManager.Get("StopCompilation");
 
             // Track compilation time
             var compilationStopwatch = System.Diagnostics.Stopwatch.StartNew();
 
             // Show status indicator with initial time
-            statusText.Text = "⏳ Compiling firmware... Elapsed: 0.0s";
+            statusText.Text = LocalizationManager.GetFormat("CompilingFirmware", 0.0);
             statusText.Foreground = System.Windows.Media.Brushes.Black;
             statusText.FontStyle = FontStyles.Oblique;
             statusText.Visibility = Visibility.Visible;
@@ -761,7 +899,7 @@ namespace GuiGenericBuilderDesktop
                         var elapsed = compilationStopwatch.Elapsed.TotalSeconds;
                         Dispatcher.Invoke(() =>
                         {
-                            statusText.Text = $"⏳ Compiling firmware... Elapsed: {elapsed:F1}s";
+                            statusText.Text = LocalizationManager.GetFormat("CompilingFirmware", elapsed);
                         });
                     }
                 }
@@ -809,20 +947,20 @@ namespace GuiGenericBuilderDesktop
                 {
                     _logger.Information("Compilation cancelled by user");
 
-                    statusText.Text = $"⏹ Compilation stopped by user. Time: {compilationTime.TotalSeconds:F1}s";
+                    statusText.Text = LocalizationManager.GetFormat("CompilationStopped", compilationTime.TotalSeconds);
                     statusText.Foreground = System.Windows.Media.Brushes.Black;
                     statusText.FontStyle = FontStyles.Oblique;
 
                     MessageBox.Show(
-                        $"Compilation stopped by user.\n\nElapsed time: {compilationTime.TotalSeconds:F1}s",
-                        "Compilation Stopped",
+                        LocalizationManager.GetFormat("CompilationStoppedMessage", compilationTime.TotalSeconds),
+                        LocalizationManager.Get("CompilationStoppedTitle"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                 }
                 else if (result.IsSuccessful)
                 {
                     // Success status with compilation time - KEEP IT VISIBLE
-                    statusText.Text = $"✓ Compilation successful! Time: {compilationTime.TotalSeconds:F1}s";
+                    statusText.Text = LocalizationManager.GetFormat("CompilationSuccessful", compilationTime.TotalSeconds);
                     statusText.Foreground = System.Windows.Media.Brushes.Black;
                     statusText.FontStyle = FontStyles.Oblique;
                     // DO NOT hide the status - keep it visible
@@ -871,7 +1009,7 @@ namespace GuiGenericBuilderDesktop
                 else
                 {
                     // Error status with compilation time - KEEP IT VISIBLE
-                    statusText.Text = $"✗ Compilation failed! Time: {compilationTime.TotalSeconds:F1}s";
+                    statusText.Text = LocalizationManager.GetFormat("CompilationFailed", compilationTime.TotalSeconds);
                     statusText.Foreground = System.Windows.Media.Brushes.Red;
                     // DO NOT hide the status - keep it visible
 
@@ -899,12 +1037,12 @@ namespace GuiGenericBuilderDesktop
 
                 _logger.Information("Compilation cancelled (OperationCanceledException caught)");
 
-                statusText.Text = $"⏹ Compilation stopped. Time: {compilationStopwatch.Elapsed.TotalSeconds:F1}s";
+                statusText.Text = LocalizationManager.GetFormat("CompilationStopped", compilationStopwatch.Elapsed.TotalSeconds);
                 statusText.Foreground = System.Windows.Media.Brushes.Orange;
 
                 MessageBox.Show(
-                    $"Compilation was stopped.\n\nElapsed time: {compilationStopwatch.Elapsed.TotalSeconds:F1}s",
-                    "Compilation Stopped",
+                    LocalizationManager.GetFormat("CompilationStoppedMessage", compilationStopwatch.Elapsed.TotalSeconds),
+                    LocalizationManager.Get("CompilationStoppedTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
             }
@@ -923,16 +1061,20 @@ namespace GuiGenericBuilderDesktop
                 }
 
                 // Error status with time - KEEP IT VISIBLE
-                statusText.Text = $"✗ Compilation error! Time: {compilationStopwatch.Elapsed.TotalSeconds:F1}s";
+                statusText.Text = LocalizationManager.GetFormat("CompilationError", compilationStopwatch.Elapsed.TotalSeconds);
                 statusText.Foreground = System.Windows.Media.Brushes.Red;
                 // DO NOT hide the status - keep it visible
 
-                MessageBox.Show($"Compilation error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    LocalizationManager.GetFormat("CompilationErrorMessage", ex.Message),
+                    LocalizationManager.Get("Error"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
             finally
             {
                 // Restore button text to "3. Compile"
-                compileButton.Content = "3. Compile";
+                compileButton.Content = LocalizationManager.Get("Compile");
 
                 // Clean up cancellation token source
                 _compilationCancellation?.Dispose();
@@ -943,159 +1085,95 @@ namespace GuiGenericBuilderDesktop
 
         private async void CheckConnectedDevice_Click(object sender, RoutedEventArgs e)
         {
-            _logger.Information("=== Device Detection Started ===");
-
             // Disable button and show status
             checkDeviceButton.IsEnabled = false;
-            statusText.Text = "⏳ Detecting device...";
+            statusText.Text = LocalizationManager.Get("DetectingDevice");
             statusText.Visibility = Visibility.Visible;
             statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
 
-            await Task.Run(async () =>
+            try
             {
-                try
-                {
-                    _logger.Debug("Detecting COM port...");
-                    var port = _deviceDetector.DetectCOMPortWithUsbBridge();
+                var (port, deviceInfo) = await _deviceManagementService.DetectDeviceAsync();
 
-                    if (port != null)
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    if (!string.IsNullOrWhiteSpace(port))
                     {
-                        _logger.Information("COM port detected: {Port}", port);
+                        // Update COM port selector
+                        comPortSelector.SelectedItem = _deviceManagementService.FindComboBoxItemByTag(comPortSelector, port);
+                        _logger.Debug("COM port selector updated to: {Port}", port);
+
+                        // Update chip and board selector
+                        _chip = deviceInfo?.ChipType ?? string.Empty;
+                        _chip = _chip.ToLowerInvariant();
+                        
+                        if (!string.IsNullOrWhiteSpace(_chip) && boardSelector != null)
+                        {
+                            var platformTag = _deviceManagementService.GetPlatformTagFromChip(_chip);
+                            
+                            if (platformTag != null)
+                            {
+                                var match = _deviceManagementService.FindComboBoxItemByTag(boardSelector, platformTag);
+                                if (match != null)
+                                {
+                                    boardSelector.SelectedItem = match;
+                                    _logger.Information("Board selector updated to: {BoardTag}", platformTag);
+
+                                    // Disable incompatible flags for this platform
+                                    var disabledFlags = _validationService.DisableIncompatibleFlags(_chip, AllBuildFlags);
+                                    
+                                    // Notify user if any flags were disabled
+                                    if (disabledFlags.Any())
+                                    {
+                                        var flagsList = string.Join("\n", disabledFlags.Select(f => $"• {f}"));
+                                        var message = LocalizationManager.GetFormat("PlatformCompatibility", _chip, flagsList);
+
+                                        MessageBox.Show(
+                                            message,
+                                            LocalizationManager.Get("PlatformCompatibilityTitle"),
+                                            MessageBoxButton.OK,
+                                            MessageBoxImage.Information);
+                                    }
+                                }
+                            }
+
+                            // Set flash size selector if available
+                            var fs = deviceInfo?.FlashSize ?? string.Empty;
+                            if (!string.IsNullOrWhiteSpace(fs) && flashSizeSelector != null)
+                            {
+                                var normalized = fs.Trim().ToUpperInvariant();
+                                var fmatch = flashSizeSelector.Items.OfType<ComboBoxItem>()
+                                    .FirstOrDefault(ci => normalized.Contains((ci.Tag as string) ?? (ci.Content as string)));
+                                if (fmatch != null)
+                                {
+                                    flashSizeSelector.SelectedItem = fmatch;
+                                    _logger.Information("Flash size selector updated to: {FlashSize}", fs);
+                                }
+                            }
+                        }
+
+                        // Success status
+                        statusText.Text = LocalizationManager.GetFormat("DeviceDetected", _chip, port);
+                        statusText.Foreground = System.Windows.Media.Brushes.Green;
+
+                        // Hide status after 3 seconds
+                        Task.Run(async () =>
+                        {
+                            await Task.Delay(3000);
+                            Dispatcher.Invoke(() =>
+                            {
+                                statusText.Visibility = Visibility.Collapsed;
+                                statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
+                            });
+                        });
                     }
                     else
                     {
-                        _logger.Warning("No COM port detected");
-                    }
+                        _logger.Warning("Device detection completed but no port found");
 
-                    EspInfo deviceModel = null;
-                    if (port != null)
-                    {
-                        _logger.Debug("Detecting ESP model on port {Port}...", port);
-                        deviceModel = await _deviceDetector.DetectEspModelAsync(port);
-
-                        if (deviceModel != null)
-                        {
-                            _logger.Information("Device detected: ChipType={ChipType}, Model={Model}, FlashSize={FlashSize}, MAC={Mac}",
-                                deviceModel.ChipType, deviceModel.Model, deviceModel.FlashSize, deviceModel.Mac);
-                        }
-                    }
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        if (!string.IsNullOrWhiteSpace(port))
-                        {
-                            comPortSelector.SelectedItem = comPortSelector.Items.OfType<ComboBoxItem>().FirstOrDefault(ci => (ci.Tag as string) == port || (ci.Content as string) == port);
-                            _logger.Debug("COM port selector updated to: {Port}", port);
-
-                            // If we detected a device model, try to select matching board in the selector
-
-                            _chip = deviceModel?.ChipType ?? string.Empty;
-                            _chip = _chip.ToLowerInvariant();
-                            if (!string.IsNullOrWhiteSpace(_chip) && boardSelector != null)
-                            {
-                                string chipLower = _chip;
-                                string selectedTag = null;
-                                if (chipLower.Contains("c6") || chipLower.Contains("c-6"))
-                                    selectedTag = "GUI_Generic_ESP32C6";
-                                else if (chipLower.Contains("c3") || chipLower.Contains("c-3"))
-                                    selectedTag = "GUI_Generic_ESP32C3";
-                                else if (chipLower.Contains("s3") || chipLower.Contains("s-3"))
-                                    selectedTag = "GUI_Generic_ESP32S3";
-                                else if (chipLower.Contains("esp32") || chipLower.Contains("esp32"))
-                                    selectedTag = "GUI_Generic_ESP32";
-
-                                if (selectedTag != null)
-                                {
-                                    var match = boardSelector.Items.OfType<ComboBoxItem>().FirstOrDefault(ci => (ci.Tag as string) == selectedTag);
-                                    if (match != null)
-                                    {
-                                        boardSelector.SelectedItem = match;
-                                        _logger.Information("Board selector updated to: {BoardTag}", selectedTag);
-
-                                        // Disable incompatible flags for this platform
-                                        DisableIncompatibleFlags(_chip);
-                                    }
-                                }
-
-                                // Set flash size selector if available
-
-                                var fs = deviceModel?.FlashSize ?? string.Empty;
-                                if (!string.IsNullOrWhiteSpace(fs) && flashSizeSelector != null)
-                                {
-                                    // Normalize like '16MB' or '16M'
-                                    var normalized = fs.Trim().ToUpperInvariant();
-                                    // Try to match beginning of string
-                                    var fmatch = flashSizeSelector.Items.OfType<ComboBoxItem>().FirstOrDefault(ci => normalized.Contains((ci.Tag as string) ?? (ci.Content as string)));
-                                    if (fmatch != null)
-                                    {
-                                        flashSizeSelector.SelectedItem = fmatch;
-                                        _logger.Information("Flash size selector updated to: {FlashSize}", fs);
-                                    }
-                                }
-
-                            }
-
-                            // Success status
-                            statusText.Text = $"✓ Device detected: {_chip} on {port}";
-                            statusText.Foreground = System.Windows.Media.Brushes.Green;
-
-                            // Hide status after 3 seconds
-                            Task.Run(async () =>
-                            {
-                                await Task.Delay(3000);
-                                Dispatcher.Invoke(() =>
-                                {
-                                    statusText.Visibility = Visibility.Collapsed;
-                                    statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
-                                });
-                            });
-                        }
-                        else
-                        {
-                            _logger.Warning("Device detection completed but no port found");
-
-                            // No device status
-                            statusText.Text = "✗ No device detected";
-                            statusText.Foreground = System.Windows.Media.Brushes.OrangeRed;
-
-                            // Hide status after 3 seconds
-                            Task.Run(async () =>
-                            {
-                                await Task.Delay(3000);
-                                Dispatcher.Invoke(() =>
-                                {
-                                    statusText.Visibility = Visibility.Collapsed;
-                                    statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
-                                });
-                            });
-
-                            MessageBox.Show(
-                                "No ESP device detected.\n\n" +
-                                "Please ensure:\n" +
-                                "• Device is connected via USB\n" +
-                                "• USB drivers are installed\n" +
-                                "• Device is powered on",
-                                "Device Not Found",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Information);
-                        }
-
-                        // Re-enable button
-                        checkDeviceButton.IsEnabled = true;
-
-                        _logger.Information("=== Device Detection Completed ===");
-                    });
-
-
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Error during device detection");
-                    Dispatcher.Invoke(() =>
-                    {
-                        // Error status
-                        statusText.Text = "✗ Device detection error";
-                        statusText.Foreground = System.Windows.Media.Brushes.Red;
+                        // No device status
+                        statusText.Text = LocalizationManager.Get("NoDeviceDetected");
+                        statusText.Foreground = System.Windows.Media.Brushes.OrangeRed;
 
                         // Hide status after 3 seconds
                         Task.Run(async () =>
@@ -1108,19 +1186,48 @@ namespace GuiGenericBuilderDesktop
                             });
                         });
 
-                        // Re-enable button
-                        checkDeviceButton.IsEnabled = true;
-
-                        // Error during device detection - could log or show message
                         MessageBox.Show(
-                            $"Device detection error: {ex.Message}\n\n" +
-                            $"Check the logs for more details.",
-                            "Detection Error",
+                            LocalizationManager.Get("NoDeviceDetectedMessage"),
+                            LocalizationManager.Get("DeviceNotFound"),
                             MessageBoxButton.OK,
-                            MessageBoxImage.Error);
+                            MessageBoxImage.Information);
+                    }
+
+                    // Re-enable button
+                    checkDeviceButton.IsEnabled = true;
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error during device detection");
+                
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    // Error status
+                    statusText.Text = LocalizationManager.Get("DeviceDetectionError");
+                    statusText.Foreground = System.Windows.Media.Brushes.Red;
+
+                    // Hide status after 3 seconds
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(3000);
+                        Dispatcher.Invoke(() =>
+                        {
+                            statusText.Visibility = Visibility.Collapsed;
+                            statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
+                        });
                     });
-                }
-            });
+
+                    // Re-enable button
+                    checkDeviceButton.IsEnabled = true;
+
+                    MessageBox.Show(
+                        LocalizationManager.GetFormat("DeviceDetectionErrorMessage", ex.Message),
+                        LocalizationManager.Get("DetectionError"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                });
+            }
         }
 
         private void EditParameters_Click(object sender, RoutedEventArgs e)
@@ -1129,7 +1236,11 @@ namespace GuiGenericBuilderDesktop
             {
                 if (item.Parameters == null || !item.Parameters.Any())
                 {
-                    MessageBox.Show("This flag has no parameters.", "No Parameters", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show(
+                        LocalizationManager.Get("ThisFlagHasNoParameters"),
+                        LocalizationManager.Get("NoParametersTitle"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
                     return;
                 }
 
@@ -1158,7 +1269,11 @@ namespace GuiGenericBuilderDesktop
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error opening configuration manager: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    LocalizationManager.GetFormat("ErrorOpeningConfigManager", ex.Message),
+                    LocalizationManager.Get("Error"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
@@ -1168,9 +1283,8 @@ namespace GuiGenericBuilderDesktop
             if (config.EnabledFlagKeys == null || !config.EnabledFlagKeys.Any())
             {
                 MessageBox.Show(
-                    $"The configuration '{config.ConfigurationName}' has no saved flags.\n\n" +
-                    "Please manually select the build flags.",
-                    "Manual Configuration Required",
+                    LocalizationManager.GetFormat("ManualConfigurationRequired", config.ConfigurationName),
+                    LocalizationManager.Get("ManualConfigurationRequiredTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
                 return;
@@ -1243,219 +1357,10 @@ namespace GuiGenericBuilderDesktop
             }
 
             MessageBox.Show(
-                $"Configuration '{config.ConfigurationName}' loaded successfully!\n\n" +
-                $"Platform: {config.Platform}\n" +
-                $"COM Port: {config.ComPort}\n" +
-                $"Enabled flags: {config.EnabledFlagKeys.Count}",
-                "Configuration Loaded",
+                LocalizationManager.GetFormat("ConfigurationLoaded", config.ConfigurationName, config.Platform, config.ComPort, config.EnabledFlagKeys.Count),
+                LocalizationManager.Get("ConfigurationLoadedTitle"),
                 MessageBoxButton.OK,
                 MessageBoxImage.Information);
-        }
-
-        private void UpdateVersionDisplay()
-        {
-            try
-            {
-                // Get SuplaDevice version
-                var suplaVersion = LibraryVersionExtractor.GetSuplaDeviceVersion(_repositoryPath);
-
-                if (!string.IsNullOrEmpty(suplaVersion))
-                {
-                    _logger.Information("SuplaDevice version detected: {Version}", suplaVersion);
-                }
-                else
-                {
-                    _logger.Debug("SuplaDevice version not found in repository");
-                }
-
-                // Get GUI-Generic version
-                var ggVersion = LibraryVersionExtractor.GetGuiGenericVersion(_repositoryPath);
-
-                if (!string.IsNullOrEmpty(ggVersion))
-                {
-                    _logger.Information("GUI-Generic version detected: {Version}", ggVersion);
-                }
-                else
-                {
-                    _logger.Debug("GUI-Generic version not found in repository");
-                }
-
-                // Update window title with versions
-                UpdateWindowTitle(suplaVersion, ggVersion);
-            }
-            catch (Exception ex)
-            {
-                _logger.Warning(ex, "Failed to extract library versions");
-
-                // Update window title even if version extraction fails
-                UpdateWindowTitle(null, null);
-            }
-        }
-
-        private void UpdateWindowTitle(string suplaVersion, string ggVersion)
-        {
-            const string baseTitle = "GUI-Generic Builder";
-
-            var titleParts = new List<string> { baseTitle };
-
-            if (!string.IsNullOrEmpty(ggVersion))
-            {
-                titleParts.Add($"GG v{ggVersion}");
-            }
-
-            if (!string.IsNullOrEmpty(suplaVersion))
-            {
-                titleParts.Add($"SD v{suplaVersion}");
-            }
-
-            // If no versions found, just show base title
-            if (titleParts.Count == 1)
-            {
-                Title = baseTitle;
-            }
-            else
-            {
-                Title = string.Join(" - ", titleParts);
-            }
-
-            _logger.Debug("Window title updated to: {Title}", Title);
-        }
-
-        /// <summary>
-        /// Disables flags that are incompatible with the specified platform
-        /// </summary>
-        private void DisableIncompatibleFlags(string platformTag)
-        {
-            if (string.IsNullOrEmpty(platformTag))
-                return;
-
-            var disabledFlags = new List<string>();
-
-            foreach (var flag in AllBuildFlags)
-            {
-                if (flag.DisabledOnPlatforms != null &&
-                    flag.DisabledOnPlatforms.Any(p => string.Equals(p, platformTag, StringComparison.OrdinalIgnoreCase)))
-                {
-                    if (flag.IsEnabled)
-                    {
-                        flag.IsEnabled = false;
-                        disabledFlags.Add(flag.FlagName ?? flag.Key);
-                        _logger.Information("Disabled flag {Flag} - incompatible with platform {Platform}", flag.Key, platformTag);
-                    }
-                }
-            }
-
-            // Notify user if any flags were disabled
-            if (disabledFlags.Any())
-            {
-                var message = $"The following flags are not compatible with the selected platform ({platformTag}) and have been disabled:\n\n" +
-                              string.Join("\n", disabledFlags.Select(f => $"• {f}"));
-
-                MessageBox.Show(
-                    message,
-                    "Platform Compatibility",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-            }
-        }
-
-        /// <summary>
-        /// Validates that all enabled flags are compatible with the selected platform
-        /// </summary>
-        private List<string> ValidatePlatformCompatibility(string platformTag, List<BuildFlagItem> enabledFlags)
-        {
-            var incompatibleFlags = new List<string>();
-
-            if (string.IsNullOrEmpty(platformTag) || platformTag.Equals("None", StringComparison.OrdinalIgnoreCase))
-            {
-                // No platform selected, skip validation
-                return incompatibleFlags;
-            }
-
-            foreach (var flag in enabledFlags)
-            {
-                if (flag.DisabledOnPlatforms != null &&
-                    flag.DisabledOnPlatforms.Any(p => string.Equals(p, platformTag, StringComparison.OrdinalIgnoreCase)))
-                {
-                    incompatibleFlags.Add($"{flag.FlagName ?? flag.Key} (disabled on {platformTag})");
-                    _logger.Warning("Flag {Flag} is incompatible with platform {Platform}", flag.Key, platformTag);
-                }
-            }
-
-            return incompatibleFlags;
-        }
-
-        /// <summary>
-        /// Validates that all I2C devices have the same SCL and SDA parameter values
-        /// </summary>
-        private string ValidateI2CParameters(List<BuildFlagItem> enabledFlags)
-        {
-            string expectedScl = null;
-            string expectedSda = null;
-            var i2cDevices = new List<string>();
-
-            foreach (var flag in enabledFlags)
-            {
-                if (flag.Parameters == null || !flag.Parameters.Any())
-                    continue;
-
-                // Check if this flag has SCL and SDA parameters (I2C device)
-                var sclParam = flag.Parameters.FirstOrDefault(p =>
-                    string.Equals(p.Identifier, "SCL", StringComparison.OrdinalIgnoreCase));
-                var sdaParam = flag.Parameters.FirstOrDefault(p =>
-                    string.Equals(p.Identifier, "SDA", StringComparison.OrdinalIgnoreCase));
-
-                if (sclParam != null && sdaParam != null)
-                {
-                    // This is an I2C device
-                    var currentScl = sclParam.Value?.Trim();
-                    var currentSda = sdaParam.Value?.Trim();
-
-                    // Skip if values are not set
-                    if (string.IsNullOrEmpty(currentScl) || string.IsNullOrEmpty(currentSda))
-                        continue;
-
-                    if (expectedScl == null && expectedSda == null)
-                    {
-                        // First I2C device found - set expected values
-                        expectedScl = currentScl;
-                        expectedSda = currentSda;
-                        i2cDevices.Add($"{flag.FlagName ?? flag.Key} (SCL={currentScl}, SDA={currentSda})");
-                    }
-                    else
-                    {
-                        // Validate against expected values
-                        if (!string.Equals(currentScl, expectedScl, StringComparison.OrdinalIgnoreCase) ||
-                            !string.Equals(currentSda, expectedSda, StringComparison.OrdinalIgnoreCase))
-                        {
-                            i2cDevices.Add($"{flag.FlagName ?? flag.Key} (SCL={currentScl}, SDA={currentSda})");
-
-                            // Build error message
-                            var errorMessage = "All I2C devices must use the same SCL and SDA pins.\n\n" +
-                                             "Conflicting configurations detected:\n\n" +
-                                             string.Join("\n", i2cDevices.Select(d => $"• {d}")) +
-                                             "\n\nPlease ensure all I2C devices have matching SCL and SDA values.";
-
-
-                            _logger.Warning("I2C parameter mismatch detected: {Devices}", string.Join(", ", i2cDevices));
-                            return errorMessage;
-                        }
-                        else
-                        {
-                            i2cDevices.Add($"{flag.FlagName ?? flag.Key} (SCL={currentScl}, SDA={currentSda})");
-                        }
-                    }
-                }
-            }
-
-            // All I2C devices have consistent parameters (or no I2C devices found)
-            if (i2cDevices.Any())
-            {
-                _logger.Information("I2C validation passed: {Count} devices with SCL={SCL}, SDA={SDA}",
-                    i2cDevices.Count, expectedScl, expectedSda);
-            }
-
-            return null; // No errors
         }
     }
 }

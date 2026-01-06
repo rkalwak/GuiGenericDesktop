@@ -55,12 +55,9 @@ When implementing features or fixes:
 
 ## To do
 
-- GPIO of diod for different esp modules 
 - GPIOS in general Jak już opanujesz diody dla różnych układów (C3 - GPIO8, C6 - GIO8 ale tu jest RGB, S3 - GIO2 to zwykły LED, 
 mogą być jeszcze inne kombinacje w SuperMini czy Xiao dla C3, S3 i C6), to trzeba się będzie wziąć za pozostałe GPIO (opis). Teraz np. kompiluję na C3 i w opcjach wyporu GPIO (np. dla przekaźnika) mam, że GPIO-1 to TX, a domyślnie dla tego układu jest TX na GPIO21. 
 Rozwiązania są dwa: albo do wszystkich układów dajemy GPIO bez opisów (TX, RX) albo szukamy rozpiski pinout i wstawiamy (C3 - RX20, TX21, C6 - RX17, TX16, S3- TX43, RX44, dla samego ESP32 - jest OK 1(TX) i 3(RX)).
-
-- 
 - zaluzje rs->addTiltFunctions();
 - default settings from cloud
 - HC_SR04 https://github.com/SUPLA/supla-device/pull/122
@@ -74,6 +71,13 @@ Na pewno musze zaczac brac pod uwage rozmiar flasha i dac mozliwosc wyboru jakie
 Zapisze sobie to do powalczenia bo trzeba tu porobic testy i przejrzec definicje partycji. 
 - json settings
 - partition selection
+	- use fixed partitions based on flash size and esp model
+	- create mapping of esp models to partition files
+	- create partition files for different flash sizes if not existing
+	- each file should support OTA
+	- when user select flash of 8MB use the partition file min_spiffs_8mb.csv, when 4MB use min_spiffs_4mb.csv and so on
+	- for merge_bin use the partition file based on esp model and flash size, but need to figure out the mapping of addresses
+	- create a method to validate selected partition scheme against available flash size
 - building Zigbee Gateway?
 - CC1101 given version downloading
 - Modbus control?

@@ -223,7 +223,7 @@ namespace CompilationLib
         }
 
         /// <summary>
-        /// Runs esptool.exe (--port {comPort} chip-id and flash-id), parses output and returns model + flash size.
+        /// Runs esptool.exe (--port {comPort} chip-id and flash-id), parses output and returns model + flash info.
         /// </summary>
         /// <param name="comPort">COM port to query (e.g. "COM3" or "/dev/ttyUSB0").</param>
         /// <returns>EspInfo with parsed values and raw output for diagnostics.</returns>
@@ -262,7 +262,6 @@ namespace CompilationLib
             var deviceRegex = new Regex(@"Device:\s*(?<dev>[^\r\n]+)", RegexOptions.IgnoreCase);
             var flashRegex = new Regex(@".*size[:\s]+?(?<size>[a-zA-Z0-9]{1,2}MB)", RegexOptions.IgnoreCase);
             var modelRegex = new Regex(@"Chip type:\s*(?<chip>[A-Z0-9\- ]+)", RegexOptions.IgnoreCase);
-
 
             var m2 = chipLineRegex.Match(chipExit.StdOut ?? string.Empty);
             if (m2.Success)
@@ -340,8 +339,8 @@ namespace CompilationLib
                 Device = device,
                 FlashSize = flashSize,
                 Message = isRecognized ? "ESP device detected." : "Model not detected.",
-                RawOutput = (chipExit.StdOut ?? string.Empty) + "\n" + (flashExit.StdOut ?? string.Empty),
-                RawError = (chipExit.StdErr ?? string.Empty) + "\n" + (flashExit.StdErr ?? string.Empty)
+                RawOutput = string.Join("\n", new[] { chipExit.StdOut, flashExit.StdOut }.Where(s => !string.IsNullOrEmpty(s))),
+                RawError = string.Join("\n", new[] { chipExit.StdErr, flashExit.StdErr }.Where(s => !string.IsNullOrEmpty(s)))
             };
 
             return info;
