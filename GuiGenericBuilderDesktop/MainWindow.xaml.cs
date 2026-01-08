@@ -189,8 +189,8 @@ namespace GuiGenericBuilderDesktop
                 FontFamily = new System.Windows.Media.FontFamily("Segoe UI"),
                 FontSize = 12
             };
+            
             // Add Device detection panel
-            // Device detection panel
             var devicePanel = new DockPanel { LastChildFill = false, Margin = new Thickness(12, 8, 12, 6) };
 
             // Board selector ComboBox
@@ -249,24 +249,8 @@ namespace GuiGenericBuilderDesktop
             };
             updateGGButton.Click += UpdateGG_Click;
 
-
-            // Load Configuration button
-
-
-
             checkDeviceButton = new Button { Content = LocalizationManager.Get("CheckDevice"), Width = 140, Height = 28, Margin = new Thickness(8, 0, 0, 0) };
             checkDeviceButton.Click += CheckConnectedDevice_Click;
-
-            // Status text for operations
-            statusText = new TextBlock
-            {
-                Text = string.Empty,
-                Margin = new Thickness(12, 0, 8, 0),
-                VerticalAlignment = VerticalAlignment.Center,
-                FontWeight = FontWeights.Normal,
-                Foreground = System.Windows.Media.Brushes.DarkBlue,
-                Visibility = Visibility.Collapsed
-            };
 
             compileButton = new Button
             {
@@ -277,7 +261,6 @@ namespace GuiGenericBuilderDesktop
                 Margin = new Thickness(4)
             };
             compileButton.Click += CompileSelected_Click;
-            // right-align the button inside the DockPanel
 
             // COM port selector (COM1..COM10)
             var portLabel = new TextBlock(new Run(LocalizationManager.Get("Port"))) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
@@ -397,9 +380,6 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(languageLabel);
             devicePanel.Children.Add(languageSelector);
 
-            // Status text (hidden initially)
-            devicePanel.Children.Add(statusText);
-
             // Deploy checkbox - positioned right before compile button
             deployCheckBox = new CheckBox
             {
@@ -432,7 +412,6 @@ namespace GuiGenericBuilderDesktop
                 ToolTip = LocalizationManager.Get("EraseFlashTooltip")
             };
 
-
             DockPanel.SetDock(compileButton, Dock.Right);
             devicePanel.Children.Add(compileButton);
             DockPanel.SetDock(deployCheckBox, Dock.Right);
@@ -442,7 +421,6 @@ namespace GuiGenericBuilderDesktop
             DockPanel.SetDock(eraseFlashCheckBox, Dock.Right);
             devicePanel.Children.Add(eraseFlashCheckBox);
 
-
             DockPanel.SetDock(checkDeviceButton, Dock.Right);
             devicePanel.Children.Add(checkDeviceButton);
             DockPanel.SetDock(updateGGButton, Dock.Right);
@@ -451,11 +429,23 @@ namespace GuiGenericBuilderDesktop
             DockPanel.SetDock(loadConfigButton, Dock.Right);
             devicePanel.Children.Add(loadConfigButton);
 
-
-            // right-align the button inside the DockPanel
-
-
             doc.Blocks.Add(new BlockUIContainer(devicePanel));
+
+            // Status text row - separate from controls for better visibility
+            statusText = new TextBlock
+            {
+                Text = string.Empty,
+                Margin = new Thickness(12, 4, 12, 4),
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                FontWeight = FontWeights.Normal,
+                FontSize = 13,
+                Foreground = System.Windows.Media.Brushes.DarkBlue,
+                Visibility = Visibility.Collapsed,
+                TextWrapping = TextWrapping.Wrap
+            };
+
+            doc.Blocks.Add(new BlockUIContainer(statusText));
 
             var grouped = AllBuildFlags.GroupBy(f => f.Section).ToList();
 
@@ -851,6 +841,26 @@ namespace GuiGenericBuilderDesktop
                 return;
             }
 
+            // Get and validate flash size selection
+            var selectedFlashSize = (flashSizeSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+            if (!string.IsNullOrEmpty(selectedFlashSize) && !selectedFlashSize.Equals("None", StringComparison.OrdinalIgnoreCase))
+            {
+                // Validate flash size is compatible with platform
+                if (!PartitionManager.ValidateFlashSize(selectedPlatform, selectedFlashSize))
+                {
+                    var supportedSizes = PartitionManager.GetSupportedFlashSizes(selectedPlatform);
+                    var sizesList = string.Join(", ", supportedSizes);
+                    
+                    MessageBox.Show(
+                        $"Flash size {selectedFlashSize} is not supported for {selectedPlatform}.\n\n" +
+                        $"Supported flash sizes: {sizesList}",
+                        "Incompatible Flash Size",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+            }
+
             // Get deploy and backup checkbox states
             bool shouldDeploy = deployCheckBox?.IsChecked ?? true;
             bool shouldBackup = backupCheckBox?.IsChecked ?? true;
@@ -919,6 +929,7 @@ namespace GuiGenericBuilderDesktop
                     ProjectDirectory = _repositoryPath,
                     LibrariesPath = Path.Combine(_repositoryPath, "lib"),
                     PortCom = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
+                    FlashSize = (flashSizeSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "4MB", // Get flash size from UI
                     ShouldDeploy = shouldDeploy,
                     ShouldBackup = shouldBackup,
                     ShouldEraseFlash = shouldEraseFlash,
