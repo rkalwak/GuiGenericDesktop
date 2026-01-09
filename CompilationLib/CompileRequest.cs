@@ -14,6 +14,11 @@ public class CompileRequest
     public bool ShouldDeploy { get; set; }
     public bool ShouldBackup { get; set; }
     public bool ShouldEraseFlash { get; set; }
+    
+    /// <summary>
+    /// Flash size (e.g., "4MB", "8MB", "16MB", "32MB")
+    /// </summary>
+    public string FlashSize { get; set; }
 
     public GlobalSettings GlobalSettings { get; set; } = new GlobalSettings();
 }

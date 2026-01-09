@@ -985,6 +985,7 @@ namespace GuiGenericBuilderDesktop
                         var platform = selectedPlatform;
                         var comPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
                         var compiledFirmwarePath = Path.Combine(result.OutputDirectory, result.OutputFile);
+                        var flashSize = (flashSizeSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
 
                         _configManager.SaveConfiguration(
                             selectedFlags,
@@ -992,7 +993,10 @@ namespace GuiGenericBuilderDesktop
                             platform: platform,
                             comPort: comPort,
                             firmwareFilePath: compiledFirmwarePath,
-                            buildOutputDirectory: result.OutputDirectory);
+                            buildOutputDirectory: result.OutputDirectory,
+                            flashSize: flashSize,
+                            repositoryPath: _repositoryPath,
+                            esptoolWrapper: new EsptoolWrapper());
                     }
                     catch (Exception ex)
                     {

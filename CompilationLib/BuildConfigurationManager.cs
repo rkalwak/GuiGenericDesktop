@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.IO.Compression;
 using Newtonsoft.Json;
 
@@ -24,7 +24,16 @@ namespace CompilationLib
         /// <summary>
         /// Saves a build configuration
         /// </summary>
-        public void SaveConfiguration(IEnumerable<BuildFlagItem> enabledFlags, string configName = null, string platform = null, string comPort = null, string firmwareFilePath = null, string buildOutputDirectory = null)
+        public void SaveConfiguration(
+            IEnumerable<BuildFlagItem> enabledFlags, 
+            string configName = null, 
+            string platform = null, 
+            string comPort = null, 
+            string firmwareFilePath = null, 
+            string buildOutputDirectory = null,
+            string flashSize = null,
+            string repositoryPath = null,
+            IEsptoolWrapper esptoolWrapper = null)
         {
             if (enabledFlags == null)
                 return;
@@ -97,9 +106,18 @@ namespace CompilationLib
                     
                     // Create merged ZIP file with all necessary files
                     string mergedZipPath = null;
+                    string mergedBinPath = null;
+                    
                     if (!string.IsNullOrEmpty(buildOutputDirectory) && Directory.Exists(buildOutputDirectory))
                     {
-                        mergedZipPath = CreateMergedZipFile(sanitizedName, buildOutputDirectory);
+                        mergedZipPath = CreateMergedZipFile(
+                            sanitizedName, 
+                            buildOutputDirectory, 
+                            platform, 
+                            flashSize, 
+                            repositoryPath, 
+                            esptoolWrapper,
+                            out mergedBinPath);
                     }
                     
                     // Update config with firmware file references
@@ -187,10 +205,19 @@ namespace CompilationLib
         }
 
         /// <summary>
-        /// Creates a merged ZIP file containing firmware.bin, bootloader.bin, and partitions.bin
+        /// Creates a merged ZIP file containing firmware.bin, bootloader.bin, partitions.bin, and a complete merged binary
         /// </summary>
-        private string CreateMergedZipFile(string sanitizedName, string buildOutputDirectory)
+        private string CreateMergedZipFile(
+            string sanitizedName, 
+            string buildOutputDirectory, 
+            string platform, 
+            string flashSize, 
+            string repositoryPath, 
+            IEsptoolWrapper esptoolWrapper,
+            out string mergedBinPath)
         {
+            mergedBinPath = null;
+            
             try
             {
                 var zipFileName = $"{sanitizedName}_merged.zip";
@@ -200,6 +227,41 @@ namespace CompilationLib
                 if (File.Exists(zipFilePath))
                 {
                     File.Delete(zipFilePath);
+                }
+
+                // Create merged bin file if esptool wrapper is provided and we have platform/flash size info
+                if (esptoolWrapper != null && 
+                    !string.IsNullOrEmpty(platform) && 
+                    !string.IsNullOrEmpty(flashSize) &&
+                    !flashSize.Equals("None", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        mergedBinPath = Path.Combine(_configurationsDirectory, $"{sanitizedName}_complete.bin");
+                        
+                        Console.WriteLine($"Creating merged firmware binary...");
+                        var result = esptoolWrapper.MergeFirmwareFiles(
+                            buildOutputDirectory, 
+                            mergedBinPath, 
+                            platform, 
+                            flashSize, 
+                            repositoryPath).GetAwaiter().GetResult();
+                        
+                        if (string.IsNullOrEmpty(result))
+                        {
+                            Console.WriteLine($"⚠ Warning: Failed to create merged bin file");
+                            mergedBinPath = null;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"✓ Created merged bin file: {Path.GetFileName(mergedBinPath)}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"⚠ Warning: Error creating merged bin: {ex.Message}");
+                        mergedBinPath = null;
+                    }
                 }
 
                 // Create ZIP file
@@ -225,9 +287,60 @@ namespace CompilationLib
                     {
                         zip.CreateEntryFromFile(partitionsPath, "partitions.bin", CompressionLevel.Optimal);
                     }
+                    
+                    // Add merged complete binary if it was created successfully
+                    if (!string.IsNullOrEmpty(mergedBinPath) && File.Exists(mergedBinPath))
+                    {
+                        zip.CreateEntryFromFile(mergedBinPath, $"firmware_merged.bin", CompressionLevel.Optimal);
+                        Console.WriteLine($"✓ Added merged bin to ZIP: {Path.GetFileName(mergedBinPath)}");
+                    }
+                    
+                    // Add README with flashing instructions
+                    var readmeEntry = zip.CreateEntry("README.txt");
+                    using (var writer = new StreamWriter(readmeEntry.Open()))
+                    {
+                        writer.WriteLine("=== Supla Firmware Package ===");
+                        writer.WriteLine($"Configuration: {sanitizedName}");
+                        writer.WriteLine($"Platform: {platform}");
+                        writer.WriteLine($"Flash Size: {flashSize}");
+                        writer.WriteLine($"Created: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                        writer.WriteLine();
+                        writer.WriteLine("=== Files Included ===");
+                        writer.WriteLine("1. firmware.bin      - Application firmware");
+                        writer.WriteLine("2. bootloader.bin    - ESP32 bootloader");
+                        writer.WriteLine("3. partitions.bin    - Partition table");
+                        
+                        if (!string.IsNullOrEmpty(mergedBinPath) && File.Exists(mergedBinPath))
+                        {
+                            writer.WriteLine($"4. {sanitizedName}_complete.bin - Complete merged firmware (RECOMMENDED)");
+                            writer.WriteLine();
+                            writer.WriteLine("=== RECOMMENDED: Flash Complete Binary ===");
+                            writer.WriteLine($"Flash the complete binary to address 0x0:");
+                            writer.WriteLine();
+                            var chipType = GetChipFromPlatform(platform);
+                            writer.WriteLine($"esptool --chip {chipType} --port COM_PORT write_flash 0x0 {sanitizedName}_complete.bin");
+                            writer.WriteLine();
+                            writer.WriteLine("This single file contains bootloader, partitions, and firmware.");
+                            writer.WriteLine();
+                        }
+                        
+                        writer.WriteLine("=== Alternative: Flash Individual Files ===");
+                        writer.WriteLine("If you need to flash individual files:");
+                        writer.WriteLine();
+                        var chip = GetChipFromPlatform(platform);
+                        writer.WriteLine($"esptool --chip {chip} --port COM_PORT write_flash \\ ");
+                        writer.WriteLine("  0x1000 bootloader.bin \\ ");
+                        writer.WriteLine("  0x8000 partitions.bin \\ ");
+                        writer.WriteLine("  0x10000 firmware.bin");
+                        writer.WriteLine();
+                        writer.WriteLine("=== Notes ===");
+                        writer.WriteLine("- Replace COM_PORT with your device's COM port (e.g., COM3)");
+                        writer.WriteLine("- Ensure esptool is installed: pip install esptool");
+                        writer.WriteLine("- OTA updates are supported after initial flash");
+                    }
                 }
 
-                Console.WriteLine($"? Created merged firmware ZIP: {zipFileName}");
+                Console.WriteLine($"✓ Created merged firmware ZIP: {zipFileName}");
                 return zipFilePath;
             }
             catch (Exception ex)
@@ -235,6 +348,28 @@ namespace CompilationLib
                 Console.WriteLine($"Failed to create merged ZIP file: {ex.Message}");
                 return null;
             }
+        }
+        
+        /// <summary>
+        /// Extracts chip type from platform name
+        /// </summary>
+        private static string GetChipFromPlatform(string platform)
+        {
+            if (string.IsNullOrEmpty(platform))
+                return "esp32";
+
+            var platformLower = platform.ToLowerInvariant();
+            
+            if (platformLower.Contains("esp32c6"))
+                return "esp32c6";
+            if (platformLower.Contains("esp32c3"))
+                return "esp32c3";
+            if (platformLower.Contains("esp32s3"))
+                return "esp32s3";
+            if (platformLower.Contains("esp32s2"))
+                return "esp32s2";
+            
+            return "esp32";
         }
     }
 

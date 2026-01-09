@@ -31,13 +31,18 @@ namespace CompilationLib
         /// <summary>
         /// Merges partition.bin, bootloader.bin and firmware.bin into a single complete firmware file using esptool merge_bin.
         /// The merged file can be flashed directly to address 0x0000 for a complete firmware installation.
+        /// Addresses are parsed from the partition CSV file to ensure accuracy.
         /// </summary>
         /// <param name="buildOutputDirectory">Directory containing bootloader.bin, partitions.bin, and firmware.bin</param>
         /// <param name="outputFilePath">Path where the merged complete firmware file should be saved</param>
         /// <param name="platform">Platform name (e.g., "GUI_Generic_ESP32", "GUI_Generic_ESP32C6")</param>
+        /// <param name="flashSize">Flash size (e.g., "4MB", "8MB")</param>
+        /// <param name="repositoryPath">Path to GUI-Generic repository (to find partition CSV)</param>
         /// <returns>Path to the merged file if successful, null otherwise</returns>
-        public async Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize)
+        public async Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string repositoryPath = null)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            
             try
             {
                 Console.WriteLine($"=== Merging firmware files for {platform} using esptool ===");
@@ -75,33 +80,88 @@ namespace CompilationLib
                 // Get chip type for target-specific handling
                 var chipType = GetChipFromPlatform(platform);
 
-                // Build esptool merge_bin command
+                // Parse partition addresses from CSV if available
+                int bootloaderOffset = 0x1000;  // Standard bootloader offset
+                int partitionsOffset = 0x8000;  // Standard partitions offset
+                int firmwareOffset = 0x10000;   // Default firmware offset
+
+                // Try to get actual firmware offset from partition CSV
+                if (!string.IsNullOrEmpty(repositoryPath) && !string.IsNullOrEmpty(flashSize) && 
+                    !flashSize.Equals("None", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        var partitionFilePath = PartitionManager.GetPartitionFilePath(platform, flashSize, repositoryPath);
+                        if (!string.IsNullOrEmpty(partitionFilePath) && File.Exists(partitionFilePath))
+                        {
+                            Console.WriteLine($"  Reading partition layout from: {Path.GetFileName(partitionFilePath)}");
+                            var layout = PartitionGenerator.GetPartitionLayout(partitionFilePath);
+                            
+                            if (layout != null && layout.App0Offset > 0)
+                            {
+                                firmwareOffset = layout.App0Offset;
+                                Console.WriteLine($"  Firmware offset from partition CSV: 0x{firmwareOffset:X}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"  Using default firmware offset: 0x{firmwareOffset:X}");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"  Partition CSV not found, using default offsets");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"  Warning: Failed to parse partition CSV: {ex.Message}");
+                        Console.WriteLine($"  Using default firmware offset: 0x{firmwareOffset:X}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"  Using standard ESP32 offsets");
+                }
+
+                // Build esptool merge_bin command with parsed addresses
                 // Format: esptool.py --chip {chip} merge_bin -o output.bin --flash_mode dio --flash_size 4MB 0x1000 bootloader.bin 0x8000 partitions.bin 0x10000 firmware.bin
                 var arguments = $"--chip {chipType} merge_bin " +
                                $"-o {EscapeArgument(outputFilePath)} " +
                                $"--flash_mode dio " +
                                $"--flash_size {flashSize} " +
-                               $"0x1000 {EscapeArgument(bootloaderPath)} " +
-                               $"0x8000 {EscapeArgument(partitionsPath)} " +
-                               $"0x10000 {EscapeArgument(firmwarePath)}";
+                               $"0x{bootloaderOffset:X} {EscapeArgument(bootloaderPath)} " +
+                               $"0x{partitionsOffset:X} {EscapeArgument(partitionsPath)} " +
+                               $"0x{firmwareOffset:X} {EscapeArgument(firmwarePath)}";
 
                 Console.WriteLine($"  Running: esptool {arguments}");
+                Console.WriteLine($"  Merge started at: {DateTime.Now:HH:mm:ss}");
 
                 // Run esptool merge_bin command
+                var mergeStopwatch = System.Diagnostics.Stopwatch.StartNew();
                 var result = await RunEsptoolAsync(arguments, CancellationToken.None);
+                mergeStopwatch.Stop();
+
+                Console.WriteLine($"  Merge operation completed in: {mergeStopwatch.Elapsed.TotalSeconds:F2}s");
 
                 if (result.Success && File.Exists(outputFilePath))
                 {
+                    stopwatch.Stop();
+                    
                     var fileInfo = new FileInfo(outputFilePath);
                     Console.WriteLine($"✓ Successfully created merged firmware: {Path.GetFileName(outputFilePath)}");
                     Console.WriteLine($"  Total size: {fileInfo.Length:N0} bytes ({fileInfo.Length / 1024.0:F2} KB)");
+                    Console.WriteLine($"  Bootloader: 0x{bootloaderOffset:X}");
+                    Console.WriteLine($"  Partitions: 0x{partitionsOffset:X}");
+                    Console.WriteLine($"  Firmware:   0x{firmwareOffset:X}");
+                    Console.WriteLine($"  Total time: {stopwatch.Elapsed.TotalSeconds:F2}s");
                     Console.WriteLine($"  Flash command: esptool --chip {chipType} write_flash 0x0 \"{Path.GetFileName(outputFilePath)}\"");
 
                     return outputFilePath;
                 }
                 else
                 {
-                    Console.WriteLine($"⚠ Failed to merge firmware files");
+                    stopwatch.Stop();
+                    Console.WriteLine($"⚠ Failed to merge firmware files (took {stopwatch.Elapsed.TotalSeconds:F2}s)");
                     if (!string.IsNullOrEmpty(result.StdErr))
                     {
                         Console.WriteLine($"  Error: {result.StdErr}");
@@ -111,7 +171,8 @@ namespace CompilationLib
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"⚠ Error merging firmware files: {ex.Message}");
+                stopwatch.Stop();
+                Console.WriteLine($"⚠ Error merging firmware files: {ex.Message} (took {stopwatch.Elapsed.TotalSeconds:F2}s)");
                 return null;
             }
         }
