@@ -843,23 +843,6 @@ namespace GuiGenericBuilderDesktop
 
             // Get and validate flash size selection
             var selectedFlashSize = (flashSizeSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
-            if (!string.IsNullOrEmpty(selectedFlashSize) && !selectedFlashSize.Equals("None", StringComparison.OrdinalIgnoreCase))
-            {
-                // Validate flash size is compatible with platform
-                if (!PartitionManager.ValidateFlashSize(selectedPlatform, selectedFlashSize))
-                {
-                    var supportedSizes = PartitionManager.GetSupportedFlashSizes(selectedPlatform);
-                    var sizesList = string.Join(", ", supportedSizes);
-                    
-                    MessageBox.Show(
-                        $"Flash size {selectedFlashSize} is not supported for {selectedPlatform}.\n\n" +
-                        $"Supported flash sizes: {sizesList}",
-                        "Incompatible Flash Size",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Warning);
-                    return;
-                }
-            }
 
             // Get deploy and backup checkbox states
             bool shouldDeploy = deployCheckBox?.IsChecked ?? true;
@@ -929,7 +912,6 @@ namespace GuiGenericBuilderDesktop
                     ProjectDirectory = _repositoryPath,
                     LibrariesPath = Path.Combine(_repositoryPath, "lib"),
                     PortCom = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
-                    FlashSize = (flashSizeSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "4MB", // Get flash size from UI
                     ShouldDeploy = shouldDeploy,
                     ShouldBackup = shouldBackup,
                     ShouldEraseFlash = shouldEraseFlash,
