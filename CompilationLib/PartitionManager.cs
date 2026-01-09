@@ -62,17 +62,15 @@ namespace CompilationLib
         /// <summary>
         /// Gets partition scheme for a specific platform and flash size
         /// </summary>
-        /// <param name="platform">Platform name (e.g., "GUI_Generic_ESP32", "esp32c6")</param>
         /// <param name="flashSize">Flash size (e.g., "4MB", "8MB")</param>
+        /// <param name="board">Board name (e.g., "esp32", "esp32c3", "esp32c6", "esp32s3")</param>
         /// <returns>PartitionScheme or null if not found</returns>
-        public static PartitionScheme GetPartitionScheme(string platform, string flashSize)
-        {
-            var chipName = NormalizeChipName(platform);
-            
-            if (string.IsNullOrEmpty(chipName) || string.IsNullOrEmpty(flashSize))
+        public static PartitionScheme GetPartitionScheme(string flashSize, string board)
+        {            
+            if (string.IsNullOrEmpty(board) || string.IsNullOrEmpty(flashSize))
                 return null;
 
-            if (!PlatformPartitions.TryGetValue(chipName, out var platformInfo))
+            if (!PlatformPartitions.TryGetValue(board, out var platformInfo))
                 return null;
 
             if (!platformInfo.PartitionSchemes.TryGetValue(flashSize, out var scheme))
@@ -84,16 +82,14 @@ namespace CompilationLib
         /// <summary>
         /// Gets all supported flash sizes for a platform
         /// </summary>
-        /// <param name="platform">Platform name</param>
+        /// <param name="board">Platform name</param>
         /// <returns>Array of supported flash sizes</returns>
-        public static string[] GetSupportedFlashSizes(string platform)
-        {
-            var chipName = NormalizeChipName(platform);
-            
-            if (string.IsNullOrEmpty(chipName))
+        public static string[] GetSupportedFlashSizes(string board)
+        {            
+            if (string.IsNullOrEmpty(board))
                 return Array.Empty<string>();
 
-            if (!PlatformPartitions.TryGetValue(chipName, out var platformInfo))
+            if (!PlatformPartitions.TryGetValue(board, out var platformInfo))
                 return Array.Empty<string>();
 
             return platformInfo.SupportedFlashSizes;
@@ -116,48 +112,15 @@ namespace CompilationLib
         /// </summary>
         /// <param name="platform">Platform name</param>
         /// <returns>Default flash size</returns>
-        public static string GetDefaultFlashSize(string platform)
+        public static string GetDefaultFlashSize(string board)
         {
-            var chipName = NormalizeChipName(platform);
-            
-            if (string.IsNullOrEmpty(chipName))
+            if (string.IsNullOrEmpty(board))
                 return "4MB";
 
-            if (!PlatformPartitions.TryGetValue(chipName, out var platformInfo))
+            if (!PlatformPartitions.TryGetValue(board, out var platformInfo))
                 return "4MB";
 
             return platformInfo.DefaultFlashSize;
-        }
-
-        /// <summary>
-        /// Normalizes platform/chip name to standard format (e.g., "GUI_Generic_ESP32" -> "esp32")
-        /// </summary>
-        private static string NormalizeChipName(string platform)
-        {
-            if (string.IsNullOrEmpty(platform))
-                return string.Empty;
-
-            var normalized = platform.ToLowerInvariant().Trim();
-            
-            // Remove common prefixes
-            if (normalized.StartsWith("gui_generic_"))
-            {
-                normalized = normalized.Substring("gui_generic_".Length);
-            }
-
-            // Map variations to standard names
-            if (normalized.Contains("esp32c6"))
-                return "esp32c6";
-            if (normalized.Contains("esp32c3"))
-                return "esp32c3";
-            if (normalized.Contains("esp32s3"))
-                return "esp32s3";
-            if (normalized.Contains("esp32s2"))
-                return "esp32s2";
-            if (normalized.Contains("esp32"))
-                return "esp32";
-
-            return normalized;
         }
 
         /// <summary>
@@ -166,10 +129,11 @@ namespace CompilationLib
         /// <param name="platform">Platform name</param>
         /// <param name="flashSize">Flash size</param>
         /// <param name="repositoryPath">Path to GUI-Generic repository</param>
+        /// <param name="board">Board name (e.g., "esp32", "esp32c3", "esp32c6", "esp32s3")</param>
         /// <returns>Full path to partition CSV file, or null if not found</returns>
-        public static string GetPartitionFilePath(string platform, string flashSize, string repositoryPath)
+        public static string GetPartitionFilePath(string platform, string flashSize, string repositoryPath, string board)
         {
-            var scheme = GetPartitionScheme(platform, flashSize);
+            var scheme = GetPartitionScheme(flashSize, board);
             if (scheme == null)
                 return null;
 

@@ -1,4 +1,4 @@
-﻿<Window x:Class="GuiGenericBuilderDesktop.MainWindow"
+<Window x:Class="GuiGenericBuilderDesktop.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -7,45 +7,35 @@
         mc:Ignorable="d"
         Title="Gui Generic Builder Desktop" WindowState="Maximized" Height="1200" Width="1700" Background="#00d151">
 
-    <!-- Replaced Grid with FlowDocumentScrollViewer containing a FlowDocument. -->
-    <FlowDocumentScrollViewer x:Name="docView" Margin="0" VerticalScrollBarVisibility="Auto" IsToolBarVisible="False">
-        <FlowDocument>
-            <BlockUIContainer>
-                <Border Background="#F5F5F5" Padding="12">
-                    <TextBlock Text="Build Flags Configuration" FontSize="22" FontWeight="Bold" Foreground="#333" />
-                </Border>
-            </BlockUIContainer>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-            <BlockUIContainer>
-                <DataGrid x:Name="FlagsDataGrid"
-                       Margin="12"
-                       AutoGenerateColumns="False"
-                       CanUserAddRows="False"
-                       ItemsSource="{Binding AllBuildFlags}">
-                    <DataGrid.GroupStyle>
-                        <GroupStyle>
-                            <GroupStyle.HeaderTemplate>
-                                <DataTemplate>
-                                    <DockPanel Background="#EFEFEF" VerticalAlignment="Center" LastChildFill="False">
-                                       
-                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" VerticalAlignment="Center" Margin="8,0,0,0" />
-                                        <TextBlock Text="{Binding ItemCount, StringFormat=' ({0})'}" Margin="6,0,0,0" VerticalAlignment="Center" />
-                                    </DockPanel>
-                                </DataTemplate>
-                            </GroupStyle.HeaderTemplate>
-                        </GroupStyle>
-                    </DataGrid.GroupStyle>
+        <DockPanel x:Name="devicePanel" Grid.Row="0" LastChildFill="False" Margin="4,4,4,4" Background="#00d151" Height="40">
+        </DockPanel>
 
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Section" Binding="{Binding Section}" Width="30" IsReadOnly="True" />
-                        <DataGridTextColumn Header="Flag Name" Binding="{Binding FlagName}" Width="50" IsReadOnly="True" />
-                        <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding IsEnabled}" Width="50" />
-                        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" IsReadOnly="True" />
+        <DockPanel x:Name="buttonsPanel" Grid.Row="1" LastChildFill="False" Margin="4,4,4,4" Background="#00d151" Height="40">
+        </DockPanel>
 
-                        <!-- Parameters column will be added dynamically in code-behind -->
-                    </DataGrid.Columns>
-                </DataGrid>
-            </BlockUIContainer>
-        </FlowDocument>
-    </FlowDocumentScrollViewer>
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#00d151" Focusable="False">
+            <StackPanel x:Name="flagsContainer" Margin="12" Background="White">
+            </StackPanel>
+        </ScrollViewer>
+
+        <DataGrid x:Name="FlagsDataGrid"
+                  Visibility="Collapsed"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  ItemsSource="{Binding AllBuildFlags}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Section" Binding="{Binding Section}" Width="30" IsReadOnly="True" />
+                <DataGridTextColumn Header="Flag Name" Binding="{Binding FlagName}" Width="50" IsReadOnly="True" />
+                <DataGridCheckBoxColumn Header="Enabled" Binding="{Binding IsEnabled}" Width="50" />
+                <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*" IsReadOnly="True" />
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
 </Window>

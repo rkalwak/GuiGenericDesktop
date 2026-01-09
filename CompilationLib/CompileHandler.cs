@@ -12,7 +12,7 @@ public class CompileHandler : ICompileHandler
     {
         var compileResponse = new CompileResponse();
         string buildFlagsString = BuildFlagsStringForCompilation(request.BuildFlags);
-        string arguments = $"compile {request.ProjectPath}{(request.LibrariesPath != null ? " --libraries " + request.LibrariesPath : string.Empty)} --fqbn {request.Platform} --verbose --log --build-property build.flags=\"{buildFlagsString}\" --output-dir \"{request.ProjectDirectory}/build\"";
+        string arguments = $"compile {request.ProjectPath}{(request.LibrariesPath != null ? " --libraries " + request.LibrariesPath : string.Empty)} --fqbn {request.EnvironmentName} --verbose --log --build-property build.flags=\"{buildFlagsString}\" --output-dir \"{request.ProjectDirectory}/build\"";
         var processStartInfo = new ProcessStartInfo
         {
             FileName = @"arduino-cli.exe",

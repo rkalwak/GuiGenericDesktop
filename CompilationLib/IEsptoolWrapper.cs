@@ -17,6 +17,6 @@ namespace CompilationLib
         /// <param name="flashSize">Flash size (e.g., "4MB", "8MB")</param>
         /// <param name="repositoryPath">Path to GUI-Generic repository (to find partition CSV)</param>
         /// <returns>Path to the merged file if successful, null otherwise</returns>
-        Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string repositoryPath = null);
+        Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string board, string repositoryPath = null);
     }
 }

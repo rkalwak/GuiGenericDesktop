@@ -2,7 +2,6 @@ using Xunit;
 using FluentAssertions;
 using System;
 using System.IO;
-using CompilationLib;
 
 namespace CompilationLib.Tests
 {

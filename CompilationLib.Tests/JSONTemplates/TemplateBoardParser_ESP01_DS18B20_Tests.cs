@@ -1,6 +1,5 @@
 ﻿using FluentAssertions;
 using SuplaTemplateBoard;
-using System.Linq;
 using Xunit;
 
 namespace CompilationLib.Tests.JSONTemplates

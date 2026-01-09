@@ -1,4 +1,3 @@
-using CompilationLib;
 using FluentAssertions;
 using FluentAssertions.Execution;
 using System;
@@ -31,7 +30,7 @@ namespace CompilationLib.Tests
             var request = new CompileRequest
             {
                 BuildFlags = flags,
-                Platform = platform,
+                EnvironmentName = platform,
                 ProjectDirectory = projectDir,
                 LibrariesPath = Path.Combine(projectDir, "lib"),
                 ProjectPath = Path.Combine(projectDir, "platformio.ini"),

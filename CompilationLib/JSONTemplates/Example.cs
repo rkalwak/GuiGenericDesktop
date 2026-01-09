@@ -1,7 +1,4 @@
-using System;
 using System.Text.Json;
-using SuplaTemplateBoard;
-using SuplaTemplateBoard.Models;
 
 namespace SuplaTemplateBoard.Examples
 {

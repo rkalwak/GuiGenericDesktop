@@ -1,4 +1,3 @@
-using CompilationLib;
 using FluentAssertions;
 using System;
 using System.IO;
@@ -48,7 +47,8 @@ namespace CompilationLib.Tests
             // Arrange - Create partition files
             PartitionGenerator.EnsurePartitionFilesExist(_repositoryPath);
             
-            var partitionFile = PartitionManager.GetPartitionFilePath(platform, flashSize, _repositoryPath);
+            var board = GetBoardFromPlatform(platform);
+            var partitionFile = PartitionManager.GetPartitionFilePath(platform, flashSize, _repositoryPath, board);
 
             // Act
             var layout = PartitionGenerator.GetPartitionLayout(partitionFile);
@@ -63,9 +63,10 @@ namespace CompilationLib.Tests
         {
             // Arrange
             PartitionGenerator.EnsurePartitionFilesExist(_repositoryPath);
+            var board = GetBoardFromPlatform("GUI_Generic_ESP32");
 
             // Act
-            var partitionFile = PartitionManager.GetPartitionFilePath("GUI_Generic_ESP32", "8MB", _repositoryPath);
+            var partitionFile = PartitionManager.GetPartitionFilePath("GUI_Generic_ESP32", "8MB", _repositoryPath, board);
 
             // Assert
             partitionFile.Should().NotBeNullOrEmpty();
@@ -105,7 +106,8 @@ namespace CompilationLib.Tests
             // Arrange
             PartitionGenerator.EnsurePartitionFilesExist(_repositoryPath);
             var platform = $"GUI_Generic_{chipType}".Replace("gui_generic_", "GUI_Generic_");
-            var partitionFile = PartitionManager.GetPartitionFilePath(platform, "4MB", _repositoryPath);
+            var board = GetBoardFromPlatform(platform);
+            var partitionFile = PartitionManager.GetPartitionFilePath(platform, "4MB", _repositoryPath, board);
 
             // Act
             var layout = PartitionGenerator.GetPartitionLayout(partitionFile);
@@ -154,7 +156,8 @@ namespace CompilationLib.Tests
             // Arrange
             PartitionGenerator.EnsurePartitionFilesExist(_repositoryPath);
             var platform = "GUI_Generic_ESP32S3"; // S3 supports all sizes including 32MB
-            var partitionFile = PartitionManager.GetPartitionFilePath(platform, flashSize, _repositoryPath);
+            var board = GetBoardFromPlatform(platform);
+            var partitionFile = PartitionManager.GetPartitionFilePath(platform, flashSize, _repositoryPath, board);
             
             if (partitionFile == null)
             {
@@ -171,6 +174,30 @@ namespace CompilationLib.Tests
             app0.Size.Should().Be(expectedAppSize, $"App size for {flashSize} flash should be correct");
         }
 
+        /// <summary>
+        /// Helper method to extract board name from platform string
+        /// </summary>
+        private static string GetBoardFromPlatform(string platform)
+        {
+            if (string.IsNullOrEmpty(platform))
+                return string.Empty;
+
+            var platformLower = platform.ToLowerInvariant();
+
+            if (platformLower.Contains("esp32c6"))
+                return "esp32c6";
+            if (platformLower.Contains("esp32c3"))
+                return "esp32c3";
+            if (platformLower.Contains("esp32s3"))
+                return "esp32s3";
+            if (platformLower.Contains("esp32s2"))
+                return "esp32s2";
+            if (platformLower.Contains("esp32"))
+                return "esp32";
+
+            return platform.ToLowerInvariant();
+        }
+        
         [Fact]
         public void PartitionGenerator_GetPartitionLayout_HandlesComments()
         {

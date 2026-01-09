@@ -43,7 +43,7 @@ public class PlatformioCliHandler : ICompileHandler
         }
         
         // Set partition scheme based on flash size (before modifying flags)
-        SetPartitionScheme(request.ProjectDirectory, request.Platform, request.FlashSize);
+        SetPartitionScheme(request.ProjectDirectory, request.EnvironmentName, request.FlashSize, request.Board);
       
         // PlatformIO uses 'run' command for compilation
         CommentUnlistedFlagsBetweenMarkers($"{request.ProjectDirectory}/platformio.ini", request.BuildFlags, request.GlobalSettings);
@@ -61,8 +61,8 @@ public class PlatformioCliHandler : ICompileHandler
                 // Generate encoded config for this build
                 var encodedConfig = BuildConfigurationHasher.EncodeOptions(request.BuildFlags);
 
-                // Determine chip type from platform
-                var chipType = request.Platform?.ToLowerInvariant() ?? "esp32";
+                // Determine chip type from board
+                var chipType = request.Board?.ToLowerInvariant() ?? "esp32";
 
                 var backupPath = await backupManager.CreateBackupAsync(
                     request.PortCom,
@@ -94,7 +94,7 @@ public class PlatformioCliHandler : ICompileHandler
         }
 
         // Build the arguments for PlatformIO run command
-        string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.Platform}";
+        string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.EnvironmentName}";
 
         // Add erase target if enabled (before upload)
         if (request.ShouldDeploy && request.ShouldEraseFlash)
@@ -145,7 +145,7 @@ public class PlatformioCliHandler : ICompileHandler
             stopwatch.Stop();
             compileResponse.IsSuccessful = process.ExitCode == 0;
             compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
-            compileResponse.OutputDirectory = $"{request.ProjectDirectory}/.pio/build/{request.Platform}";
+            compileResponse.OutputDirectory = $"{request.ProjectDirectory}/.pio/build/{request.EnvironmentName}";
             compileResponse.OutputFile = $"firmware.bin";
             compileResponse.Logs = "Errors:\r\n" + errors;
         }
@@ -347,7 +347,8 @@ public class PlatformioCliHandler : ICompileHandler
     /// <param name="projectDirectory">Path to project directory</param>
     /// <param name="platform">Platform name (e.g., "GUI_Generic_ESP32")</param>
     /// <param name="flashSize">Flash size (e.g., "4MB", "8MB")</param>
-    private void SetPartitionScheme(string projectDirectory, string platform, string flashSize)
+    /// <param name="board">Board name (e.g., "ESP32", "ESP32-C3")</param>
+    private void SetPartitionScheme(string projectDirectory, string platform, string flashSize, string board)
     {
         if (string.IsNullOrEmpty(flashSize) || flashSize.Equals("None", StringComparison.OrdinalIgnoreCase))
         {
@@ -356,7 +357,7 @@ public class PlatformioCliHandler : ICompileHandler
         }
 
         // Get partition scheme for this platform/flash size combination
-        var scheme = PartitionManager.GetPartitionScheme(platform, flashSize);
+        var scheme = PartitionManager.GetPartitionScheme(flashSize, board);
         if (scheme == null)
         {
             Console.WriteLine($"? Warning: No partition scheme found for {platform}/{flashSize}, using default");

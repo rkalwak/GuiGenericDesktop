@@ -14,19 +14,29 @@ namespace GuiGenericBuilderDesktop
         private readonly List<SavedBuildConfiguration> _configurations;
         private readonly BuildConfigurationManager _configManager;
         private readonly List<BuildFlagItem> _allFlags;
+        private readonly string _currentPlatform;
+        private readonly string _currentBoard;
+        private readonly string _currentComPort;
+        private readonly string _currentFlashSize;
+        private readonly IEsptoolWrapper _esptoolWrapper;
 
         public SavedBuildConfiguration SelectedConfiguration { get; private set; }
 
-        public ConfigurationManagerWindow(List<BuildFlagItem> allFlags)
+        public ConfigurationManagerWindow(List<BuildFlagItem> allFlags, string currentPlatform, string currentComPort, string currentFlashSize, string currentBoard, IEsptoolWrapper esptoolWrapper)
         {
             InitializeComponent();
             _allFlags = allFlags ?? new List<BuildFlagItem>();
-            
+            _currentPlatform = currentPlatform;
+            _currentComPort = currentComPort;
+            _currentBoard = currentBoard;
+            _currentFlashSize = currentFlashSize;
+            _esptoolWrapper = esptoolWrapper;
             // Initialize configuration manager
             var configDir = Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory, 
                 "configurations");
-            _configManager = new BuildConfigurationManager(configDir);
+
+            _configManager = new BuildConfigurationManager(configDir, _esptoolWrapper);
             
             // Load saved configurations
             _configurations = _configManager.GetAllConfigurations();
@@ -144,6 +154,7 @@ namespace GuiGenericBuilderDesktop
             DetailNameText.Text = config.ConfigurationName ?? "N/A";
             DetailPlatformText.Text = config.Platform ?? "N/A";
             DetailComPortText.Text = config.ComPort ?? "N/A";
+            DetailFlashSizeText.Text = config.FlashSize ?? "N/A";
             DetailSavedDateText.Text = config.SavedDate.ToString("yyyy-MM-dd HH:mm:ss");
             DetailEncodedText.Text = config.EncodedConfig ?? "N/A";
             
@@ -406,7 +417,7 @@ namespace GuiGenericBuilderDesktop
             }
         }
 
-        private void SaveDecodedConfiguration_Click(object sender, RoutedEventArgs e)
+        private async void SaveDecodedConfiguration_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -459,8 +470,8 @@ namespace GuiGenericBuilderDesktop
                         enabledFlags.Add(new BuildFlagItem { Key = flagKey });
                     }
 
-                    // Save configuration (hash will be auto-generated internally)
-                    _configManager.SaveConfiguration(enabledFlags, configName);
+                    // Save configuration asynchronously
+                    await _configManager.SaveConfigurationAsync(enabledFlags, configName, board: _currentBoard, platform: _currentPlatform, comPort: _currentComPort, null, null, flashSize: _currentFlashSize);
 
                     MessageBox.Show(
                         LocalizationManager.GetFormat("ConfigurationSaved", configName),
@@ -495,7 +506,7 @@ namespace GuiGenericBuilderDesktop
 
         #region Save Current Configuration Tab
 
-        private void SaveCurrentConfiguration_Click(object sender, RoutedEventArgs e)
+        private async void SaveCurrentConfiguration_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -531,16 +542,8 @@ namespace GuiGenericBuilderDesktop
                         return;
                     }
 
-                    // Get platform and COM port (empty if not set in parent window)
-                    var platform = string.Empty;
-                    var comPort = string.Empty;
-
-                    // Save the configuration
-                    _configManager.SaveConfiguration(
-                        enabledFlags,
-                        configName,
-                        platform,
-                        comPort);
+                    // Save the configuration asynchronously
+                    await _configManager.SaveConfigurationAsync(enabledFlags, configName, _currentPlatform, _currentComPort, firmwareFilePath: null, buildOutputDirectory: null, flashSize: _currentFlashSize);
 
                     // Generate encoded string for display
                     var encoded = BuildConfigurationHasher.EncodeOptions(enabledFlags);
@@ -548,8 +551,8 @@ namespace GuiGenericBuilderDesktop
                     // Update UI with success message
                     SavedNameText.Text = configName;
                     SavedFlagCountText.Text = LocalizationManager.GetFormat("FlagsCount", enabledFlags.Count);
-                    SavedPlatformText.Text = string.IsNullOrEmpty(platform) ? LocalizationManager.Get("NotSpecified") : platform;
-                    SavedComPortText.Text = string.IsNullOrEmpty(comPort) ? LocalizationManager.Get("NotSpecified") : comPort;
+                    SavedPlatformText.Text = string.IsNullOrEmpty(_currentPlatform) ? LocalizationManager.Get("NotSpecified") : _currentPlatform;
+                    SavedComPortText.Text = string.IsNullOrEmpty(_currentComPort) ? LocalizationManager.Get("NotSpecified") : _currentComPort;
                     SavedEncodedTextBox.Text = encoded;
 
                     SaveResultsPanel.Visibility = Visibility.Visible;

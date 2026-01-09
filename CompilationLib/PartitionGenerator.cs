@@ -1,20 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
-
 namespace CompilationLib
 {
     /// <summary>
-    /// Generates ESP32 partition CSV files with OTA support for different flash sizes
+    /// Validates and parses ESP32 partition CSV files with OTA support
     /// </summary>
     public class PartitionGenerator
     {
         /// <summary>
-        /// Ensures all required partition files exist in the repository
+        /// Verifies that required partition files exist in the repository
         /// </summary>
         /// <param name="repositoryPath">Path to GUI-Generic repository</param>
-        /// <returns>Number of partition files created</returns>
+        /// <returns>Number of partition files found</returns>
         public static int EnsurePartitionFilesExist(string repositoryPath)
         {
             if (string.IsNullOrEmpty(repositoryPath) || !Directory.Exists(repositoryPath))
@@ -25,101 +20,46 @@ namespace CompilationLib
             var partitionsDir = Path.Combine(repositoryPath, "partitions");
             if (!Directory.Exists(partitionsDir))
             {
-                Directory.CreateDirectory(partitionsDir);
-                Console.WriteLine($"Created partitions directory: {partitionsDir}");
+                Console.WriteLine($"? Warning: Partitions directory not found: {partitionsDir}");
+                return 0;
             }
 
-            int filesCreated = 0;
-
-            // Generate partition files for all supported flash sizes
-            var partitionConfigs = new Dictionary<string, PartitionConfig>
+            // Check for expected partition files
+            var expectedFiles = new[]
             {
-                ["4MB"] = new PartitionConfig 
-                { 
-                    FileName = "min_spiffs_4mb.csv",
-                    FlashSize = 0x400000, // 4MB = 4 * 1024 * 1024
-                    AppSize = 0x180000,   // 1.5MB per app (for OTA)
-                    SpiffsSize = 0x90000  // 576KB for SPIFFS
-                },
-                ["8MB"] = new PartitionConfig 
-                { 
-                    FileName = "min_spiffs_8mb.csv",
-                    FlashSize = 0x800000, // 8MB
-                    AppSize = 0x300000,   // 3MB per app (for OTA)
-                    SpiffsSize = 0x140000 // 1.25MB for SPIFFS
-                },
-                ["16MB"] = new PartitionConfig 
-                { 
-                    FileName = "min_spiffs_16mb.csv",
-                    FlashSize = 0x1000000, // 16MB
-                    AppSize = 0x500000,    // 5MB per app (for OTA)
-                    SpiffsSize = 0x590000  // 5.6MB for SPIFFS (adjusted to fit)
-                },
-                ["32MB"] = new PartitionConfig 
-                { 
-                    FileName = "min_spiffs_32mb.csv",
-                    FlashSize = 0x2000000, // 32MB
-                    AppSize = 0xA00000,    // 10MB per app (for OTA)
-                    SpiffsSize = 0xBE0000  // 11.9MB for SPIFFS (adjusted to fit)
-                }
+                "min_spiffs_4mb.csv",
+                "min_spiffs_8mb.csv",
+                "min_spiffs_16mb.csv",
+                "min_spiffs_32mb.csv"
             };
 
-            foreach (var config in partitionConfigs.Values)
+            int filesFound = 0;
+
+            foreach (var fileName in expectedFiles)
             {
-                var filePath = Path.Combine(partitionsDir, config.FileName);
+                var filePath = Path.Combine(partitionsDir, fileName);
                 
-                if (!File.Exists(filePath))
+                if (File.Exists(filePath))
                 {
-                    GeneratePartitionFile(filePath, config);
-                    filesCreated++;
-                    Console.WriteLine($"? Created partition file: {config.FileName}");
+                    filesFound++;
+                    Console.WriteLine($"? Found partition file: {fileName}");
                 }
                 else
                 {
-                    Console.WriteLine($"  Partition file already exists: {config.FileName}");
+                    Console.WriteLine($"? Warning: Partition file not found: {fileName}");
                 }
             }
 
-            return filesCreated;
-        }
-
-        /// <summary>
-        /// Generates a partition CSV file with OTA support
-        /// </summary>
-        private static void GeneratePartitionFile(string filePath, PartitionConfig config)
-        {
-            var sb = new StringBuilder();
-            
-            // CSV Header
-            sb.AppendLine("# Name,   Type, SubType, Offset,  Size, Flags");
-            
-            // NVS - Non-Volatile Storage (20KB)
-            sb.AppendLine("nvs,      data, nvs,     0x9000,  0x5000,");
-            
-            // OTA Data - OTA selection (8KB)
-            sb.AppendLine("otadata,  data, ota,     0xe000,  0x2000,");
-            
-            // App0 - First OTA partition (starts at 0x10000)
-            sb.AppendLine($"app0,     app,  ota_0,   0x10000, 0x{config.AppSize:X},");
-            
-            // App1 - Second OTA partition (for OTA updates)
-            var app1Offset = 0x10000 + config.AppSize;
-            sb.AppendLine($"app1,     app,  ota_1,   0x{app1Offset:X}, 0x{config.AppSize:X},");
-            
-            // SPIFFS - File system (remaining space)
-            var spiffsOffset = app1Offset + config.AppSize;
-            sb.AppendLine($"spiffs,   data, spiffs,  0x{spiffsOffset:X}, 0x{config.SpiffsSize:X},");
-            
-            // Verify partition layout doesn't exceed flash size
-            var totalUsed = spiffsOffset + config.SpiffsSize;
-            if (totalUsed > config.FlashSize)
+            if (filesFound == 0)
             {
-                throw new InvalidOperationException(
-                    $"Partition layout exceeds flash size! Used: 0x{totalUsed:X} ({totalUsed / 1024.0 / 1024.0:F2} MB), " +
-                    $"Available: 0x{config.FlashSize:X} ({config.FlashSize / 1024.0 / 1024.0:F2} MB)");
+                Console.WriteLine($"? Warning: No partition files found in {partitionsDir}");
             }
-            
-            File.WriteAllText(filePath, sb.ToString());
+            else
+            {
+                Console.WriteLine($"? Found {filesFound} of {expectedFiles.Length} expected partition files");
+            }
+
+            return filesFound;
         }
 
         /// <summary>
@@ -232,17 +172,6 @@ namespace CompilationLib
 
             return int.TryParse(value, System.Globalization.NumberStyles.HexNumber, null, out result);
         }
-    }
-
-    /// <summary>
-    /// Configuration for generating a partition file
-    /// </summary>
-    public class PartitionConfig
-    {
-        public string FileName { get; set; }
-        public int FlashSize { get; set; }
-        public int AppSize { get; set; }
-        public int SpiffsSize { get; set; }
     }
 
     /// <summary>

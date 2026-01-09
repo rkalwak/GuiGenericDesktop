@@ -1,4 +1,3 @@
-using CompilationLib;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -21,7 +20,7 @@ namespace CompilationLib.Tests
                 _flashStdErr = flashStdErr;
             }
 
-            public Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string repositoryPath = null)
+            public Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string board, string repositoryPath = null)
             {
                 return Task.FromResult(string.Empty);
             }

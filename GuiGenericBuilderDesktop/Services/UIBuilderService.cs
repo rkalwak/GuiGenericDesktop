@@ -1,4 +1,3 @@
-using CompilationLib;
 using GuiGenericBuilderDesktop.Localization;
 using Serilog;
 using System.Windows;
@@ -39,16 +38,22 @@ namespace GuiGenericBuilderDesktop.Services
         /// <summary>
         /// Adds a text block to a grid cell
         /// </summary>
-        public void AddText(Grid grid, int row, int col, string text, FontWeight? weight = null)
+        public void AddText(Grid grid, int row, int col, string text, FontWeight? weight = null, bool enableTextWrapping = false)
         {
             var tb = new TextBlock(new Run(text)) 
             { 
                 VerticalAlignment = VerticalAlignment.Center, 
-                Margin = new Thickness(4, 2, 4, 2) 
+                Margin = new Thickness(4, 2, 4, 2),
             };
             
             if (weight.HasValue) 
                 tb.FontWeight = weight.Value;
+            
+            if (enableTextWrapping)
+            {
+                tb.TextWrapping = TextWrapping.Wrap;
+                tb.VerticalAlignment = VerticalAlignment.Top;
+            }
             
             Grid.SetRow(tb, row); 
             Grid.SetColumn(tb, col);
@@ -99,12 +104,61 @@ namespace GuiGenericBuilderDesktop.Services
         public Grid CreateFlagsGrid()
         {
             var grid = new Grid { Margin = new Thickness(0, 8, 0, 0) };
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(300) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(70), });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(200) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(300) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(120) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(150) });
             return grid;
+        }
+
+        /// <summary>
+        /// Adds a Parameters column to a DataGrid dynamically
+        /// </summary>
+        /// <param name="dataGrid">The DataGrid to add the column to</param>
+        /// <param name="editParametersHandler">Click event handler for the parameters button</param>
+        public void AddParametersColumnDynamically(DataGrid dataGrid, RoutedEventHandler editParametersHandler)
+        {
+            if (dataGrid == null)
+                throw new ArgumentNullException(nameof(dataGrid));
+
+            if (editParametersHandler == null)
+                throw new ArgumentNullException(nameof(editParametersHandler));
+
+            // Prevent adding twice
+            if (dataGrid.Columns.Any(c => string.Equals(c.Header?.ToString(), "Parameters", StringComparison.OrdinalIgnoreCase)))
+            {
+                _logger.Debug("Parameters column already exists in DataGrid, skipping");
+                return;
+            }
+
+            var templateCol = new DataGridTemplateColumn 
+            { 
+                Header = "Parameters", 
+                Width = new DataGridLength(120) 
+            };
+
+            // Create DataTemplate in code
+            var buttonFactory = new FrameworkElementFactory(typeof(Button));
+            buttonFactory.SetValue(Button.ContentProperty, "Params...");
+            buttonFactory.SetValue(Button.PaddingProperty, new Thickness(6, 2, 6, 2));
+            buttonFactory.SetValue(Button.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+
+            // Bind Tag to entire row (the BuildFlagItem)
+            var tagBinding = new Binding(); // binds to DataContext (row item)
+            buttonFactory.SetBinding(Button.TagProperty, tagBinding);
+            
+            // Register Click handler
+            buttonFactory.AddHandler(Button.ClickEvent, editParametersHandler);
+
+            var dataTemplate = new DataTemplate { VisualTree = buttonFactory };
+            templateCol.CellTemplate = dataTemplate;
+
+            // Insert before Description column if possible, otherwise add to end
+            int insertIndex = Math.Max(0, dataGrid.Columns.Count - 1);
+            dataGrid.Columns.Insert(insertIndex, templateCol);
+
+            _logger.Debug("Parameters column added to DataGrid at index {Index}", insertIndex);
         }
     }
 }
