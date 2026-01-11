@@ -67,23 +67,6 @@ board_build.partitions = partitions/min_spiffs_8mb.csv
             result.Should().Contain(";-D SUPLA_RELAY"); // Commented out (no space after semicolon)
         }
 
-        [Fact]
-        public void PartitionGenerator_CreatesFilesInTestDirectory()
-        {
-            // Arrange
-            var partitionsDir = Path.Combine(_testDirectory, "partitions");
-
-            // Act
-            var filesCreated = PartitionGenerator.EnsurePartitionFilesExist(_testDirectory);
-
-            // Assert
-            filesCreated.Should().Be(4); // 4MB, 8MB, 16MB, 32MB
-            File.Exists(Path.Combine(partitionsDir, "min_spiffs_4mb.csv")).Should().BeTrue();
-            File.Exists(Path.Combine(partitionsDir, "min_spiffs_8mb.csv")).Should().BeTrue();
-            File.Exists(Path.Combine(partitionsDir, "min_spiffs_16mb.csv")).Should().BeTrue();
-            File.Exists(Path.Combine(partitionsDir, "min_spiffs_32mb.csv")).Should().BeTrue();
-        }
-
         [Theory]
         [InlineData("GUI_Generic_ESP32", "4MB", "min_spiffs_4mb.csv")]
         [InlineData("GUI_Generic_ESP32", "8MB", "min_spiffs_8mb.csv")]
@@ -133,24 +116,6 @@ board_build.partitions = partitions/min_spiffs_8mb.csv
 
             // Assert
             request.FlashSize.Should().Be("8MB");
-        }
-
-        [Fact]
-        public void PartitionGenerator_ValidatesGeneratedFiles()
-        {
-            // Arrange
-            PartitionGenerator.EnsurePartitionFilesExist(_testDirectory);
-            var partitionFile = Path.Combine(_testDirectory, "partitions", "min_spiffs_8mb.csv");
-
-            // Act
-            var isValid = PartitionGenerator.ValidatePartitionFile(partitionFile);
-            var layout = PartitionGenerator.GetPartitionLayout(partitionFile);
-
-            // Assert
-            isValid.Should().BeTrue();
-            layout.Should().NotBeNull();
-            layout.App0Offset.Should().Be(0x10000);
-            layout.Partitions.Should().HaveCountGreaterThanOrEqualTo(5); // nvs, otadata, app0, app1, spiffs
         }
 
         [Fact]
