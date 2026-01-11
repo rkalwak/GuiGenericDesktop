@@ -1,7 +1,5 @@
 using Xunit;
 using FluentAssertions;
-using CompilationLib;
-using System.Collections.Generic;
 
 namespace CompilationLib.Tests
 {

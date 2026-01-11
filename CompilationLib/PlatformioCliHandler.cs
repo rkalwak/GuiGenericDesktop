@@ -25,7 +25,25 @@ public class PlatformioCliHandler : ICompileHandler
     public async Task<CompileResponse> Handle(CompileRequest request, CancellationToken cancellationToken)
     {
         var compileResponse = new CompileResponse();
-        // Deduplicate before processing
+        
+        // Ensure partition files exist in the repository
+        try
+        {
+            Console.WriteLine("=== Checking Partition Files ===");
+            var filesCreated = PartitionGenerator.EnsurePartitionFilesExist(request.ProjectDirectory);
+            if (filesCreated > 0)
+            {
+                Console.WriteLine($"? Created {filesCreated} partition file(s)");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"? Warning: Failed to create partition files: {ex.Message}");
+            // Continue anyway - may use existing partitions
+        }
+        
+        // Set partition scheme based on flash size (before modifying flags)
+        SetPartitionScheme(request.ProjectDirectory, request.EnvironmentName, request.FlashSize, request.Board);
       
         // PlatformIO uses 'run' command for compilation
         CommentUnlistedFlagsBetweenMarkers($"{request.ProjectDirectory}/platformio.ini", request.BuildFlags, request.GlobalSettings);
@@ -43,8 +61,8 @@ public class PlatformioCliHandler : ICompileHandler
                 // Generate encoded config for this build
                 var encodedConfig = BuildConfigurationHasher.EncodeOptions(request.BuildFlags);
 
-                // Determine chip type from platform
-                var chipType = request.Platform?.ToLowerInvariant() ?? "esp32";
+                // Determine chip type from board
+                var chipType = request.Board?.ToLowerInvariant() ?? "esp32";
 
                 var backupPath = await backupManager.CreateBackupAsync(
                     request.PortCom,
@@ -76,7 +94,7 @@ public class PlatformioCliHandler : ICompileHandler
         }
 
         // Build the arguments for PlatformIO run command
-        string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.Platform}";
+        string arguments = $"run -d \"{request.ProjectDirectory}\" -e {request.EnvironmentName}";
 
         // Add erase target if enabled (before upload)
         if (request.ShouldDeploy && request.ShouldEraseFlash)
@@ -127,7 +145,7 @@ public class PlatformioCliHandler : ICompileHandler
             stopwatch.Stop();
             compileResponse.IsSuccessful = process.ExitCode == 0;
             compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
-            compileResponse.OutputDirectory = $"{request.ProjectDirectory}/.pio/build/{request.Platform}";
+            compileResponse.OutputDirectory = $"{request.ProjectDirectory}/.pio/build/{request.EnvironmentName}";
             compileResponse.OutputFile = $"firmware.bin";
             compileResponse.Logs = "Errors:\r\n" + errors;
         }
@@ -321,6 +339,98 @@ public class PlatformioCliHandler : ICompileHandler
         }
 
         File.WriteAllText(iniPath, string.Join("\n", lines) + "\n");
+    }
+
+    /// <summary>
+    /// Sets the partition scheme in platformio.ini based on platform and flash size
+    /// </summary>
+    /// <param name="projectDirectory">Path to project directory</param>
+    /// <param name="platform">Platform name (e.g., "GUI_Generic_ESP32")</param>
+    /// <param name="flashSize">Flash size (e.g., "4MB", "8MB")</param>
+    /// <param name="board">Board name (e.g., "ESP32", "ESP32-C3")</param>
+    private void SetPartitionScheme(string projectDirectory, string platform, string flashSize, string board)
+    {
+        if (string.IsNullOrEmpty(flashSize) || flashSize.Equals("None", StringComparison.OrdinalIgnoreCase))
+        {
+            Console.WriteLine("? No flash size specified, using default partition scheme");
+            return;
+        }
+
+        // Get partition scheme for this platform/flash size combination
+        var scheme = PartitionManager.GetPartitionScheme(flashSize, board);
+        if (scheme == null)
+        {
+            Console.WriteLine($"? Warning: No partition scheme found for {platform}/{flashSize}, using default");
+            return;
+        }
+
+        Console.WriteLine($"=== Setting Partition Scheme ===");
+        Console.WriteLine($"  Platform: {platform}");
+        Console.WriteLine($"  Flash Size: {flashSize}");
+        Console.WriteLine($"  Partition File: {scheme.FileName}");
+
+        var iniPath = Path.Combine(projectDirectory, "platformio.ini");
+        if (!File.Exists(iniPath))
+        {
+            Console.WriteLine($"? Warning: platformio.ini not found at {iniPath}");
+            return;
+        }
+
+        try
+        {
+            var lines = File.ReadAllLines(iniPath).ToList();
+            
+            // Look for the environment section for this platform
+            var envSection = $"[env:{platform}]";
+            var envIndex = lines.FindIndex(line => line.Trim().Equals(envSection, StringComparison.OrdinalIgnoreCase));
+            
+            if (envIndex == -1)
+            {
+                Console.WriteLine($"? Warning: Environment section {envSection} not found in platformio.ini");
+                return;
+            }
+
+            // Find the next section or end of file
+            var nextSectionIndex = lines.FindIndex(envIndex + 1, line => line.TrimStart().StartsWith("["));
+            if (nextSectionIndex == -1)
+                nextSectionIndex = lines.Count;
+
+            // Look for existing board_build.partitions line
+            var partitionsKey = "board_build.partitions";
+            var partitionsIndex = -1;
+            
+            for (int i = envIndex + 1; i < nextSectionIndex; i++)
+            {
+                if (lines[i].TrimStart().StartsWith(partitionsKey, StringComparison.OrdinalIgnoreCase))
+                {
+                    partitionsIndex = i;
+                    break;
+                }
+            }
+
+            var partitionsValue = $"board_build.partitions = partitions/{scheme.FileName}";
+
+            if (partitionsIndex != -1)
+            {
+                // Update existing line
+                lines[partitionsIndex] = partitionsValue;
+                Console.WriteLine($"  Updated existing partition configuration");
+            }
+            else
+            {
+                // Add new line after environment header
+                lines.Insert(envIndex + 1, partitionsValue);
+                Console.WriteLine($"  Added partition configuration");
+            }
+
+            File.WriteAllText(iniPath, string.Join("\n", lines) + "\n");
+            Console.WriteLine($"? Partition scheme configured successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"? Warning: Failed to set partition scheme: {ex.Message}");
+            // Continue compilation with default partitions
+        }
     }
 
     private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)

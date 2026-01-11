@@ -65,7 +65,6 @@ Rozwiązania są dwa: albo do wszystkich układów dajemy GPIO bez opisów (TX, 
 - sound when compilation is done
 - Niestety całkowicie wirtualny termostat (oparty na linkach bezpośrednich) nie działa. To znaczy działa odczyt temperatury, ale jeśli dodamy linki bezpośrednie do przekaźnika (włącznika) to moduł odmawia współpracy. 
 Zawiesza się, nie loguje do cloud i trzeba go przeflashować na nowo, bo nawet w tryb config wejść nie chce. Krystian nie dał z tym rady, ale miałem nadzieję, że się "cudownie" naprawiło. Niestety nie ;-)
-- Languages support
 - Jeśli chodzi o merge, to wydaje sie trywialne, ale nie jestem pewien co do parametrów - flash-mode, troche nie czaje jakie to ma znaczenie do stworzenia pliku i musze poczytac, a druga rzecz to adresy partycji i rozmiary.
 Na pewno musze zaczac brac pod uwage rozmiar flasha i dac mozliwosc wyboru jakiegos ukladu partycji - teraz idzie w ciemno minimum spiffs
 Zapisze sobie to do powalczenia bo trzeba tu porobic testy i przejrzec definicje partycji. 
@@ -76,7 +75,7 @@ Zapisze sobie to do powalczenia bo trzeba tu porobic testy i przejrzec definicje
 	- create partition files for different flash sizes if not existing
 	- each file should support OTA
 	- when user select flash of 8MB use the partition file min_spiffs_8mb.csv, when 4MB use min_spiffs_4mb.csv and so on
-	- for merge_bin use the partition file based on esp model and flash size, but need to figure out the mapping of addresses
+	- for merge_bin use the partition file based on esp model and flash size, but need to figure out the mapping of addresses in partition file
 	- create a method to validate selected partition scheme against available flash size
 - building Zigbee Gateway?
 - CC1101 given version downloading

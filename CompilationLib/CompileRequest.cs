@@ -3,7 +3,7 @@
 public class CompileRequest
 {
     [System.ComponentModel.DefaultValue("GUI_Generic_ESP32")]
-    public string Platform { get; set; }
+    public string EnvironmentName { get; set; }
 
     public List<BuildFlagItem> BuildFlags { get; set; } = new List<BuildFlagItem>() {  };
     public string ProjectName { get; set; }
@@ -14,6 +14,12 @@ public class CompileRequest
     public bool ShouldDeploy { get; set; }
     public bool ShouldBackup { get; set; }
     public bool ShouldEraseFlash { get; set; }
+    
+    /// <summary>
+    /// Flash size (e.g., "4MB", "8MB", "16MB", "32MB")
+    /// </summary>
+    public string FlashSize { get; set; }
 
     public GlobalSettings GlobalSettings { get; set; } = new GlobalSettings();
+    public string Board { get; set; }
 }

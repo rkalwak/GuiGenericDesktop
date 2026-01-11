@@ -6,7 +6,10 @@ namespace CompilationLib
     public  class EsptoolWrapper : IEsptoolWrapper
     {
         private string _esptoolPath = "esptool.exe";
-
+        string errors = string.Empty;
+        string logs = string.Empty;
+        public event EventHandler<string> OutputLine;
+        public event EventHandler<string> ErrorLine;
         public Task<EsptoolResult> ReadChipId(string comPort, CancellationToken cancellation = default)
             => RunEsptoolAsync($"--port {EscapeArgument(comPort)} chip-id", cancellation);
 
@@ -22,22 +25,28 @@ namespace CompilationLib
                                 cancellation);
 
         /// <summary>
-        /// Runs esptool --chip esp32c6 --port {comPort} read-flash 0x000000 0x4000000 {backupFile}
+        /// Runs esptool --chip esp32c6 --port {comPort} read-flash 0x000000 ALL {backupFile}
         /// </summary>
         public Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, CancellationToken cancellation = default)
-            => RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 read-flash 0x000000 0x400000 {EscapeArgument(backupFile)}",
+            => RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 read-flash 0x000000 ALL {EscapeArgument(backupFile)}",
                                cancellation);
 
         /// <summary>
         /// Merges partition.bin, bootloader.bin and firmware.bin into a single complete firmware file using esptool merge_bin.
         /// The merged file can be flashed directly to address 0x0000 for a complete firmware installation.
+        /// Addresses are parsed from the partition CSV file to ensure accuracy.
         /// </summary>
         /// <param name="buildOutputDirectory">Directory containing bootloader.bin, partitions.bin, and firmware.bin</param>
         /// <param name="outputFilePath">Path where the merged complete firmware file should be saved</param>
         /// <param name="platform">Platform name (e.g., "GUI_Generic_ESP32", "GUI_Generic_ESP32C6")</param>
+        /// <param name="board">Board name (e.g., "ESP32", "ESP32-C3")</param>
+        /// <param name="flashSize">Flash size (e.g., "4MB", "8MB")</param>
+        /// <param name="repositoryPath">Path to GUI-Generic repository (to find partition CSV)</param>
         /// <returns>Path to the merged file if successful, null otherwise</returns>
-        public async Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize)
+        public async Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string board, string repositoryPath)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            
             try
             {
                 Console.WriteLine($"=== Merging firmware files for {platform} using esptool ===");
@@ -71,37 +80,89 @@ namespace CompilationLib
                     Console.WriteLine($"⚠ Warning: firmware.bin not found at {firmwarePath}");
                     return null;
                 }
+;
+                // Parse partition addresses from CSV if available
+                int bootloaderOffset = 0x1000;  // Standard bootloader offset
+                int partitionsOffset = 0x8000;  // Standard partitions offset
+                int firmwareOffset = 0x10000;   // Default firmware offset
 
-                // Get chip type for target-specific handling
-                var chipType = GetChipFromPlatform(platform);
+                // Try to get actual firmware offset from partition CSV
+                if (!string.IsNullOrEmpty(repositoryPath) && !string.IsNullOrEmpty(flashSize) && 
+                    !flashSize.Equals("None", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        var partitionFilePath = PartitionManager.GetPartitionFilePath(platform, flashSize, repositoryPath, board);
+                        if (!string.IsNullOrEmpty(partitionFilePath) && File.Exists(partitionFilePath))
+                        {
+                            Console.WriteLine($"  Reading partition layout from: {Path.GetFileName(partitionFilePath)}");
+                            var layout = PartitionGenerator.GetPartitionLayout(partitionFilePath);
+                            
+                            if (layout != null && layout.App0Offset > 0)
+                            {
+                                firmwareOffset = layout.App0Offset;
+                                Console.WriteLine($"  Firmware offset from partition CSV: 0x{firmwareOffset:X}");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"  Using default firmware offset: 0x{firmwareOffset:X}");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine($"  Partition CSV not found, using default offsets");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"  Warning: Failed to parse partition CSV: {ex.Message}");
+                        Console.WriteLine($"  Using default firmware offset: 0x{firmwareOffset:X}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"  Using standard ESP32 offsets");
+                }
 
-                // Build esptool merge_bin command
+                // Build esptool merge_bin command with parsed addresses
                 // Format: esptool.py --chip {chip} merge_bin -o output.bin --flash_mode dio --flash_size 4MB 0x1000 bootloader.bin 0x8000 partitions.bin 0x10000 firmware.bin
-                var arguments = $"--chip {chipType} merge_bin " +
+                var arguments = $"--chip {board} merge-bin " +
                                $"-o {EscapeArgument(outputFilePath)} " +
-                               $"--flash_mode dio " +
-                               $"--flash_size {flashSize} " +
-                               $"0x1000 {EscapeArgument(bootloaderPath)} " +
-                               $"0x8000 {EscapeArgument(partitionsPath)} " +
-                               $"0x10000 {EscapeArgument(firmwarePath)}";
+                               $"--flash-mode dio " +
+                               $"--flash-size {flashSize} " +
+                               $"0x{bootloaderOffset:X} {EscapeArgument(bootloaderPath)} " +
+                               $"0x{partitionsOffset:X} {EscapeArgument(partitionsPath)} " +
+                               $"0x{firmwareOffset:X} {EscapeArgument(firmwarePath)}";
 
                 Console.WriteLine($"  Running: esptool {arguments}");
+                Console.WriteLine($"  Merge started at: {DateTime.Now:HH:mm:ss}");
 
                 // Run esptool merge_bin command
+                var mergeStopwatch = System.Diagnostics.Stopwatch.StartNew();
                 var result = await RunEsptoolAsync(arguments, CancellationToken.None);
+                mergeStopwatch.Stop();
+
+                Console.WriteLine($"  Merge operation completed in: {mergeStopwatch.Elapsed.TotalSeconds:F2}s");
 
                 if (result.Success && File.Exists(outputFilePath))
                 {
+                    stopwatch.Stop();
+                    
                     var fileInfo = new FileInfo(outputFilePath);
                     Console.WriteLine($"✓ Successfully created merged firmware: {Path.GetFileName(outputFilePath)}");
                     Console.WriteLine($"  Total size: {fileInfo.Length:N0} bytes ({fileInfo.Length / 1024.0:F2} KB)");
-                    Console.WriteLine($"  Flash command: esptool --chip {chipType} write_flash 0x0 \"{Path.GetFileName(outputFilePath)}\"");
+                    Console.WriteLine($"  Bootloader: 0x{bootloaderOffset:X}");
+                    Console.WriteLine($"  Partitions: 0x{partitionsOffset:X}");
+                    Console.WriteLine($"  Firmware:   0x{firmwareOffset:X}");
+                    Console.WriteLine($"  Total time: {stopwatch.Elapsed.TotalSeconds:F2}s");
+                    Console.WriteLine($"  Flash command: esptool --chip {platform} write_flash 0x0 \"{Path.GetFileName(outputFilePath)}\"");
 
                     return outputFilePath;
                 }
                 else
                 {
-                    Console.WriteLine($"⚠ Failed to merge firmware files");
+                    stopwatch.Stop();
+                    Console.WriteLine($"⚠ Failed to merge firmware files (took {stopwatch.Elapsed.TotalSeconds:F2}s)");
                     if (!string.IsNullOrEmpty(result.StdErr))
                     {
                         Console.WriteLine($"  Error: {result.StdErr}");
@@ -111,31 +172,10 @@ namespace CompilationLib
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"⚠ Error merging firmware files: {ex.Message}");
+                stopwatch.Stop();
+                Console.WriteLine($"⚠ Error merging firmware files: {ex.Message} (took {stopwatch.Elapsed.TotalSeconds:F2}s)");
                 return null;
             }
-        }
-
-        /// <summary>
-        /// Extracts chip type from platform name
-        /// </summary>
-        private static string GetChipFromPlatform(string platform)
-        {
-            if (string.IsNullOrEmpty(platform))
-                return "esp32";
-
-            var platformLower = platform.ToLowerInvariant();
-            
-            if (platformLower.Contains("esp32c6"))
-                return "esp32c6";
-            if (platformLower.Contains("esp32c3"))
-                return "esp32c3";
-            if (platformLower.Contains("esp32s3"))
-                return "esp32s3";
-            if (platformLower.Contains("esp32s2"))
-                return "esp32s2";
-            
-            return "esp32"; // Default
         }
 
         private static string EscapeArgument(string value)
@@ -148,10 +188,12 @@ namespace CompilationLib
 
         private async Task<EsptoolResult> RunEsptoolAsync(string arguments, CancellationToken cancellation)
         {
-
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var sbOut = new StringBuilder();
             var sbErr = new StringBuilder();
-            Console.WriteLine(arguments);
+            
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Executing esptool: {_esptoolPath} {arguments}");
+            
             var psi = new ProcessStartInfo
             {
                 FileName = _esptoolPath,
@@ -164,43 +206,99 @@ namespace CompilationLib
 
             try
             {
-                using var proc = Process.Start(psi) ?? throw new InvalidOperationException("Failed to start esptool process.");
-                var outTask = proc.StandardOutput.ReadToEndAsync();
-                var errTask = proc.StandardError.ReadToEndAsync();
-                await Task.WhenAll(outTask, errTask).ConfigureAwait(false);
-                sbOut.AppendLine(outTask.Result);
-                sbErr.AppendLine(errTask.Result);
+                using var process = Process.Start(psi);
+                
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Process started with PID: {process.Id}");
+                
+                process.EnableRaisingEvents = true;
 
-                // Wait for exit with cancellation support
-                using var reg = cancellation.Register(() =>
+                // Capture output data
+                process.OutputDataReceived += (sender, e) =>
                 {
-                    try { if (!proc.HasExited) proc.Kill(true); } catch { }
-                });
+                    if (e.Data != null)
+                    {
+                        sbOut.AppendLine(e.Data);
+                        Console.WriteLine($"[STDOUT] {e.Data}");
+                        Debug.WriteLine($"[STDOUT] {e.Data}");
+                        OutputLine?.Invoke(this, e.Data);
+                    }
+                };
 
-                await proc.WaitForExitAsync(cancellation).ConfigureAwait(false);
+                // Capture error data
+                process.ErrorDataReceived += (sender, e) =>
+                {
+                    if (e.Data != null)
+                    {
+                        sbErr.AppendLine(e.Data);
+                        Console.WriteLine($"[STDERR] {e.Data}");
+                        Debug.WriteLine($"[STDERR] {e.Data}");
+                        ErrorLine?.Invoke(this, e.Data);
+                    }
+                };
+
+                process.Start();
+                // Start async reading
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                // Wait for process to exit
+                await process.WaitForExitAsync(cancellation);
+                
+                stopwatch.Stop();
+                
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Process exited with code: {process.ExitCode}");
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Total execution time: {stopwatch.Elapsed.TotalSeconds:F2}s");
 
                 var result = new EsptoolResult
                 {
                     Command = $"{_esptoolPath} {arguments}",
-                    ExitCode = proc.ExitCode,
+                    ExitCode = process.ExitCode,
                     StdOut = sbOut.ToString(),
                     StdErr = sbErr.ToString(),
-                    Success = proc.ExitCode == 0
+                    Success = process.ExitCode == 0
                 };
 
-                Console.WriteLine(result.StdOut);
-                if (!string.IsNullOrEmpty(result.StdErr))
-                    Console.Error.WriteLine(result.StdErr);
+                if (!result.Success)
+                {
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Command failed with exit code: {process.ExitCode}");
+                    if (!string.IsNullOrEmpty(result.StdErr))
+                    {
+                        Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Error output: {result.StdErr}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Command completed successfully");
+                }
 
                 return result;
             }
             catch (OperationCanceledException)
             {
-                return new EsptoolResult { Command = $"{_esptoolPath} {arguments}", Success = false, ExitCode = -1, StdErr = "Operation canceled." };
+                stopwatch.Stop();
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Operation canceled after {stopwatch.Elapsed.TotalSeconds:F2}s");
+                return new EsptoolResult 
+                { 
+                    Command = $"{_esptoolPath} {arguments}", 
+                    Success = false, 
+                    ExitCode = -1, 
+                    StdErr = "Operation canceled.",
+                    StdOut = sbOut.ToString()
+                };
             }
             catch (Exception ex)
             {
-                return new EsptoolResult { Command = $"{_esptoolPath} {arguments}", Success = false, ExitCode = -1, StdErr = ex.ToString() };
+                stopwatch.Stop();
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Exception after {stopwatch.Elapsed.TotalSeconds:F2}s: {ex.Message}");
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Stack trace: {ex.StackTrace}");
+                return new EsptoolResult 
+                { 
+                    Command = $"{_esptoolPath} {arguments}", 
+                    Success = false, 
+                    ExitCode = -1, 
+                    StdErr = ex.ToString(),
+                    StdOut = sbOut.ToString()
+                };
             }
         }
     }

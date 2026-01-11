@@ -18,10 +18,14 @@ namespace GuiGenericBuilderDesktop
     {
         public List<BuildFlagItem> AllBuildFlags { get; set; }
         GitHubRepoDownloader _gitHubRepoDownloader = new GitHubRepoDownloader();
-        DeviceDetector _deviceDetector = new(new EsptoolWrapper());
+        IEsptoolWrapper _esptoolWrapper = null;
+        DeviceDetector _deviceDetector;
         string _repositoryPath = string.Empty;
-        string _port = string.Empty;
-        string _chip = string.Empty;
+        string _portCom = string.Empty;
+        string _board = string.Empty;
+
+        private string _platform;
+        string _flashSize = string.Empty;
         BuildConfigurationManager _configManager;
         private ComboBox boardSelector;
         private ComboBox comPortSelector;
@@ -37,7 +41,7 @@ namespace GuiGenericBuilderDesktop
         private TextBlock statusText;
         private CancellationTokenSource _compilationCancellation;
         private BuilderConfig _builderConfig = new BuilderConfig();
-        
+
         // Service layer
         private ValidationService _validationService;
         private DeviceManagementService _deviceManagementService;
@@ -46,6 +50,8 @@ namespace GuiGenericBuilderDesktop
 
         public MainWindow()
         {
+            _esptoolWrapper = new EsptoolWrapper();
+            _deviceDetector = new DeviceDetector(_esptoolWrapper);
             InitializeComponent();
             _logger = Log.ForContext<MainWindow>();
             _logger.Information("MainWindow initializing");
@@ -54,14 +60,9 @@ namespace GuiGenericBuilderDesktop
 
             // Initialize configuration manager
             var configDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "configurations");
-            _configManager = new BuildConfigurationManager(configDir);
+            _configManager = new BuildConfigurationManager(configDir, _esptoolWrapper);
 
-            InitializeBuildFlags();
 
-            // Add the Parameters column dynamically so it's visible in the grid
-            AddParametersColumnDynamically();
-
-            FlagsDataGrid.ItemsSource = AllBuildFlags;
             if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("GGLocal")))
             {
                 _repositoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo", "gg");
@@ -76,40 +77,18 @@ namespace GuiGenericBuilderDesktop
             _deviceManagementService = new DeviceManagementService(_deviceDetector, _logger);
             _versionService = new VersionService(_repositoryPath, _logger);
             _uiBuilderService = new UIBuilderService(_builderConfig, _logger);
+            InitializeBuildFlags();
+            // Add the Parameters column dynamically so it's visible in the grid
+            _uiBuilderService.AddParametersColumnDynamically(FlagsDataGrid, EditParameters_Click);
+
+            FlagsDataGrid.ItemsSource = AllBuildFlags;
+
 
             // Update version display and window title on startup
             var (suplaVersion, ggVersion) = _versionService.GetVersions();
             Title = _versionService.GenerateWindowTitle(suplaVersion, ggVersion);
 
             _logger.Information("MainWindow initialized successfully");
-        }
-
-        private void AddParametersColumnDynamically()
-        {
-            // Prevent adding twice
-            if (FlagsDataGrid.Columns.Any(c => string.Equals(c.Header?.ToString(), "Parameters", StringComparison.OrdinalIgnoreCase)))
-                return;
-
-            var templateCol = new DataGridTemplateColumn { Header = "Parameters", Width = new DataGridLength(120) };
-
-            // Create DataTemplate in code
-            var buttonFactory = new FrameworkElementFactory(typeof(Button));
-            buttonFactory.SetValue(Button.ContentProperty, "Params...");
-            buttonFactory.SetValue(Button.PaddingProperty, new Thickness(6, 2, 6, 2));
-            buttonFactory.SetValue(Button.HorizontalAlignmentProperty, HorizontalAlignment.Center);
-
-            // Bind Tag to entire row (the BuildFlagItem)
-            var tagBinding = new Binding(); // binds to DataContext (row item)
-            buttonFactory.SetBinding(Button.TagProperty, tagBinding);
-            // Register Click handler
-            buttonFactory.AddHandler(Button.ClickEvent, new RoutedEventHandler(EditParameters_Click));
-
-            var dataTemplate = new DataTemplate { VisualTree = buttonFactory };
-            templateCol.CellTemplate = dataTemplate;
-
-            // Insert before Description column if possible, otherwise add to end
-            int insertIndex = Math.Max(0, FlagsDataGrid.Columns.Count - 1);
-            FlagsDataGrid.Columns.Insert(insertIndex, templateCol);
         }
 
         private void InitializeBuildFlags()
@@ -182,42 +161,61 @@ namespace GuiGenericBuilderDesktop
 
         private void BuildFlowDocument()
         {
-            var doc = new FlowDocument
-            {
-                PagePadding = new Thickness(12),
-                ColumnGap = 24,
-                FontFamily = new System.Windows.Media.FontFamily("Segoe UI"),
-                FontSize = 12
-            };
-            
-            // Add Device detection panel
-            var devicePanel = new DockPanel { LastChildFill = false, Margin = new Thickness(12, 8, 12, 6) };
+            // Clear existing panels
+            devicePanel.Children.Clear();
+            buttonsPanel.Children.Clear();
+            flagsContainer.Children.Clear();
 
-            // Board selector ComboBox
-            var boardLabel = new TextBlock(new Run(LocalizationManager.Get("Board"))) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
-            boardSelector = new ComboBox { Width = 220, Margin = new Thickness(12, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
+            // ===== DEVICE PANEL (Row 0) - Port/Board/Flash/Language =====
+
+            var portLabel = new TextBlock(new Run(LocalizationManager.Get("Port"))) 
+            { 
+                FontWeight = FontWeights.SemiBold, 
+                Margin = new Thickness(4, 0, 4, 0), 
+                VerticalAlignment = VerticalAlignment.Center 
+            };
+            comPortSelector = new ComboBox { Width = 80, Margin = new Thickness(4, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
+            comPortSelector.Items.Add(new ComboBoxItem { Content = LocalizationManager.Get("None"), Tag = "None", IsSelected = true });
+            for (int i = 1; i <= 100; i++)
+            {
+                comPortSelector.Items.Add(new ComboBoxItem { Content = $"COM{i}", Tag = $"COM{i}" });
+            }
+            comPortSelector.SelectionChanged += (s, e) =>
+            {
+                if (comPortSelector.SelectedItem is ComboBoxItem ci)
+                {
+                    _portCom = (ci.Tag as string) ?? (ci.Content as string) ?? string.Empty;
+                }
+            };
+
+            var boardLabel = new TextBlock(new Run(LocalizationManager.Get("Board"))) 
+            { 
+                FontWeight = FontWeights.SemiBold, 
+                Margin = new Thickness(4, 0, 4, 0), 
+                VerticalAlignment = VerticalAlignment.Center 
+            };
+            boardSelector = new ComboBox { Width = 80, Margin = new Thickness(4, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
             boardSelector.Items.Add(new ComboBoxItem { Content = LocalizationManager.Get("None"), Tag = "None", IsSelected = true });
-            boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32 (default)", Tag = "GUI_Generic_ESP32" });
+            boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32", Tag = "GUI_Generic_ESP32" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C3", Tag = "GUI_Generic_ESP32C3" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C6", Tag = "GUI_Generic_ESP32C6" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-S3", Tag = "GUI_Generic_ESP32S3" });
 
-            // Add SelectionChanged handler to validate platform compatibility when user manually selects a board
             boardSelector.SelectionChanged += (s, e) =>
             {
                 if (boardSelector.SelectedItem is ComboBoxItem selectedItem)
                 {
-                    _chip = selectedItem.Content?.ToString()?.ToLower() ?? string.Empty;
+                    _board = selectedItem.Content?.ToString()?.ToLower() ?? string.Empty;
+                    _platform = selectedItem.Tag?.ToString() ?? string.Empty;
 
-                    if (!string.IsNullOrEmpty(_chip))
+                    if (!string.IsNullOrEmpty(_board))
                     {
-                        var disabledFlags = _validationService.DisableIncompatibleFlags(_chip, AllBuildFlags);
-                        
-                        // Notify user if any flags were disabled
+                        var disabledFlags = _validationService.DisableIncompatibleFlags(_board, AllBuildFlags);
+
                         if (disabledFlags.Any())
                         {
                             var flagsList = string.Join("\n", disabledFlags.Select(f => $"• {f}"));
-                            var message = LocalizationManager.GetFormat("PlatformCompatibility", _chip, flagsList);
+                            var message = LocalizationManager.GetFormat("PlatformCompatibility", _board, flagsList);
 
                             MessageBox.Show(
                                 message,
@@ -229,96 +227,46 @@ namespace GuiGenericBuilderDesktop
                 }
             };
 
-            var loadConfigButton = new Button
-            {
-                Content = LocalizationManager.Get("ManageConfigs"),
-                Width = 160,
-                Height = 28,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                Margin = new Thickness(4)
+            var flashSizeLabel = new TextBlock(new Run(LocalizationManager.Get("Flash"))) 
+            { 
+                FontWeight = FontWeights.SemiBold, 
+                Margin = new Thickness(4, 0, 4, 0), 
+                VerticalAlignment = VerticalAlignment.Center 
             };
-            loadConfigButton.Click += LoadConfig_Click;
-
-            updateGGButton = new Button
-            {
-                Content = LocalizationManager.Get("UpdateGuiGeneric"),
-                Width = 160,
-                Height = 28,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                Margin = new Thickness(4)
-            };
-            updateGGButton.Click += UpdateGG_Click;
-
-            checkDeviceButton = new Button { Content = LocalizationManager.Get("CheckDevice"), Width = 140, Height = 28, Margin = new Thickness(8, 0, 0, 0) };
-            checkDeviceButton.Click += CheckConnectedDevice_Click;
-
-            compileButton = new Button
-            {
-                Content = LocalizationManager.Get("Compile"),
-                Width = 140,
-                Height = 28,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                Margin = new Thickness(4)
-            };
-            compileButton.Click += CompileSelected_Click;
-
-            // COM port selector (COM1..COM10)
-            var portLabel = new TextBlock(new Run(LocalizationManager.Get("Port"))) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
-            comPortSelector = new ComboBox { Width = 100, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
-            comPortSelector.Items.Add(new ComboBoxItem { Content = LocalizationManager.Get("None"), Tag = "None", IsSelected = true });
-            for (int i = 1; i <= 100; i++)
-            {
-                var item = new ComboBoxItem { Content = $"COM{i}", Tag = $"COM{i}" };
-                comPortSelector.Items.Add(item);
-            }
-            comPortSelector.SelectionChanged += (s, e) =>
-            {
-                if (comPortSelector.SelectedItem is ComboBoxItem ci)
-                {
-                    _port = (ci.Tag as string) ?? (ci.Content as string) ?? string.Empty;
-                }
-            };
-
-            devicePanel.Children.Add(portLabel);
-            devicePanel.Children.Add(comPortSelector);
-            devicePanel.Children.Add(boardLabel);
-            devicePanel.Children.Add(boardSelector);
-
-            // Flash size selector
-            var flashSizeLabel = new TextBlock(new Run(LocalizationManager.Get("Flash"))) { FontWeight = FontWeights.SemiBold, Margin = new Thickness(12, 0, 4, 0), VerticalAlignment = VerticalAlignment.Center };
-            flashSizeSelector = new ComboBox { Width = 120, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
+            flashSizeSelector = new ComboBox { Width = 80, Margin = new Thickness(4, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
             flashSizeSelector.Items.Add(new ComboBoxItem { Content = LocalizationManager.Get("None"), Tag = "None", IsSelected = true });
             flashSizeSelector.Items.Add(new ComboBoxItem { Content = "4MB", Tag = "4MB" });
             flashSizeSelector.Items.Add(new ComboBoxItem { Content = "8MB", Tag = "8MB" });
             flashSizeSelector.Items.Add(new ComboBoxItem { Content = "16MB", Tag = "16MB" });
             flashSizeSelector.Items.Add(new ComboBoxItem { Content = "32MB", Tag = "32MB" });
-            flashSizeSelector.Items.Add(new ComboBoxItem { Content = "64MB", Tag = "64MB" });
-            devicePanel.Children.Add(flashSizeLabel);
-            devicePanel.Children.Add(flashSizeSelector);
-
-            // Language selector
-            var languageLabel = new TextBlock(new Run(LocalizationManager.Get("Language"))) 
-            { 
-                FontWeight = FontWeights.SemiBold, 
-                Margin = new Thickness(12, 0, 4, 0), 
-                VerticalAlignment = VerticalAlignment.Center 
+            flashSizeSelector.SelectionChanged += (s, e) =>
+            {
+                if (flashSizeSelector.SelectedItem is ComboBoxItem ci)
+                {
+                    _flashSize = (ci.Tag as string) ?? (ci.Content as string) ?? string.Empty;
+                }
             };
-            
-            // Remember current language before recreating selector
+
+            var languageLabel = new TextBlock(new Run(LocalizationManager.Get("Language")))
+            {
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(12, 0, 4, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
             var currentLanguageCode = LocalizationManager.CurrentLanguage;
-            
-            languageSelector = new ComboBox 
-            { 
-                Width = 120, 
-                Margin = new Thickness(8, 0, 0, 0), 
+
+            languageSelector = new ComboBox
+            {
+                Width = 100,
+                Margin = new Thickness(4, 0, 0, 0),
                 VerticalAlignment = VerticalAlignment.Center,
                 ToolTip = LocalizationManager.Get("LanguageTooltip")
             };
-            
+
             var languages = LocalizationManager.GetAvailableLanguages();
             languageSelector.ItemsSource = languages;
-            
-            // Set the previously selected language
+
             var selectedLanguage = languages.FirstOrDefault(l => l.Code == currentLanguageCode);
             if (selectedLanguage != null)
             {
@@ -326,32 +274,27 @@ namespace GuiGenericBuilderDesktop
             }
             else
             {
-                languageSelector.SelectedIndex = 0; // Fallback to Polish
+                languageSelector.SelectedIndex = 0;
             }
-            
-            // Flag to prevent recursive calls during UI rebuild
+
             bool isChangingLanguage = false;
-            
+
             languageSelector.SelectionChanged += async (s, e) =>
             {
                 if (isChangingLanguage) return;
-                
+
                 if (languageSelector.SelectedItem is LanguageOption option)
                 {
-                    // Skip if this is the same language (happens during rebuild)
                     if (option.Code == currentLanguageCode) return;
-                    
+
                     _logger.Information("Changing language to: {Language}", option.Code);
-                    
+
                     isChangingLanguage = true;
                     try
                     {
                         LocalizationManager.SetLanguage(option.Code);
-                        
-                        // Rebuild UI with new language
                         BuildFlowDocument();
-                        
-                        // Show confirmation message
+
                         await Dispatcher.InvokeAsync(() =>
                         {
                             MessageBox.Show(
@@ -376,32 +319,45 @@ namespace GuiGenericBuilderDesktop
                     }
                 }
             };
-            
+
+            devicePanel.Children.Add(portLabel);
+            devicePanel.Children.Add(comPortSelector);
+            devicePanel.Children.Add(boardLabel);
+            devicePanel.Children.Add(boardSelector);
+            devicePanel.Children.Add(flashSizeLabel);
+            devicePanel.Children.Add(flashSizeSelector);
             devicePanel.Children.Add(languageLabel);
             devicePanel.Children.Add(languageSelector);
 
-            // Deploy checkbox - positioned right before compile button
-            deployCheckBox = new CheckBox
-            {
-                Content = LocalizationManager.Get("Deploy"),
-                IsChecked = true,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(12, 0, 4, 0),
-                FontWeight = FontWeights.SemiBold
-            };
+            // ===== BUTTONS PANEL (Row 1) - Action Buttons and Checkboxes =====
 
-            // Backup checkbox - positioned right before deploy checkbox
-            backupCheckBox = new CheckBox
-            {
-                Content = LocalizationManager.Get("Backup"),
-                IsChecked = true,
-                VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(12, 0, 4, 0),
-                FontWeight = FontWeights.SemiBold,
-                ToolTip = LocalizationManager.Get("BackupTooltip")
+            checkDeviceButton = new Button 
+            { 
+                Content = LocalizationManager.Get("CheckDevice"), 
+                Width = 140, 
+                Height = 28, 
+                Margin = new Thickness(4, 0, 0, 0) 
             };
+            checkDeviceButton.Click += CheckConnectedDevice_Click;
 
-            // Erase Flash checkbox - positioned right before backup checkbox
+            updateGGButton = new Button
+            {
+                Content = LocalizationManager.Get("UpdateGuiGeneric"),
+                Width = 160,
+                Height = 28,
+                Margin = new Thickness(4, 0, 0, 0)
+            };
+            updateGGButton.Click += UpdateGG_Click;
+
+            var loadConfigButton = new Button
+            {
+                Content = LocalizationManager.Get("ManageConfigs"),
+                Width = 160,
+                Height = 28,
+                Margin = new Thickness(4, 0, 0, 0)
+            };
+            loadConfigButton.Click += LoadConfig_Click;
+
             eraseFlashCheckBox = new CheckBox
             {
                 Content = LocalizationManager.Get("EraseFlash"),
@@ -412,31 +368,57 @@ namespace GuiGenericBuilderDesktop
                 ToolTip = LocalizationManager.Get("EraseFlashTooltip")
             };
 
+            backupCheckBox = new CheckBox
+            {
+                Content = LocalizationManager.Get("Backup"),
+                IsChecked = true,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(12, 0, 4, 0),
+                FontWeight = FontWeights.SemiBold,
+                ToolTip = LocalizationManager.Get("BackupTooltip")
+            };
+
+            deployCheckBox = new CheckBox
+            {
+                Content = LocalizationManager.Get("Deploy"),
+                IsChecked = true,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(12, 0, 4, 0),
+                FontWeight = FontWeights.SemiBold
+            };
+
+            compileButton = new Button
+            {
+                Content = LocalizationManager.Get("Compile"),
+                Width = 140,
+                Height = 28,
+                Margin = new Thickness(4, 0, 0, 0)
+            };
+            compileButton.Click += CompileSelected_Click;
+
             DockPanel.SetDock(compileButton, Dock.Right);
-            devicePanel.Children.Add(compileButton);
+            buttonsPanel.Children.Add(compileButton);
             DockPanel.SetDock(deployCheckBox, Dock.Right);
-            devicePanel.Children.Add(deployCheckBox);
+            buttonsPanel.Children.Add(deployCheckBox);
             DockPanel.SetDock(backupCheckBox, Dock.Right);
-            devicePanel.Children.Add(backupCheckBox);
+            buttonsPanel.Children.Add(backupCheckBox);
             DockPanel.SetDock(eraseFlashCheckBox, Dock.Right);
-            devicePanel.Children.Add(eraseFlashCheckBox);
+            buttonsPanel.Children.Add(eraseFlashCheckBox);
 
+            buttonsPanel.Children.Add(checkDeviceButton);
             DockPanel.SetDock(checkDeviceButton, Dock.Right);
-            devicePanel.Children.Add(checkDeviceButton);
+
+            buttonsPanel.Children.Add(updateGGButton);
             DockPanel.SetDock(updateGGButton, Dock.Right);
-            devicePanel.Children.Add(updateGGButton);
 
+            buttonsPanel.Children.Add(loadConfigButton);
             DockPanel.SetDock(loadConfigButton, Dock.Right);
-            devicePanel.Children.Add(loadConfigButton);
 
-            doc.Blocks.Add(new BlockUIContainer(devicePanel));
-
-            // Status text row - separate from controls for better visibility
+            // Status text
             statusText = new TextBlock
             {
                 Text = string.Empty,
-                Margin = new Thickness(12, 4, 12, 4),
-                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(0, 4, 0, 12),
                 HorizontalAlignment = HorizontalAlignment.Left,
                 FontWeight = FontWeights.Normal,
                 FontSize = 13,
@@ -445,17 +427,15 @@ namespace GuiGenericBuilderDesktop
                 TextWrapping = TextWrapping.Wrap
             };
 
-            doc.Blocks.Add(new BlockUIContainer(statusText));
+            flagsContainer.Children.Add(statusText);
 
             var grouped = AllBuildFlags.GroupBy(f => f.Section).ToList();
 
             foreach (var group in grouped)
             {
-                // Get the section info from config to access translations
                 string sectionDisplayName = group.Key;
                 if (_builderConfig?.Sections != null && _builderConfig.Sections.TryGetValue(group.Key, out var sectionInfo))
                 {
-                    // Try to get translated section name
                     var currentLang = LocalizationManager.CurrentLanguage;
                     if (sectionInfo.Translations != null && sectionInfo.Translations.TryGetValue(currentLang, out var translatedName) && !string.IsNullOrEmpty(translatedName))
                     {
@@ -463,7 +443,6 @@ namespace GuiGenericBuilderDesktop
                     }
                 }
 
-                // Section header with a checkbox to toggle all flags in the section
                 var headerPanel = new DockPanel
                 {
                     LastChildFill = true,
@@ -476,19 +455,22 @@ namespace GuiGenericBuilderDesktop
                     Margin = new Thickness(2),
                     IsThreeState = false
                 };
-                // Initialize checked state based on group's items
                 UpdateGroupCheckBoxState(groupCheckBox, group);
 
-                // When checkbox toggled, set all items in the group accordingly
                 groupCheckBox.Checked += (s, e) => SetGroupFlags(group, true, groupCheckBox);
                 groupCheckBox.Unchecked += (s, e) => SetGroupFlags(group, false, groupCheckBox);
 
-                var titleText = new TextBlock(new Run(sectionDisplayName + $" ({group.Count()})")) { FontWeight = FontWeights.Bold, FontSize = 14, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 0, 0) };
+                var titleText = new TextBlock(new Run(sectionDisplayName + $" ({group.Count()})")) 
+                { 
+                    FontWeight = FontWeights.Bold, 
+                    FontSize = 14, 
+                    VerticalAlignment = VerticalAlignment.Center, 
+                    Margin = new Thickness(8, 0, 0, 0) 
+                };
 
                 headerPanel.Children.Add(groupCheckBox);
                 headerPanel.Children.Add(titleText);
 
-                // Subscribe to item property changes to update group checkbox state
                 foreach (var item in group)
                 {
                     item.PropertyChanged += (s, e) =>
@@ -500,7 +482,6 @@ namespace GuiGenericBuilderDesktop
                     };
                 }
 
-                // Create bordered container for the section
                 var border = new Border
                 {
                     BorderBrush = System.Windows.Media.Brushes.LightGray,
@@ -514,21 +495,14 @@ namespace GuiGenericBuilderDesktop
                 var panel = new StackPanel { Orientation = Orientation.Vertical };
                 panel.Children.Add(headerPanel);
 
-                // Grid to show items
-                var grid = new Grid { Margin = new Thickness(0, 8, 0, 0) };
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(300) });
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(300) });
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-                grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(120) });
+                var grid = _uiBuilderService.CreateFlagsGrid();
 
-                // header row - USE LOCALIZED STRINGS
                 grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                AddText(grid, 0, 0, LocalizationManager.Get("Enabled"), FontWeights.SemiBold);
-                AddText(grid, 0, 1, LocalizationManager.Get("Key"), FontWeights.SemiBold);
-                AddText(grid, 0, 2, LocalizationManager.Get("Name"), FontWeights.SemiBold);
-                AddText(grid, 0, 3, LocalizationManager.Get("Description"), FontWeights.SemiBold);
-                AddText(grid, 0, 4, LocalizationManager.Get("Parameters"), FontWeights.SemiBold);
+                _uiBuilderService.AddText(grid, 0, 0, LocalizationManager.Get("Enabled"), FontWeights.SemiBold);
+                _uiBuilderService.AddText(grid, 0, 1, LocalizationManager.Get("Key"), FontWeights.SemiBold);
+                _uiBuilderService.AddText(grid, 0, 2, LocalizationManager.Get("Name"), FontWeights.SemiBold);
+                _uiBuilderService.AddText(grid, 0, 3, LocalizationManager.Get("Description"), FontWeights.SemiBold);
+                _uiBuilderService.AddText(grid, 0, 4, LocalizationManager.Get("Parameters"), FontWeights.SemiBold);
 
                 int r = 1;
                 foreach (var item in group.OrderBy(i => i.SectionOrder).ThenBy(x => x.Key))
@@ -541,8 +515,6 @@ namespace GuiGenericBuilderDesktop
                     chk.Checked += (s, e) =>
                     {
                         var errorMessage = DependencyResolver.ProcessFlagEnabled(item, AllBuildFlags);
-                        // Only show error if the flag is NOT enabled (meaning ProcessFlagEnabled failed)
-                        // If the flag IS enabled, it was successfully auto-enabled, so no error
                         if (errorMessage != null && !item.IsEnabled)
                         {
                             MessageBox.Show(
@@ -552,16 +524,14 @@ namespace GuiGenericBuilderDesktop
                                 MessageBoxImage.Warning);
                         }
 
-                        // Check platform compatibility when user enables a flag
-                        if (item.IsEnabled && !string.IsNullOrEmpty(_chip))
+                        if (item.IsEnabled && !string.IsNullOrEmpty(_board))
                         {
                             if (item.DisabledOnPlatforms != null &&
-                                item.DisabledOnPlatforms.Any(p => string.Equals(p, _chip, StringComparison.OrdinalIgnoreCase)))
+                                item.DisabledOnPlatforms.Any(p => string.Equals(p, _board, StringComparison.OrdinalIgnoreCase)))
                             {
-                                // Flag is incompatible with current platform, disable it and show message
                                 item.IsEnabled = false;
                                 MessageBox.Show(
-                                    LocalizationManager.GetFormat("PlatformIncompatibility", item.GetLocalizedName(), _chip, string.Join(", ", item.DisabledOnPlatforms)),
+                                    LocalizationManager.GetFormat("PlatformIncompatibility", item.GetLocalizedName(), _board, string.Join(", ", item.DisabledOnPlatforms)),
                                     LocalizationManager.Get("PlatformIncompatibilityTitle"),
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Warning);
@@ -574,9 +544,9 @@ namespace GuiGenericBuilderDesktop
                     };
                     Grid.SetRow(chk, r); Grid.SetColumn(chk, 0); grid.Children.Add(chk);
 
-                    AddText(grid, r, 1, item.Key ?? string.Empty);
-                    AddText(grid, r, 2, item.GetLocalizedName());
-                    AddText(grid, r, 3, item.GetLocalizedDescription());
+                    _uiBuilderService.AddText(grid, r, 1, item.Key ?? string.Empty);
+                    _uiBuilderService.AddText(grid, r, 2, item.GetLocalizedName());
+                    _uiBuilderService.AddText(grid, r, 3, item.GetLocalizedDescription(), enableTextWrapping: true);
 
                     var btn = new Button { Content = LocalizationManager.Get("ParamsButton"), Padding = new Thickness(6, 2, 6, 2), Margin = new Thickness(2), Tag = item };
                     btn.Click += (s, e) =>
@@ -602,22 +572,8 @@ namespace GuiGenericBuilderDesktop
                 panel.Children.Add(grid);
                 border.Child = panel;
 
-                doc.Blocks.Add(new BlockUIContainer(border));
-
-                // local helper
-                void AddText(Grid g, int row, int col, string text, System.Windows.FontWeight? weight = null)
-                {
-                    var tb = new TextBlock(new Run(text)) { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(4, 2, 4, 2) };
-                    if (weight.HasValue) tb.FontWeight = weight.Value;
-                    Grid.SetRow(tb, row); Grid.SetColumn(tb, col);
-                    g.Children.Add(tb);
-                }
+                flagsContainer.Children.Add(border);
             }
-
-
-
-
-            docView.Document = doc;
         }
 
         private void EditSelectedParameters_Click(object sender, RoutedEventArgs e)
@@ -800,11 +756,8 @@ namespace GuiGenericBuilderDesktop
                 return;
             }
 
-            // Get selected platform
-            var selectedPlatform = (boardSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
-
             // Validate platform is selected
-            if (string.IsNullOrEmpty(selectedPlatform) || selectedPlatform.Equals("None", StringComparison.OrdinalIgnoreCase))
+            if (string.IsNullOrEmpty(_board) || _board.Equals("None", StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show(
                     LocalizationManager.Get("PlatformRequired"),
@@ -815,11 +768,11 @@ namespace GuiGenericBuilderDesktop
             }
 
             // Validate platform compatibility
-            var incompatibleFlags = _validationService.ValidatePlatformCompatibility(_chip, selectedFlags);
+            var incompatibleFlags = _validationService.ValidatePlatformCompatibility(_board, selectedFlags);
             if (incompatibleFlags.Any())
             {
                 var flagsList = string.Join("\n", incompatibleFlags.Select(f => $"• {f}"));
-                var message = LocalizationManager.GetFormat("PlatformCompatibilityError", selectedPlatform, flagsList);
+                var message = LocalizationManager.GetFormat("PlatformCompatibilityError", _board, flagsList);
 
                 MessageBox.Show(
                     message,
@@ -842,7 +795,24 @@ namespace GuiGenericBuilderDesktop
             }
 
             // Get and validate flash size selection
-            var selectedFlashSize = (flashSizeSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
+            var selectedFlashSize = _flashSize;
+            if (!string.IsNullOrEmpty(selectedFlashSize) && !selectedFlashSize.Equals("None", StringComparison.OrdinalIgnoreCase))
+            {
+                // Validate flash size is compatible with platform
+                if (!PartitionManager.ValidateFlashSize(_board, selectedFlashSize))
+                {
+                    var supportedSizes = PartitionManager.GetSupportedFlashSizes(_board);
+                    var sizesList = string.Join(", ", supportedSizes);
+
+                    MessageBox.Show(
+                        $"Flash size {selectedFlashSize} is not supported for {_board}.\n\n" +
+                        $"Supported flash sizes: {sizesList}",
+                        "Incompatible Flash Size",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+            }
 
             // Get deploy and backup checkbox states
             bool shouldDeploy = deployCheckBox?.IsChecked ?? true;
@@ -852,8 +822,7 @@ namespace GuiGenericBuilderDesktop
             // Validate COM port selection only if deploying
             if (shouldDeploy)
             {
-                var selectedComPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
-                if (string.IsNullOrEmpty(selectedComPort) || selectedComPort.Equals("None", StringComparison.OrdinalIgnoreCase))
+                if (string.IsNullOrEmpty(_portCom) || _portCom.Equals("None", StringComparison.OrdinalIgnoreCase))
                 {
                     MessageBox.Show(
                         LocalizationManager.Get("COMPortRequired"),
@@ -907,11 +876,13 @@ namespace GuiGenericBuilderDesktop
                 var ggRequest = new CompileRequest
                 {
                     BuildFlags = selectedFlags,
-                    Platform = selectedPlatform,
+                    EnvironmentName = _platform,
+                    Board = _board,
                     ProjectPath = Path.Combine(_repositoryPath, "src"),
                     ProjectDirectory = _repositoryPath,
                     LibrariesPath = Path.Combine(_repositoryPath, "lib"),
-                    PortCom = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty,
+                    PortCom = _portCom,
+                    FlashSize = _flashSize,
                     ShouldDeploy = shouldDeploy,
                     ShouldBackup = shouldBackup,
                     ShouldEraseFlash = shouldEraseFlash,
@@ -956,25 +927,15 @@ namespace GuiGenericBuilderDesktop
                     statusText.Text = LocalizationManager.GetFormat("CompilationSuccessful", compilationTime.TotalSeconds);
                     statusText.Foreground = System.Windows.Media.Brushes.Black;
                     statusText.FontStyle = FontStyles.Oblique;
-                    // DO NOT hide the status - keep it visible
 
-                    // Generate encoded configuration string
                     var encodedConfig = BuildConfigurationHasher.EncodeOptions(selectedFlags);
-
-                    // Save configuration with hash
+                    var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                    var configBaseName = $"Config_{timestamp}";
                     try
                     {
-                        var platform = selectedPlatform;
-                        var comPort = (comPortSelector?.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? string.Empty;
                         var compiledFirmwarePath = Path.Combine(result.OutputDirectory, result.OutputFile);
 
-                        _configManager.SaveConfiguration(
-                            selectedFlags,
-                            configName: null,
-                            platform: platform,
-                            comPort: comPort,
-                            firmwareFilePath: compiledFirmwarePath,
-                            buildOutputDirectory: result.OutputDirectory);
+                        await _configManager.SaveConfigurationAsync(selectedFlags, configName: configBaseName, board: _board, platform: _platform, comPort: _portCom, firmwareFilePath: compiledFirmwarePath, buildOutputDirectory: result.OutputDirectory, flashSize: _flashSize, repositoryPath: _repositoryPath);
                     }
                     catch (Exception ex)
                     {
@@ -984,8 +945,7 @@ namespace GuiGenericBuilderDesktop
                     // Show success results with encoded configuration string and backup path
                     // Use the copy in configurations directory instead of the build directory
                     var configurationsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "configurations");
-                    var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                    var configBaseName = $"Config_{timestamp}";
+
                     var firmwareInConfigsPath = Path.Combine(configurationsDir, $"{configBaseName}.bin");
 
                     var resultsWindow = new CompilationResultsWindow(
@@ -1097,29 +1057,30 @@ namespace GuiGenericBuilderDesktop
                         _logger.Debug("COM port selector updated to: {Port}", port);
 
                         // Update chip and board selector
-                        _chip = deviceInfo?.ChipType ?? string.Empty;
-                        _chip = _chip.ToLowerInvariant();
-                        
-                        if (!string.IsNullOrWhiteSpace(_chip) && boardSelector != null)
+                        _board = deviceInfo?.ChipType ?? string.Empty;
+                        _board = _board.ToLowerInvariant();
+
+                        if (!string.IsNullOrWhiteSpace(_board) && boardSelector != null)
                         {
-                            var platformTag = _deviceManagementService.GetPlatformTagFromChip(_chip);
-                            
+                            var platformTag = _deviceManagementService.GetPlatformTagFromChip(_board);
+
                             if (platformTag != null)
                             {
                                 var match = _deviceManagementService.FindComboBoxItemByTag(boardSelector, platformTag);
                                 if (match != null)
                                 {
+                                    _platform = platformTag;
                                     boardSelector.SelectedItem = match;
                                     _logger.Information("Board selector updated to: {BoardTag}", platformTag);
 
                                     // Disable incompatible flags for this platform
-                                    var disabledFlags = _validationService.DisableIncompatibleFlags(_chip, AllBuildFlags);
-                                    
+                                    var disabledFlags = _validationService.DisableIncompatibleFlags(_board, AllBuildFlags);
+
                                     // Notify user if any flags were disabled
                                     if (disabledFlags.Any())
                                     {
                                         var flagsList = string.Join("\n", disabledFlags.Select(f => $"• {f}"));
-                                        var message = LocalizationManager.GetFormat("PlatformCompatibility", _chip, flagsList);
+                                        var message = LocalizationManager.GetFormat("PlatformCompatibility", _board, flagsList);
 
                                         MessageBox.Show(
                                             message,
@@ -1146,19 +1107,8 @@ namespace GuiGenericBuilderDesktop
                         }
 
                         // Success status
-                        statusText.Text = LocalizationManager.GetFormat("DeviceDetected", _chip, port);
+                        statusText.Text = LocalizationManager.GetFormat("DeviceDetected", _board, port);
                         statusText.Foreground = System.Windows.Media.Brushes.Green;
-
-                        // Hide status after 3 seconds
-                        Task.Run(async () =>
-                        {
-                            await Task.Delay(3000);
-                            Dispatcher.Invoke(() =>
-                            {
-                                statusText.Visibility = Visibility.Collapsed;
-                                statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
-                            });
-                        });
                     }
                     else
                     {
@@ -1167,17 +1117,6 @@ namespace GuiGenericBuilderDesktop
                         // No device status
                         statusText.Text = LocalizationManager.Get("NoDeviceDetected");
                         statusText.Foreground = System.Windows.Media.Brushes.OrangeRed;
-
-                        // Hide status after 3 seconds
-                        Task.Run(async () =>
-                        {
-                            await Task.Delay(3000);
-                            Dispatcher.Invoke(() =>
-                            {
-                                statusText.Visibility = Visibility.Collapsed;
-                                statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
-                            });
-                        });
 
                         MessageBox.Show(
                             LocalizationManager.Get("NoDeviceDetectedMessage"),
@@ -1193,24 +1132,12 @@ namespace GuiGenericBuilderDesktop
             catch (Exception ex)
             {
                 _logger.Error(ex, "Error during device detection");
-                
+
                 await Dispatcher.InvokeAsync(() =>
                 {
                     // Error status
                     statusText.Text = LocalizationManager.Get("DeviceDetectionError");
                     statusText.Foreground = System.Windows.Media.Brushes.Red;
-
-                    // Hide status after 3 seconds
-                    Task.Run(async () =>
-                    {
-                        await Task.Delay(3000);
-                        Dispatcher.Invoke(() =>
-                        {
-                            statusText.Visibility = Visibility.Collapsed;
-                            statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
-                        });
-                    });
-
                     // Re-enable button
                     checkDeviceButton.IsEnabled = true;
 
@@ -1250,7 +1177,7 @@ namespace GuiGenericBuilderDesktop
         {
             try
             {
-                var managerWindow = new ConfigurationManagerWindow(AllBuildFlags)
+                var managerWindow = new ConfigurationManagerWindow(AllBuildFlags, _platform, _portCom, _flashSize, _board, _esptoolWrapper)
                 {
                     Owner = this
                 };
@@ -1346,6 +1273,18 @@ namespace GuiGenericBuilderDesktop
                 if (comPortItem != null)
                 {
                     comPortSelector.SelectedItem = comPortItem;
+                }
+            }
+
+            // Restore flash size selection if available
+            if (!string.IsNullOrEmpty(config.FlashSize) && flashSizeSelector != null)
+            {
+                var flashSizeItem = flashSizeSelector.Items.OfType<ComboBoxItem>()
+                    .FirstOrDefault(item => string.Equals(item.Tag?.ToString(), config.FlashSize, StringComparison.OrdinalIgnoreCase));
+
+                if (flashSizeItem != null)
+                {
+                    flashSizeSelector.SelectedItem = flashSizeItem;
                 }
             }
 

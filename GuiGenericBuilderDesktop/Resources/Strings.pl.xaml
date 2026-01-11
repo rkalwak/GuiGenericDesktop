@@ -28,7 +28,7 @@
     <system:String x:Key="Name">Nazwa</system:String>
     <system:String x:Key="Description">Opis</system:String>
     <system:String x:Key="Parameters">Parametry</system:String>
-    <system:String x:Key="ParamsButton">Param...</system:String>
+    <system:String x:Key="ParamsButton">Parametry</system:String>
     
     <!-- Status Messages -->
     <system:String x:Key="DownloadingRepository">⏳ Pobieranie repozytorium GUI-Generic...</system:String>
