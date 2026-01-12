@@ -234,13 +234,13 @@ spiffs,   data, spiffs,  0x1410000, 0x1BF0000,
             var platformLower = platform.ToLowerInvariant();
 
             if (platformLower.Contains("esp32c6"))
-                return "esp32c6";
+                return "esp32-c6";
             if (platformLower.Contains("esp32c3"))
-                return "esp32c3";
+                return "esp32-c3";
             if (platformLower.Contains("esp32s3"))
-                return "esp32s3";
+                return "esp32-s3";
             if (platformLower.Contains("esp32s2"))
-                return "esp32s2";
+                return "esp32-s2";
             if (platformLower.Contains("esp32"))
                 return "esp32";
 

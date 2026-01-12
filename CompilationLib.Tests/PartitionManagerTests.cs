@@ -6,14 +6,13 @@ namespace CompilationLib.Tests
     public class PartitionManagerTests
     {
         [Theory]
-        [InlineData("GUI_Generic_ESP32", "esp32", "4MB", "min_spiffs_4mb.csv")]
-        [InlineData("GUI_Generic_ESP32", "esp32", "8MB", "min_spiffs_8mb.csv")]
-        [InlineData("GUI_Generic_ESP32C6", "esp32c6", "4MB", "min_spiffs_4mb.csv")]
-        [InlineData("GUI_Generic_ESP32C6", "esp32c6", "16MB", "min_spiffs_16mb.csv")]
-        [InlineData("GUI_Generic_ESP32S3", "esp32s3", "32MB", "min_spiffs_32mb.csv")]
-        [InlineData("esp32", "esp32", "4MB", "min_spiffs_4mb.csv")]
-        [InlineData("esp32c3", "esp32c3", "8MB", "min_spiffs_8mb.csv")]
-        public void GetPartitionScheme_ReturnsCorrectScheme(string platform, string board, string flashSize, string expectedFileName)
+        [InlineData("esp32", "4MB", "min_spiffs_4mb.csv")]
+        [InlineData("esp32", "8MB", "min_spiffs_8mb.csv")]
+        [InlineData("esp32-c6", "4MB", "min_spiffs_4mb.csv")]
+        [InlineData("esp32-c6", "16MB", "min_spiffs_16mb.csv")]
+        [InlineData("esp32-s3", "32MB", "min_spiffs_32mb.csv")]
+        [InlineData("esp32-c3", "8MB", "min_spiffs_8mb.csv")]
+        public void GetPartitionScheme_ReturnsCorrectScheme(string board, string flashSize, string expectedFileName)
         {
             // Act
             var scheme = PartitionManager.GetPartitionScheme(flashSize, board);
@@ -42,9 +41,9 @@ namespace CompilationLib.Tests
 
         [Theory]
         [InlineData("esp32", new[] { "4MB", "8MB", "16MB" })]
-        [InlineData("esp32c3", new[] { "4MB", "8MB", "16MB" })]
-        [InlineData("esp32c6", new[] { "4MB", "8MB", "16MB" })]
-        [InlineData("esp32s3", new[] { "4MB", "8MB", "16MB", "32MB" })]
+        [InlineData("esp32-c3", new[] { "4MB", "8MB", "16MB" })]
+        [InlineData("esp32-c6", new[] { "4MB", "8MB", "16MB" })]
+        [InlineData("esp32-s3", new[] { "4MB", "8MB", "16MB", "32MB" })]
         public void GetSupportedFlashSizes_ReturnsCorrectSizes(string board, string[] expectedSizes)
         {
             // Act
@@ -59,8 +58,8 @@ namespace CompilationLib.Tests
         [InlineData("esp32", "8MB", true)]
         [InlineData("esp32", "16MB", true)]
         [InlineData("esp32", "32MB", false)] // Not supported for ESP32
-        [InlineData("esp32s3", "32MB", true)]
-        [InlineData("esp32c6", "32MB", false)] // Not supported for C6
+        [InlineData("esp32-s3", "32MB", true)]
+        [InlineData("esp32-c6", "32MB", false)] // Not supported for C6
         [InlineData("", "4MB", false)] // Empty platform
         [InlineData("unknown", "4MB", false)] // Unknown platform
         public void ValidateFlashSize_ReturnsCorrectResult(string board, string flashSize, bool expected)
@@ -74,9 +73,9 @@ namespace CompilationLib.Tests
 
         [Theory]
         [InlineData("esp32", "4MB")]
-        [InlineData("esp32c3", "4MB")]
-        [InlineData("esp32c6", "4MB")]
-        [InlineData("esp32s3", "4MB")]
+        [InlineData("esp32-c3", "4MB")]
+        [InlineData("esp32-c6", "4MB")]
+        [InlineData("esp32-s3", "4MB")]
         [InlineData("", "4MB")] // Fallback for empty
         [InlineData("unknown", "4MB")] // Fallback for unknown
         public void GetDefaultFlashSize_ReturnsCorrectDefault(string board, string expectedDefault)
@@ -110,8 +109,8 @@ namespace CompilationLib.Tests
         [InlineData("GUI_GENERIC_ESP32", "esp32", "esp32")] // Case insensitive
         [InlineData("esp32", "esp32", "esp32")]
         [InlineData("ESP32", "esp32", "esp32")]
-        [InlineData("GUI_Generic_ESP32C6", "esp32c6", "esp32c6")]
-        [InlineData("esp32c6", "esp32c6", "esp32c6")]
+        [InlineData("GUI_Generic_ESP32C6", "esp32-c6", "esp32-c6")]
+        [InlineData("esp32c6", "esp32-c6", "esp32-c6")]
         public void ChipNameNormalization_WorksCorrectly(string input, string board, string expectedChip)
         {
             // Act - test normalization indirectly through GetPartitionScheme

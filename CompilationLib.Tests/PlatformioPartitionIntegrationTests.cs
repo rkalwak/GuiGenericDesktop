@@ -68,15 +68,12 @@ board_build.partitions = partitions/min_spiffs_8mb.csv
         }
 
         [Theory]
-        [InlineData("GUI_Generic_ESP32", "4MB", "min_spiffs_4mb.csv")]
-        [InlineData("GUI_Generic_ESP32", "8MB", "min_spiffs_8mb.csv")]
-        [InlineData("GUI_Generic_ESP32C6", "16MB", "min_spiffs_16mb.csv")]
-        [InlineData("GUI_Generic_ESP32S3", "32MB", "min_spiffs_32mb.csv")]
-        public void PartitionManager_ReturnsCorrectSchemeForPlatformAndFlashSize(string platform, string flashSize, string expectedFile)
+        [InlineData("esp32", "4MB", "min_spiffs_4mb.csv")]
+        [InlineData("esp32", "8MB", "min_spiffs_8mb.csv")]
+        [InlineData("esp32-c6", "16MB", "min_spiffs_16mb.csv")]
+        [InlineData("esp32-s3", "32MB", "min_spiffs_32mb.csv")]
+        public void PartitionManager_ReturnsCorrectSchemeForBoardAndFlashSize(string board, string flashSize, string expectedFile)
         {
-            // Arrange
-            var board = GetBoardFromPlatform(platform);
-
             // Act
             var scheme = PartitionManager.GetPartitionScheme(flashSize, board);
 
@@ -88,15 +85,12 @@ board_build.partitions = partitions/min_spiffs_8mb.csv
         }
 
         [Theory]
-        [InlineData("GUI_Generic_ESP32", "4MB", true)]
-        [InlineData("GUI_Generic_ESP32", "32MB", false)] // ESP32 doesn't support 32MB
-        [InlineData("GUI_Generic_ESP32S3", "32MB", true)] // ESP32-S3 supports 32MB
-        [InlineData("GUI_Generic_ESP32C6", "32MB", false)] // ESP32-C6 doesn't support 32MB
-        public void PartitionManager_ValidatesFlashSizeCorrectly(string platform, string flashSize, bool expected)
+        [InlineData("esp32", "4MB", true)]
+        [InlineData("esp32", "32MB", false)] // ESP32 doesn't support 32MB
+        [InlineData("esp32-s3", "32MB", true)] // ESP32-S3 supports 32MB
+        [InlineData("esp32-c6", "32MB", false)] // ESP32-C6 doesn't support 32MB
+        public void PartitionManager_ValidatesFlashSizeCorrectly(string board, string flashSize, bool expected)
         {
-            // Arrange
-            var board = GetBoardFromPlatform(platform);
-
             // Act
             var isValid = PartitionManager.ValidateFlashSize(board, flashSize);
 
@@ -116,46 +110,6 @@ board_build.partitions = partitions/min_spiffs_8mb.csv
 
             // Assert
             request.FlashSize.Should().Be("8MB");
-        }
-
-        [Fact]
-        public void PartitionManager_GetSupportedFlashSizes_ReturnsCorrectSizes()
-        {
-            // Arrange
-            var esp32Board = GetBoardFromPlatform("GUI_Generic_ESP32");
-            var esp32s3Board = GetBoardFromPlatform("GUI_Generic_ESP32S3");
-
-            // Act
-            var esp32Sizes = PartitionManager.GetSupportedFlashSizes(esp32Board);
-            var esp32s3Sizes = PartitionManager.GetSupportedFlashSizes(esp32s3Board);
-
-            // Assert
-            esp32Sizes.Should().BeEquivalentTo(new[] { "4MB", "8MB", "16MB" });
-            esp32s3Sizes.Should().BeEquivalentTo(new[] { "4MB", "8MB", "16MB", "32MB" });
-        }
-
-        /// <summary>
-        /// Helper method to extract board name from platform string
-        /// </summary>
-        private static string GetBoardFromPlatform(string platform)
-        {
-            if (string.IsNullOrEmpty(platform))
-                return string.Empty;
-
-            var platformLower = platform.ToLowerInvariant();
-
-            if (platformLower.Contains("esp32c6"))
-                return "esp32c6";
-            if (platformLower.Contains("esp32c3"))
-                return "esp32c3";
-            if (platformLower.Contains("esp32s3"))
-                return "esp32s3";
-            if (platformLower.Contains("esp32s2"))
-                return "esp32s2";
-            if (platformLower.Contains("esp32"))
-                return "esp32";
-
-            return platform.ToLowerInvariant();
         }
     }
 }

@@ -20,9 +20,9 @@ namespace CompilationLib
                     ["16MB"] = new PartitionScheme { FileName = "min_spiffs_16mb.csv", FlashSize = "16MB", HasOTA = true }
                 }
             },
-            ["esp32c3"] = new PlatformPartitionInfo
+            ["esp32-c3"] = new PlatformPartitionInfo
             {
-                ChipName = "esp32c3",
+                ChipName = "esp32-c3",
                 DefaultFlashSize = "4MB",
                 SupportedFlashSizes = new[] { "4MB", "8MB", "16MB" },
                 PartitionSchemes = new Dictionary<string, PartitionScheme>
@@ -32,9 +32,9 @@ namespace CompilationLib
                     ["16MB"] = new PartitionScheme { FileName = "min_spiffs_16mb.csv", FlashSize = "16MB", HasOTA = true }
                 }
             },
-            ["esp32c6"] = new PlatformPartitionInfo
+            ["esp32-c6"] = new PlatformPartitionInfo
             {
-                ChipName = "esp32c6",
+                ChipName = "esp32-c6",
                 DefaultFlashSize = "4MB",
                 SupportedFlashSizes = new[] { "4MB", "8MB", "16MB" },
                 PartitionSchemes = new Dictionary<string, PartitionScheme>
@@ -44,9 +44,9 @@ namespace CompilationLib
                     ["16MB"] = new PartitionScheme { FileName = "min_spiffs_16mb.csv", FlashSize = "16MB", HasOTA = true }
                 }
             },
-            ["esp32s3"] = new PlatformPartitionInfo
+            ["esp32-s3"] = new PlatformPartitionInfo
             {
-                ChipName = "esp32s3",
+                ChipName = "esp32-s3",
                 DefaultFlashSize = "4MB",
                 SupportedFlashSizes = new[] { "4MB", "8MB", "16MB", "32MB" },
                 PartitionSchemes = new Dictionary<string, PartitionScheme>
