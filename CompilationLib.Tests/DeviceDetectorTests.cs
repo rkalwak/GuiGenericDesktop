@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -20,22 +21,22 @@ namespace CompilationLib.Tests
                 _flashStdErr = flashStdErr;
             }
 
-            public Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string board, string repositoryPath = null)
+            public async Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string board, string repositoryPath = null, CancellationToken cancellationToken = default)
             {
-                return Task.FromResult(string.Empty);
+                return await Task.FromResult(string.Empty);
             }
 
-            public Task<EsptoolResult> ReadChipId(string comPort, System.Threading.CancellationToken cancellation = default)
-            => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = _chipStdOut, StdErr = _chipStdErr, Command = "esptool --chip-id" });
+            public async Task<EsptoolResult> ReadChipId(string comPort, System.Threading.CancellationToken cancellation = default)
+            =>  await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = _chipStdOut, StdErr = _chipStdErr, Command = "esptool --chip-id" });
 
-            public Task<EsptoolResult> ReadFlashId(string comPort, System.Threading.CancellationToken cancellation = default)
-            => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = _flashStdOut, StdErr = _flashStdErr, Command = "esptool --flash-id" });
+            public async Task<EsptoolResult> ReadFlashId(string comPort, System.Threading.CancellationToken cancellation = default)
+            => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = _flashStdOut, StdErr = _flashStdErr, Command = "esptool --flash-id" });
 
-            public Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, System.Threading.CancellationToken cancellation = default)
-            => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Read flash success", StdErr = "", Command = "esptool read-flash" });
+            public async Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, System.Threading.CancellationToken cancellation = default)
+            => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Read flash success", StdErr = "", Command = "esptool read-flash" });
 
-            public Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, System.Threading.CancellationToken cancellation = default)
-            => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Write flash success", StdErr = "", Command = "esptool write-flash" });
+            public async Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, System.Threading.CancellationToken cancellation = default)
+            => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Write flash success", StdErr = "", Command = "esptool write-flash" });
         }
 
         [Fact]

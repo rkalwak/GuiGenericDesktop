@@ -10,25 +10,25 @@ namespace CompilationLib
         string logs = string.Empty;
         public event EventHandler<string> OutputLine;
         public event EventHandler<string> ErrorLine;
-        public Task<EsptoolResult> ReadChipId(string comPort, CancellationToken cancellation = default)
-            => RunEsptoolAsync($"--port {EscapeArgument(comPort)} chip-id", cancellation);
+        public async Task<EsptoolResult> ReadChipId(string comPort, CancellationToken cancellation = default)
+            => await RunEsptoolAsync($"--port {EscapeArgument(comPort)} chip-id", cancellation);
 
 
-        public Task<EsptoolResult> ReadFlashId(string comPort, CancellationToken cancellation = default)
-            => RunEsptoolAsync($"--port {EscapeArgument(comPort)} flash-id", cancellation);
+        public async Task<EsptoolResult> ReadFlashId(string comPort, CancellationToken cancellation = default)
+            => await RunEsptoolAsync($"--port {EscapeArgument(comPort)} flash-id", cancellation);
 
         /// <summary>
         /// Runs esptool --chip esp32c6 --port {comPort} write-flash 0x000000 0x4000000 {binFile}
         /// </summary>
-        public Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, CancellationToken cancellation = default)
-            => RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 write-flash 0x000000 {EscapeArgument(binFile)}",
+        public async Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, CancellationToken cancellation = default)
+            => await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 write-flash 0x000000 {EscapeArgument(binFile)}",
                                 cancellation);
 
         /// <summary>
         /// Runs esptool --chip esp32c6 --port {comPort} read-flash 0x000000 ALL {backupFile}
         /// </summary>
-        public Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, CancellationToken cancellation = default)
-            => RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 read-flash 0x000000 ALL {EscapeArgument(backupFile)}",
+        public async Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, CancellationToken cancellation = default)
+            => await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 read-flash 0x000000 ALL {EscapeArgument(backupFile)}",
                                cancellation);
 
         /// <summary>
@@ -42,8 +42,9 @@ namespace CompilationLib
         /// <param name="board">Board name (e.g., "ESP32", "ESP32-C3")</param>
         /// <param name="flashSize">Flash size (e.g., "4MB", "8MB")</param>
         /// <param name="repositoryPath">Path to GUI-Generic repository (to find partition CSV)</param>
+        /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Path to the merged file if successful, null otherwise</returns>
-        public async Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string board, string repositoryPath)
+        public async Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string board, string repositoryPath, CancellationToken cancellationToken)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             
@@ -139,7 +140,7 @@ namespace CompilationLib
 
                 // Run esptool merge_bin command
                 var mergeStopwatch = System.Diagnostics.Stopwatch.StartNew();
-                var result = await RunEsptoolAsync(arguments, CancellationToken.None);
+                var result = await RunEsptoolAsync(arguments, cancellationToken);
                 mergeStopwatch.Stop();
 
                 Console.WriteLine($"  Merge operation completed in: {mergeStopwatch.Elapsed.TotalSeconds:F2}s");
@@ -191,7 +192,7 @@ namespace CompilationLib
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             var sbOut = new StringBuilder();
             var sbErr = new StringBuilder();
-            
+            EsptoolResult result = null;
             Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Executing esptool: {_esptoolPath} {arguments}");
             
             var psi = new ProcessStartInfo
@@ -206,71 +207,71 @@ namespace CompilationLib
 
             try
             {
-                using var process = Process.Start(psi);
-                
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Process started with PID: {process.Id}");
-                
-                process.EnableRaisingEvents = true;
-
-                // Capture output data
-                process.OutputDataReceived += (sender, e) =>
+                using (var process = new Process { StartInfo = psi })
                 {
-                    if (e.Data != null)
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Process started");
+
+                    process.EnableRaisingEvents = true;
+
+                    // Capture output data
+                    process.OutputDataReceived += (sender, e) =>
                     {
-                        sbOut.AppendLine(e.Data);
-                        Console.WriteLine($"[STDOUT] {e.Data}");
-                        Debug.WriteLine($"[STDOUT] {e.Data}");
-                        OutputLine?.Invoke(this, e.Data);
+                        if (e.Data != null)
+                        {
+                            sbOut.AppendLine(e.Data);
+                            Console.WriteLine($"[STDOUT] {e.Data}");
+                            Debug.WriteLine($"[STDOUT] {e.Data}");
+                            OutputLine?.Invoke(this, e.Data);
+                        }
+                    };
+
+                    // Capture error data
+                    process.ErrorDataReceived += (sender, e) =>
+                    {
+                        if (e.Data != null)
+                        {
+                            sbErr.AppendLine(e.Data);
+                            Console.WriteLine($"[STDERR] {e.Data}");
+                            Debug.WriteLine($"[STDERR] {e.Data}");
+                            ErrorLine?.Invoke(this, e.Data);
+                        }
+                    };
+
+                    process.Start();
+                    // Start async reading
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+
+                    // Wait for process to exit
+                    await process.WaitForExitAsync(cancellation);
+
+                    stopwatch.Stop();
+
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Process exited with code: {process.ExitCode}");
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Total execution time: {stopwatch.Elapsed.TotalSeconds:F2}s");
+
+                    result = new EsptoolResult
+                    {
+                        Command = $"{_esptoolPath} {arguments}",
+                        ExitCode = process.ExitCode,
+                        StdOut = sbOut.ToString(),
+                        StdErr = sbErr.ToString(),
+                        Success = process.ExitCode == 0
+                    };
+
+                    if (!result.Success)
+                    {
+                        Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Command failed with exit code: {process.ExitCode}");
+                        if (!string.IsNullOrEmpty(result.StdErr))
+                        {
+                            Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Error output: {result.StdErr}");
+                        }
                     }
-                };
-
-                // Capture error data
-                process.ErrorDataReceived += (sender, e) =>
-                {
-                    if (e.Data != null)
+                    else
                     {
-                        sbErr.AppendLine(e.Data);
-                        Console.WriteLine($"[STDERR] {e.Data}");
-                        Debug.WriteLine($"[STDERR] {e.Data}");
-                        ErrorLine?.Invoke(this, e.Data);
-                    }
-                };
-
-                process.Start();
-                // Start async reading
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-
-                // Wait for process to exit
-                await process.WaitForExitAsync(cancellation);
-                
-                stopwatch.Stop();
-                
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Process exited with code: {process.ExitCode}");
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Total execution time: {stopwatch.Elapsed.TotalSeconds:F2}s");
-
-                var result = new EsptoolResult
-                {
-                    Command = $"{_esptoolPath} {arguments}",
-                    ExitCode = process.ExitCode,
-                    StdOut = sbOut.ToString(),
-                    StdErr = sbErr.ToString(),
-                    Success = process.ExitCode == 0
-                };
-
-                if (!result.Success)
-                {
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Command failed with exit code: {process.ExitCode}");
-                    if (!string.IsNullOrEmpty(result.StdErr))
-                    {
-                        Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Error output: {result.StdErr}");
+                        Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Command completed successfully");
                     }
                 }
-                else
-                {
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Command completed successfully");
-                }
-
                 return result;
             }
             catch (OperationCanceledException)
