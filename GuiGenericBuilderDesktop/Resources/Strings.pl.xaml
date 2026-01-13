@@ -219,31 +219,31 @@ Wybierz flagi kompilacji ręcznie.</system:String>
     <system:String x:Key="OpenFolderErrorTitle">Błąd Otwierania Folderu</system:String>
     
     <!-- Configuration Manager Window -->
-    <system:String x:Key="ConfigurationManager">Menedżer Konfiguracji</system:String>
-    <system:String x:Key="SavedConfigurations">Zapisane Konfiguracje</system:String>
-    <system:String x:Key="LoadFromEncoded">Załaduj z Zakodowanego Ciągu</system:String>
-    <system:String x:Key="SaveCurrentConfig">Zapisz Bieżącą Konfigurację</system:String>
+    <system:String x:Key="ConfigurationManager">Menedżer konfiguracji</system:String>
+    <system:String x:Key="SavedConfigurations">Zapisane konfiguracje</system:String>
+    <system:String x:Key="LoadFromEncoded">Załaduj zakodowaną konfigurację</system:String>
+    <system:String x:Key="SaveCurrentConfig">Zapisz bieżącą konfigurację</system:String>
     <system:String x:Key="Help">Pomoc</system:String>
-    <system:String x:Key="ConfigurationDetails">Szczegóły Konfiguracji</system:String>
+    <system:String x:Key="ConfigurationDetails">Szczegóły konfiguracji</system:String>
     <system:String x:Key="ConfigName">Nazwa:</system:String>
     <system:String x:Key="Platform">Platforma:</system:String>
     <system:String x:Key="COMPort">Port COM:</system:String>
     <system:String x:Key="SavedDate">Data Zapisu:</system:String>
-    <system:String x:Key="EncodedConfig">Zakodowana Konfiguracja:</system:String>
+    <system:String x:Key="EncodedConfig">Zakodowana konfiguracja:</system:String>
     <system:String x:Key="SelectConfiguration">Wybierz konfigurację, aby zobaczyć szczegóły</system:String>
     <system:String x:Key="NoConfigurationsYet">Nie zapisano jeszcze żadnych konfiguracji.</system:String>
     <system:String x:Key="DecodeAndPreview">Dekoduj i Podgląd</system:String>
-    <system:String x:Key="LoadDecoded">Załaduj Zdekodowaną Konfigurację</system:String>
-    <system:String x:Key="SaveDecoded">Zapisz Zdekodowaną Konfigurację</system:String>
-    <system:String x:Key="SaveCurrentConfigButton">Zapisz Bieżącą Konfigurację</system:String>
-    <system:String x:Key="LoadFromEncodedTitle">Załaduj Konfigurację z Zakodowanego Ciągu</system:String>
-    <system:String x:Key="LoadFromEncodedDescription">Wklej zakodowany ciąg konfiguracji, aby go zdekodować i załadować.</system:String>
+    <system:String x:Key="LoadDecoded">Załaduj zdekodowaną konfigurację</system:String>
+    <system:String x:Key="SaveDecoded">Zapisz zdekodowaną konfigurację</system:String>
+    <system:String x:Key="SaveCurrentConfigButton">Zapisz bieżącą konfigurację</system:String>
+    <system:String x:Key="LoadFromEncodedTitle">Załaduj zdekodowaną konfigurację</system:String>
+    <system:String x:Key="LoadFromEncodedDescription">Wklej zakodowaną konfigurację, aby zdekodować i załadować.</system:String>
     <system:String x:Key="EncodedConfigString">Zakodowany Ciąg Konfiguracji:</system:String>
     <system:String x:Key="DecodedConfiguration">Zdekodowana Konfiguracja</system:String>
     <system:String x:Key="FlagsLabel">Flagi:</system:String>
     <system:String x:Key="SaveCurrentConfigDescription">Zapisz aktualnie wybrane flagi kompilacji do biblioteki konfiguracji.</system:String>
     <system:String x:Key="ConfigurationSavedTitle">Konfiguracja Zapisana</system:String>
-    <system:String x:Key="EncodedStringForSharing">Zakodowany Ciąg (do udostępnienia):</system:String>
+    <system:String x:Key="EncodedStringForSharing">Zakodowana konfiguracja (do udostępnienia):</system:String>
     <system:String x:Key="EnabledFlags">Włączone Flagi ({0})</system:String>
     <system:String x:Key="ConfirmDelete">Czy na pewno chcesz usunąć konfigurację '{0}'?
 
@@ -257,7 +257,7 @@ Wybierz flagi kompilacji ręcznie.</system:String>
     <system:String x:Key="DeleteError">Błąd Usuwania</system:String>
     <system:String x:Key="EncodedCopied">Zakodowana konfiguracja skopiowana do schowka!
 
-Możesz teraz udostępnić ten ciąg lub wkleić go w zakładce 'Załaduj z Zakodowanego Ciągu'.</system:String>
+Możesz teraz udostępnić ten ciąg lub wkleić go w zakładce 'Załaduj zakodowaną konfigurację'.</system:String>
     <system:String x:Key="NoEncodedValue">Ta konfiguracja nie ma wartości zakodowanej.
 
 Mogła zostać utworzona w starszej wersji.</system:String>
@@ -305,6 +305,9 @@ Plik firmware mógł zostać usunięty lub przeniesiony.</system:String>
     <system:String x:Key="EncodedConfigCopied">Zakodowana konfiguracja skopiowana do schowka!</system:String>
     <system:String x:Key="NotSpecified">Nie określono</system:String>
     <system:String x:Key="FlagsCount">{0} flag</system:String>
+    
+    <!-- Configuration Manager - Additional Messages -->
+    <system:String x:Key="ConfigSavedToLibrary">✓ Konfiguracja została zapisana do biblioteki i jest teraz dostępna w zakładce 'Zapisane Konfiguracje'.</system:String>
     
     <!-- ConfigurationNameInputWindow -->
     <system:String x:Key="EnterConfigName">Wprowadź Nazwę Konfiguracji</system:String>

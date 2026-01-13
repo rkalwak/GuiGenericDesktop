@@ -297,17 +297,17 @@
             <TabItem Header="{DynamicResource LoadFromEncoded}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="20">
-                        <TextBlock Text="Load Configuration from Encoded String"
+                        <TextBlock Text="{DynamicResource LoadFromEncodedTitle}"
                                    FontSize="18"
                                    FontWeight="Bold"
                                    Margin="0,0,0,10"/>
 
-                        <TextBlock Text="Paste an encoded configuration string to decode and load it."
+                        <TextBlock Text="{DynamicResource LoadFromEncodedDescription}"
                                    TextWrapping="Wrap"
                                    Margin="0,0,0,20"
                                    Foreground="#666"/>
 
-                        <TextBlock Text="Encoded Configuration String:"
+                        <TextBlock Text="{DynamicResource EncodedConfigString}"
                                    FontWeight="SemiBold"
                                    Margin="0,0,0,5"/>
 
@@ -327,19 +327,19 @@
                                      VerticalScrollBarVisibility="Auto"/>
 
                             <Button Grid.Column="1"
-                                    Content="Paste"
+                                    Content="{DynamicResource PasteFromClipboard}"
                                     Width="80"
                                     Padding="10"
                                     Margin="8,0,0,0"
                                     VerticalAlignment="Top"
                                     Click="PasteEncodedButton_Click"
-                                    ToolTip="Paste from clipboard"/>
+                                    ToolTip="{DynamicResource PasteFromClipboard}"/>
                         </Grid>
 
                         <!-- Action Buttons Row -->
                         <StackPanel Orientation="Horizontal" Margin="0,15,0,20">
                             <Button x:Name="DecodeButton"
-                                    Content="Decode and Preview"
+                                    Content="{DynamicResource DecodeAndPreview}"
                                     Click="DecodeConfiguration_Click"
                                     Padding="15,10"
                                     FontSize="14"
@@ -351,7 +351,7 @@
                                     Margin="0,0,10,0"/>
 
                             <Button x:Name="LoadDecodedButton"
-                                    Content="Load This Configuration"
+                                    Content="{DynamicResource LoadDecoded}"
                                     Click="ApplyDecodedConfiguration_Click"
                                     Padding="15,10"
                                     FontSize="14"
@@ -362,10 +362,10 @@
                                     Cursor="Hand"
                                     Margin="0,0,10,0"
                                     IsEnabled="False"
-                                    ToolTip="Load the decoded configuration into the application"/>
+                                    ToolTip="{DynamicResource LoadDecoded}"/>
 
                             <Button x:Name="SaveDecodedButton"
-                                    Content="Save to Library"
+                                    Content="{DynamicResource SaveDecoded}"
                                     Click="SaveDecodedConfiguration_Click"
                                     Padding="15,10"
                                     FontSize="14"
@@ -375,7 +375,7 @@
                                     BorderThickness="0"
                                     Cursor="Hand"
                                     IsEnabled="False"
-                                    ToolTip="Save the decoded configuration to your library"/>
+                                    ToolTip="{DynamicResource SaveDecoded}"/>
                         </StackPanel>
 
                         <!-- Decoded Results Panel -->
@@ -387,7 +387,7 @@
                                 CornerRadius="5"
                                 Padding="15">
                             <StackPanel>
-                                <TextBlock Text="Decoded Configuration" 
+                                <TextBlock Text="{DynamicResource DecodedConfiguration}" 
                                            FontSize="16" 
                                            FontWeight="Bold"
                                            Margin="0,0,0,10"/>
@@ -399,7 +399,7 @@
                                            Margin="0,0,0,10"/>
 
                                 <!-- Flags List -->
-                                <TextBlock Text="Flags:"
+                                <TextBlock Text="{DynamicResource FlagsLabel}"
                                            FontWeight="SemiBold"
                                            Margin="0,10,0,5"/>
                                 <Border BorderBrush="#DDD"
@@ -421,18 +421,18 @@
             <TabItem Header="{DynamicResource SaveCurrentConfig}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="20">
-                        <TextBlock Text="Save Current Configuration"
+                        <TextBlock Text="{DynamicResource SaveCurrentConfig}"
                                    FontSize="18"
                                    FontWeight="Bold"
                                    Margin="0,0,0,10"/>
 
-                        <TextBlock Text="Save the currently selected build flags to your configuration library."
+                        <TextBlock Text="{DynamicResource SaveCurrentConfigDescription}"
                                    TextWrapping="Wrap"
                                    Margin="0,0,0,20"
                                    Foreground="#666"/>
 
                         <Button x:Name="SaveCurrentButton"
-                                Content="Save Current Configuration"
+                                Content="{DynamicResource SaveCurrentConfigButton}"
                                 Click="SaveCurrentConfiguration_Click"
                                 Padding="15,10"
                                 FontSize="14"
@@ -453,7 +453,7 @@
                                 CornerRadius="5"
                                 Padding="15">
                             <StackPanel>
-                                <TextBlock Text="Configuration Saved" 
+                                <TextBlock Text="{DynamicResource ConfigurationSavedTitle}" 
                                            FontSize="16" 
                                            FontWeight="Bold"
                                            Foreground="#28A745"
@@ -475,7 +475,7 @@
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource ConfigName}" FontWeight="SemiBold" Margin="0,2,8,2"/>
                                     <TextBlock Grid.Row="0" Grid.Column="1" x:Name="SavedNameText" Margin="0,2,0,2"/>
 
-                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource Flags}" FontWeight="SemiBold" Margin="0,2,8,2"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource FlagsLabel}" FontWeight="SemiBold" Margin="0,2,8,2"/>
                                     <TextBlock Grid.Row="1" Grid.Column="1" x:Name="SavedFlagCountText" Margin="0,2,0,2"/>
 
                                     <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Platform}" FontWeight="SemiBold" Margin="0,2,8,2"/>
@@ -485,8 +485,8 @@
                                     <TextBlock Grid.Row="3" Grid.Column="1" x:Name="SavedComPortText" Margin="0,2,0,2"/>
                                 </Grid>
 
-                                <!-- Encoded Section (optional to show) -->
-                                <TextBlock Text="Encoded String (for sharing):"
+                                <!-- Encoded Section -->
+                                <TextBlock Text="{DynamicResource EncodedStringForSharing}"
                                            FontWeight="SemiBold"
                                            Margin="0,10,0,5"/>
                                 <Grid Margin="0,0,0,10">
@@ -505,15 +505,15 @@
                                              MinHeight="60"
                                              VerticalScrollBarVisibility="Auto"/>
                                     <Button Grid.Column="1"
-                                            Content="Copy"
+                                            Content="{DynamicResource Copy}"
                                             Click="CopySavedEncoded_Click"
                                             Padding="10,5"
                                             Margin="5,0,0,0"
                                             VerticalAlignment="Top"
-                                            ToolTip="Copy encoded string to clipboard"/>
+                                            ToolTip="{DynamicResource Copy}"/>
                                 </Grid>
 
-                                <TextBlock Text="? Configuration has been saved to your library and is now available in the 'Saved Configurations' tab."
+                                <TextBlock Text="{DynamicResource ConfigSavedToLibrary}"
                                            TextWrapping="Wrap"
                                            Foreground="#28A745"
                                            FontStyle="Italic"
@@ -524,91 +524,7 @@
                 </ScrollViewer>
             </TabItem>
 
-            <!-- Help Tab -->
-            <TabItem Header="{DynamicResource Help}">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="20">
-                        <TextBlock FontSize="18" FontWeight="Bold" Margin="0,0,0,10">
-                            Configuration Manager Help
-                        </TextBlock>
-
-                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,20">
-                            This tool helps you save, load, and share build configurations.
-                        </TextBlock>
-
-                        <Border Background="White" 
-                                BorderBrush="#DDD" 
-                                BorderThickness="1" 
-                                CornerRadius="5" 
-                                Padding="15" 
-                                Margin="0,0,0,10">
-                            <StackPanel>
-                                <TextBlock FontWeight="Bold" Margin="0,0,0,5" FontSize="14">
-                                    Saved Configurations
-                                </TextBlock>
-                                <TextBlock TextWrapping="Wrap">
-                                    View and manage your saved build configurations. Select a configuration to see its details, load it, or delete it.
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Background="White" 
-                                BorderBrush="#DDD" 
-                                BorderThickness="1" 
-                                CornerRadius="5" 
-                                Padding="15" 
-                                Margin="0,0,0,10">
-                            <StackPanel>
-                                <TextBlock FontWeight="Bold" Margin="0,0,0,5" FontSize="14">
-                                    Load from Encoded String
-                                </TextBlock>
-                                <TextBlock TextWrapping="Wrap">
-                                    Paste an encoded configuration string (shared by someone or from a backup) to load it. You can preview the flags before loading, and optionally save it to your library.
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-
-                        <Border Background="White" 
-                                BorderBrush="#DDD" 
-                                BorderThickness="1" 
-                                CornerRadius="5" 
-                                Padding="15" 
-                                Margin="0,0,0,10">
-                            <StackPanel>
-                                <TextBlock FontWeight="Bold" Margin="0,0,0,5" FontSize="14">
-                                    Save Current Configuration
-                                </TextBlock>
-                                <TextBlock TextWrapping="Wrap">
-                                    Save your currently selected flags to the configuration library with a custom name. The configuration is automatically encoded for easy sharing, and you can access it later from the 'Saved Configurations' tab.
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-
-                        <TextBlock FontWeight="Bold" Margin="0,20,0,10" FontSize="14">
-                            About Encoded Configurations
-                        </TextBlock>
-
-                        <TextBlock TextWrapping="Wrap" Margin="0,0,0,10">
-                            Encoded configurations use compression and base64 encoding to create a compact, shareable string that contains all your selected flags.
-                        </TextBlock>
-
-                        <TextBlock TextWrapping="Wrap" FontWeight="SemiBold">
-                            Features:
-                        </TextBlock>
-                        <TextBlock TextWrapping="Wrap" Margin="15,5,0,0">
-                            - Reversible: Can be decoded back to original flags
-                            <LineBreak/>
-                            - Compact: Uses GZip compression
-                            <LineBreak/>
-                            - URL-safe: Safe for sharing in URLs
-                            <LineBreak/>
-                            - Order-independent: Same flags = same encoding
-                            <LineBreak/>
-                            - Case-insensitive: Handles mixed case
-                        </TextBlock>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
+            
         </TabControl>
 
         <!-- Close Button -->

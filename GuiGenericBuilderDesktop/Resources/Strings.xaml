@@ -306,6 +306,9 @@ Firmware file may have been deleted or moved.</system:String>
     <system:String x:Key="NotSpecified">Not specified</system:String>
     <system:String x:Key="FlagsCount">{0} flags</system:String>
     
+    <!-- Configuration Manager - Additional Messages -->
+    <system:String x:Key="ConfigSavedToLibrary">✓ Configuration has been saved to your library and is now available in the 'Saved Configurations' tab.</system:String>
+    
     <!-- ConfigurationNameInputWindow -->
     <system:String x:Key="EnterConfigName">Enter Configuration Name</system:String>
     <system:String x:Key="ConfigurationNameLabel">Configuration Name:</system:String>
