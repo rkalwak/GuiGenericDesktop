@@ -320,6 +320,30 @@ namespace GuiGenericBuilderDesktop
                 }
             };
 
+            // Help button - dock to right (added first so it appears rightmost)
+            var helpButton = new Button
+            {
+                Content = LocalizationManager.Get("ViewHelp"),
+                Width = 100,
+                Height = 28,
+                Margin = new Thickness(4, 0, 4, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                ToolTip = LocalizationManager.Get("ViewHelpTooltip")
+            };
+            helpButton.Click += ViewHelp_Click;
+
+            // Changelog button - dock to right (added second so it appears to the left of help button)
+            var changelogButton = new Button
+            {
+                Content = LocalizationManager.Get("ViewChangelog"),
+                Width = 120,
+                Height = 28,
+                Margin = new Thickness(4, 0, 4, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                ToolTip = LocalizationManager.Get("ViewChangelogTooltip")
+            };
+            changelogButton.Click += ViewChangelog_Click;
+
             devicePanel.Children.Add(portLabel);
             devicePanel.Children.Add(comPortSelector);
             devicePanel.Children.Add(boardLabel);
@@ -328,6 +352,12 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(flashSizeSelector);
             devicePanel.Children.Add(languageLabel);
             devicePanel.Children.Add(languageSelector);
+            
+            // Dock buttons to the right
+            DockPanel.SetDock(helpButton, Dock.Right);
+            devicePanel.Children.Add(helpButton);
+            DockPanel.SetDock(changelogButton, Dock.Right);
+            devicePanel.Children.Add(changelogButton);
 
             // ===== BUTTONS PANEL (Row 1) - Action Buttons and Checkboxes =====
 
@@ -1192,6 +1222,48 @@ namespace GuiGenericBuilderDesktop
                 MessageBox.Show(
                     LocalizationManager.GetFormat("ErrorOpeningConfigManager", ex.Message),
                     LocalizationManager.Get("Error"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private void ViewChangelog_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var changelogWindow = new ChangelogWindow
+                {
+                    Owner = this
+                };
+                changelogWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error opening changelog window");
+                MessageBox.Show(
+                    $"Error opening changelog: {ex.Message}",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+        }
+
+        private void ViewHelp_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var helpWindow = new HelpWindow
+                {
+                    Owner = this
+                };
+                helpWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error opening help window");
+                MessageBox.Show(
+                    $"Error opening help: {ex.Message}",
+                    "Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }

@@ -11,6 +11,11 @@ namespace GuiGenericBuilderDesktop.Localization
     {
         private static string _currentLanguage = "pl"; // Polish as default (SHORT CODE to match builder.json)
 
+        /// <summary>
+        /// Event raised when the language changes
+        /// </summary>
+        public static event EventHandler LanguageChanged;
+
         static LocalizationManager()
         {
             SetLanguage("pl");
@@ -49,6 +54,7 @@ namespace GuiGenericBuilderDesktop.Localization
                 else
                     culture = new CultureInfo(shortCode);
                     
+                    
                 CultureInfo.CurrentUICulture = culture;
                 CultureInfo.CurrentCulture = culture;
             }
@@ -58,6 +64,9 @@ namespace GuiGenericBuilderDesktop.Localization
                 _currentLanguage = "pl";
                 ResourceDictionaryManager.LoadLanguageResources("pl");
             }
+            
+            // Raise the language changed event
+            LanguageChanged?.Invoke(null, EventArgs.Empty);
         }
 
         /// <summary>

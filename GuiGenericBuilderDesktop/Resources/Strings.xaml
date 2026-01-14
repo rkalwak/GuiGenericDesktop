@@ -319,4 +319,14 @@ Firmware file may have been deleted or moved.</system:String>
     <system:String x:Key="NameRequired">Configuration name is required.</system:String>
     <system:String x:Key="NameRequiredTitle">Name Required</system:String>
     
+    <!-- Changelog and Help Windows -->
+    <system:String x:Key="ViewChangelog">📋 Changelog</system:String>
+    <system:String x:Key="ViewChangelogTooltip">View changelog and version history</system:String>
+    <system:String x:Key="ViewHelp">❓ Help</system:String>
+    <system:String x:Key="ViewHelpTooltip">View user guide and documentation</system:String>
+    <system:String x:Key="ChangelogWindowTitle">Changelog - GUI-Generic Builder</system:String>
+    <system:String x:Key="HelpWindowTitle">Help - GUI-Generic Builder</system:String>
+    
+
+    
 </ResourceDictionary>

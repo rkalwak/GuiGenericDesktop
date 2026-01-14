@@ -319,4 +319,14 @@ Plik firmware mógł zostać usunięty lub przeniesiony.</system:String>
     <system:String x:Key="NameRequired">Nazwa konfiguracji jest wymagana.</system:String>
     <system:String x:Key="NameRequiredTitle">Wymagana Nazwa</system:String>
     
+    <!-- Changelog and Help Windows -->
+    <system:String x:Key="ViewChangelog">📋 Historia zmian</system:String>
+    <system:String x:Key="ViewChangelogTooltip">Wyświetl historię zmian i wersji</system:String>
+    <system:String x:Key="ViewHelp">❓ Pomoc</system:String>
+    <system:String x:Key="ViewHelpTooltip">Wyświetl przewodnik użytkownika i dokumentację</system:String>
+    <system:String x:Key="ChangelogWindowTitle">Historia zmian - GUI-Generic Builder</system:String>
+    <system:String x:Key="HelpWindowTitle">Pomoc - GUI-Generic Builder</system:String>
+    
+
+    
 </ResourceDictionary>

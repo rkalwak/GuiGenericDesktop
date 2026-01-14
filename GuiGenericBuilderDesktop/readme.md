@@ -55,19 +55,14 @@ When implementing features or fixes:
 
 ## To do
 
-- GPIOS in general Jak już opanujesz diody dla różnych układów (C3 - GPIO8, C6 - GIO8 ale tu jest RGB, S3 - GIO2 to zwykły LED, 
-mogą być jeszcze inne kombinacje w SuperMini czy Xiao dla C3, S3 i C6), to trzeba się będzie wziąć za pozostałe GPIO (opis). Teraz np. kompiluję na C3 i w opcjach wyporu GPIO (np. dla przekaźnika) mam, że GPIO-1 to TX, a domyślnie dla tego układu jest TX na GPIO21. 
+- GPIOS in general  to trzeba się będzie wziąć za pozostałe GPIO (opis). Teraz np. kompiluję na C3 i w opcjach wyporu GPIO (np. dla przekaźnika) mam, że GPIO-1 to TX, a domyślnie dla tego układu jest TX na GPIO21. 
 Rozwiązania są dwa: albo do wszystkich układów dajemy GPIO bez opisów (TX, RX) albo szukamy rozpiski pinout i wstawiamy (C3 - RX20, TX21, C6 - RX17, TX16, S3- TX43, RX44, dla samego ESP32 - jest OK 1(TX) i 3(RX)).
 - zaluzje rs->addTiltFunctions();
 - default settings from cloud
 - HC_SR04 https://github.com/SUPLA/supla-device/pull/122
-- merged bin https://github.com/platformio/platform-espressif32/issues/1078
 - sound when compilation is done
 - Niestety całkowicie wirtualny termostat (oparty na linkach bezpośrednich) nie działa. To znaczy działa odczyt temperatury, ale jeśli dodamy linki bezpośrednie do przekaźnika (włącznika) to moduł odmawia współpracy. 
 Zawiesza się, nie loguje do cloud i trzeba go przeflashować na nowo, bo nawet w tryb config wejść nie chce. Krystian nie dał z tym rady, ale miałem nadzieję, że się "cudownie" naprawiło. Niestety nie ;-)
-- Jeśli chodzi o merge, to wydaje sie trywialne, ale nie jestem pewien co do parametrów - flash-mode, troche nie czaje jakie to ma znaczenie do stworzenia pliku i musze poczytac, a druga rzecz to adresy partycji i rozmiary.
-Na pewno musze zaczac brac pod uwage rozmiar flasha i dac mozliwosc wyboru jakiegos ukladu partycji - teraz idzie w ciemno minimum spiffs
-Zapisze sobie to do powalczenia bo trzeba tu porobic testy i przejrzec definicje partycji. 
 - json settings
 - partition selection
 	- use fixed partitions based on flash size and esp model
