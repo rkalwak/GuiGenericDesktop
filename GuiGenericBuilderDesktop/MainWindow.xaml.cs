@@ -903,6 +903,9 @@ namespace GuiGenericBuilderDesktop
 
             try
             {
+                // Generate timestamp once for both backup and configuration files to ensure consistency
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                
                 var ggRequest = new CompileRequest
                 {
                     BuildFlags = selectedFlags,
@@ -916,7 +919,8 @@ namespace GuiGenericBuilderDesktop
                     ShouldDeploy = shouldDeploy,
                     ShouldBackup = shouldBackup,
                     ShouldEraseFlash = shouldEraseFlash,
-                    GlobalSettings = _builderConfig.GlobalSettings
+                    GlobalSettings = _builderConfig.GlobalSettings,
+                    ConfigTimestamp = timestamp
                 };
                 var handler = new PlatformioCliHandler();
                 ICompileHandler compiler = new PlatformioCliHandler();
@@ -959,8 +963,8 @@ namespace GuiGenericBuilderDesktop
                     statusText.FontStyle = FontStyles.Oblique;
 
                     var encodedConfig = BuildConfigurationHasher.EncodeOptions(selectedFlags);
-                    var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                    var configBaseName = $"Config_{timestamp}";
+                    // Use the same timestamp that was set in ggRequest for consistency
+                    var configBaseName = $"Config_{ggRequest.ConfigTimestamp}";
                     try
                     {
                         var compiledFirmwarePath = Path.Combine(result.OutputDirectory, result.OutputFile);

@@ -2,7 +2,7 @@
 
 ## Welcome to GUI-Generic Builder
 
-This application helps you compile and deploy firmware for Supla smart home devices using the GUI-Generic framework.
+This application helps you compile and deploy firmware for Supla devices using the GUI-Generic framework.
 
 ---
 
@@ -13,7 +13,7 @@ This application helps you compile and deploy firmware for Supla smart home devi
 Before compiling any firmware, you need to download the GUI-Generic repository:
 
 1. Click **"1. Update Gui-Generic"** button
-2. Wait for the download to complete (indicated by ? message)
+2. Wait for the download to complete (indicated by message)
 3. The repository contains all necessary source files for compilation
 
 **Note**: This step is required only once, or when you want to update to the latest version.
@@ -24,7 +24,7 @@ Before compiling any firmware, you need to download the GUI-Generic repository:
 
 To automatically detect your connected ESP device:
 
-1. Connect your ESP32/ESP8266 device via USB
+1. Connect your ESP32 device via USB
 2. Click **"2. Check Device"** button
 3. The application will:
    - Detect the COM port automatically
@@ -66,7 +66,6 @@ Some flags have dependencies on other flags:
 #### Platform Compatibility
 Not all flags work on all platforms:
 - Incompatible flags are automatically disabled when you select a board
-- Red warning appears if you try to enable incompatible flag
 - Pre-compilation validation prevents invalid configurations
 
 ---
@@ -110,6 +109,7 @@ Once you've configured your flags:
 Upon successful compilation:
 - Configuration is automatically saved
 - Firmware binary is stored in `configurations/` directory
+- Backup is saved in `backup/` directory as `Config_YYYYMMDD_HHMMSS.bin` (with the same timestamp as the configuration)
 - Compilation results window shows:
   - Encoded configuration string (for sharing)
   - Backup file location (if created)
@@ -147,7 +147,6 @@ Each configuration has an encoded string that contains all selected flags:
 
 **Features**:
 - Reversible: Can be decoded back to original flags
-- Compact: Uses GZip compression
 - Shareable: Copy and paste to share configurations
 - URL-safe: Can be used in URLs
 
@@ -200,207 +199,129 @@ Each configuration has an encoded string that contains all selected flags:
 
 ---
 
-## Deployment Options
-
-### Deploy Checkbox
-- **Checked**: Firmware is uploaded to device after compilation
-- **Unchecked**: Only compile, no upload (firmware saved to file)
-- Requires valid COM port selection
-
-### Backup Checkbox
-- **Checked** (default): Creates backup before deployment
-- Backup stored in `backup/` directory
-- Includes full flash dump (4-16MB)
-- Two files created:
-  - `*.backup`: Flash memory dump
-  - `*.info`: Metadata (date, device info, size)
-
-### Erase Flash Checkbox
-- **Checked**: Erases flash memory before uploading firmware
-- **Unchecked** (default): Flash not erased
-- Recommended for:
-  - Clean installation
-  - Switching between different firmware versions
-  - Troubleshooting issues
-
----
-
-## Firmware Files
-
-### File Locations
-
-**Configurations Directory**: `configurations/`
-- Configuration JSON files
-- Firmware binaries (`*.bin`)
-- Merged ZIP packages (`*_merged.zip`)
-
-**Backup Directory**: `backup/`
-- Flash backups (`*.backup`)
-- Backup metadata (`*.info`)
-
-### Merged ZIP Files
-
-Automatically created after compilation, contains:
-- `firmware.bin` - Main application firmware
-- `bootloader.bin` - ESP32 bootloader
-- `partitions.bin` - Partition table
-- `firmware_merged.bin` - Complete merged binary (recommended)
-- `README.txt` - Flashing instructions
-
-**Manual Flashing**:
-```bash
-# Option 1: Flash complete binary (recommended)
-esptool --chip esp32 --port COM3 write_flash 0x0 firmware_merged.bin
-
-# Option 2: Flash individual files
-esptool --chip esp32 --port COM3 write_flash \
-  0x1000 bootloader.bin \
-  0x8000 partitions.bin \
-  0x10000 firmware.bin
-```
-
----
-
 ## Troubleshooting
 
-### Device Not Detected
+### Compilation Errors
 
-**Problem**: "No device detected" message
-
-**Solutions**:
-1. Check USB cable (must support data transfer)
-2. Install USB-to-UART drivers:
-   - CH340/CH341: [Download from manufacturer](http://www.wch-ic.com/downloads/CH341SER_ZIP.html)
-   - CP2102: [Silicon Labs drivers](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers)
-   - FTDI: Usually included in Windows
-3. Try different USB port
-4. Put device in flash mode (hold BOOT button, press RESET)
-
-### Compilation Failed
-
-**Problem**: Compilation error message
-
-**Solutions**:
-1. Check error logs in compilation results window
-2. Verify repository is updated: Click "1. Update Gui-Generic"
-3. Disable conflicting flags
-4. Check platform compatibility (some flags don't work on ESP32-C3/C6/S2/S3)
-5. Ensure enough free disk space
-
-### Incompatible Flags
-
-**Problem**: Flag checkbox won't stay checked
-
+**Problem**: Compilation fails with errors
 **Solution**:
-- Flag is incompatible with selected platform
-- Check platform restrictions in flag description
-- Use compatible platform (usually ESP32 default)
+1. Check error logs in output panel
+2. Ensure all required flags are enabled
+3. Check flag compatibility with selected platform
+4. Update GUI-Generic repository
+5. Ensure PlatformIO Core is properly installed
 
-### COM Port Issues
+### Device Detection Issues
 
-**Problem**: Can't select COM port or upload fails
-
-**Solutions**:
-1. Close other applications using the port (Arduino IDE, PuTTY, etc.)
-2. Disconnect and reconnect device
-3. Try different COM port in dropdown
-4. Check Windows Device Manager for port conflicts
-
-### WebView2 Not Available
-
-**Problem**: Changelog/Help window shows error
-
+**Problem**: Device not detected
 **Solution**:
-- Install Microsoft Edge WebView2 Runtime
-- Download from: https://go.microsoft.com/fwlink/p/?LinkId=2124703
-- Usually pre-installed on Windows 10/11
+1. Check USB connection
+2. Install USB drivers (CP210x or CH340)
+3. Try different USB cable
+4. Close other programs using serial port
+5. Manually select COM port from dropdown
+
+### Upload Errors
+
+**Problem**: Upload fails
+**Solution**:
+1. Ensure correct COM port is selected
+2. Hold BOOT button during upload (on some boards)
+3. Try reducing baud rate
+4. Enable "Erase Flash" option
+5. Check USB connection
+
+### Memory Issues
+
+**Problem**: Firmware too large for selected flash size
+**Solution**:
+1. Disable some unused features
+2. Select board with larger flash
+3. Reduce debug level
+4. Remove unused sensors or modules
 
 ---
 
-## Language Support
+## Advanced Features
 
-Switch between languages using the **Language** dropdown:
-- **Polski** (Polish) - Default
-- **English**
+### Backup and Restore
 
-Language affects:
-- All UI elements
-- Flag names and descriptions
-- Error messages
-- Help and documentation
+Always backup your working firmware:
 
----
+1. Enable "Backup" option before uploading
+2. Backup files are stored in configuration directory
+3. To restore:
+   - Use esptool.py
+   - Or re-upload saved configuration
 
-## Tips and Best Practices
+### Offline Mode
 
-### 1. Start Simple
-- Begin with basic configuration (SUPLA_CONFIG + required sensors)
-- Test compilation before adding more features
-- Add features incrementally
+Application can work without internet connection:
+- GUI-Generic repository is stored locally
+- Compilations are performed locally
+- Required only for initial download/updates
 
-### 2. Save Configurations
-- Save working configurations with descriptive names
-- Create backups before major changes
-- Share configurations with encoded strings
+### Configuration Sharing
 
-### 3. Use Auto-Detection
-- Let the app detect device (more reliable)
-- Auto-detection sets optimal settings
-- Prevents platform compatibility issues
-
-### 4. Enable Backup
-- Always create backup before deployment (default: enabled)
-- Backups allow recovery if firmware has issues
-- Store backups safely for future reference
-
-### 5. Check Compatibility
-- Review incompatible flags when switching platforms
-- ESP32 (default) has best compatibility
-- ESP32-C3/C6/S2/S3 have hardware limitations
-
-### 6. Monitor Compilation Time
-- First compilation takes longer (downloads dependencies)
-- Typical compilation: 30-90 seconds
-- Very long times may indicate issues
-
-### 7. Update Regularly
-- Update GUI-Generic repository for latest features
-- Check changelog for new features and fixes
-- Update firmware on devices periodically
+Share your configurations:
+1. Export encoded string
+2. Share via email, forums, or social media
+3. Other users can import your configuration
+4. Perfect for sharing working configurations
 
 ---
 
 ## Keyboard Shortcuts
 
-- **ESC**: Close current window
-- **Ctrl+C**: Copy (in text fields)
-- **Ctrl+V**: Paste (in text fields)
+- **F1**: Open this help
+- **Ctrl+S**: Save current configuration
+- **Ctrl+O**: Open configuration manager
+- **Ctrl+B**: Start compilation
+- **Esc**: Close current dialog
 
 ---
 
 ## Additional Resources
 
-### Documentation
-- **GUI-Generic GitHub**: https://github.com/krycha88/GUI-Generic
-- **Supla Website**: https://www.supla.org/
-- **Supla Forum**: https://forum.supla.org/
+### Links
+
+- **GUI-Generic Documentation**: [github.com/rkalwak/GUI-Generic](https://github.com/rkalwak/GUI-Generic)
+- **SUPLA Forum**: [forum.supla.org](https://forum.supla.org)
+- **PlatformIO Documentation**: [docs.platformio.org](https://docs.platformio.org)
 
 ### Support
-- Check changelog for recent updates
-- Report issues on GitHub
-- Ask questions on Supla forum
+
+If you encounter issues:
+1. Check this help for solutions
+2. Search SUPLA forum
+3. Report bugs on GitHub
+4. Contact the community
+
+**Application Logs**:
+- Application logs are stored in the `logs/` directory
+- Attach log files to forum posts if requested by developer
+- Logs contain detailed information about compilation process and errors
 
 ---
 
-## Credits
+## About the Application
 
-**GUI-Generic Builder Desktop** - Desktop application for building Supla firmware
+**GUI-Generic Builder** was created to simplify the SUPLA firmware compilation process.
 
-**GUI-Generic Framework** by krycha88 - Web-based configuration for Supla devices
+**Features**:
+- ? Automatic device detection
+- ? Visual build flag management
+- ? Dependency verification
+- ? Platform compatibility checking
+- ? Configuration management
+- ? Backup and restore
+- ? Configuration sharing
+- ? Multi-language support
 
-**Supla** - Open-source home automation system
+**License**: MIT
+
+**Version**: 2.0
 
 ---
 
-*Last Updated: January 2025*
-*Version: 2.0.6*
+*Last Updated: 2026*

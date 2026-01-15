@@ -68,6 +68,7 @@ public class PlatformioCliHandler : ICompileHandler
                     request.PortCom,
                     chipType,
                     encodedConfig,
+                    request.ConfigTimestamp,
                     cancellationToken);
 
                 if (!string.IsNullOrEmpty(backupPath))

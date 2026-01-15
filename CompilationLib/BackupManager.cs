@@ -26,12 +26,14 @@ namespace CompilationLib
         /// <param name="comPort">COM port where the device is connected</param>
         /// <param name="chipType">ESP chip type (e.g., "esp32", "esp32c3", "esp32c6")</param>
         /// <param name="encodedConfig">Encoded configuration string for the new firmware</param>
+        /// <param name="configTimestamp">Configuration timestamp in format yyyyMMdd_HHmmss for consistent naming</param>
         /// <param name="cancellationToken">Cancellation token</param>
         /// <returns>Path to the created backup file, or null if backup failed</returns>
         public async Task<string> CreateBackupAsync(
             string comPort, 
             string chipType, 
-            string encodedConfig, 
+            string encodedConfig,
+            string configTimestamp = null,
             CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(comPort))
@@ -45,20 +47,14 @@ namespace CompilationLib
 
             try
             {
-                // Generate filename: {encodedConfig}_{timestamp}.backup
-                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                var safeEncodedConfig = SanitizeFileName(encodedConfig);
-                var fileName = $"{safeEncodedConfig}_{timestamp}.backup";
+                var fileName = $"Backup_{configTimestamp}.backup";
                 var backupFilePath = Path.Combine(_backupDirectory, fileName);
 
                 Console.WriteLine($"Creating backup to: {backupFilePath}");
                 Console.WriteLine($"Backup may take several minutes depending on flash size...");
 
-                // Normalize chip type (remove any "esp" prefix if present for esptool)
-                var normalizedChip = NormalizeChipType(chipType);
-
                 // Read flash using esptool
-                var result = await _esptoolWrapper.ReadFlush(comPort, normalizedChip, backupFilePath, cancellationToken);
+                var result = await _esptoolWrapper.ReadFlush(comPort, chipType, backupFilePath, cancellationToken);
 
                 if (result.Success)
                 {
@@ -133,57 +129,7 @@ namespace CompilationLib
         /// <summary>
         /// Sanitizes the encoded config string to be safe for use in filenames
         /// </summary>
-        private static string SanitizeFileName(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return "unknown";
-
-            // Limit length to avoid too long filenames
-            const int maxLength = 50;
-            if (input.Length > maxLength)
-            {
-                // Take first part and hash the rest
-                var hashCode = input.GetHashCode().ToString("X8");
-                input = input.Substring(0, maxLength - 9) + "_" + hashCode;
-            }
-
-            // Replace invalid filename characters
-            var invalid = Path.GetInvalidFileNameChars();
-            foreach (var c in invalid)
-            {
-                input = input.Replace(c, '_');
-            }
-
-            // Also replace some other problematic characters
-            input = input.Replace(' ', '_')
-                         .Replace(':', '_')
-                         .Replace('/', '_')
-                         .Replace('\\', '_');
-
-            return input;
-        }
-
-        /// <summary>
-        /// Normalizes chip type for esptool command
-        /// </summary>
-        private static string NormalizeChipType(string chipType)
-        {
-            if (string.IsNullOrEmpty(chipType))
-                return "auto";
-
-            // Convert to lowercase and remove common prefixes/suffixes
-            var normalized = chipType.ToLowerInvariant().Trim();
-            
-            // Remove "GUI_Generic_" prefix if present
-            if (normalized.StartsWith("gui_generic_"))
-            {
-                normalized = normalized.Substring("gui_generic_".Length);
-            }
-
-            // esptool expects lowercase chip names like: esp32, esp32c3, esp32c6, esp32s3
-            return normalized;
-        }
-
+       
         /// <summary>
         /// Gets the backup directory path
         /// </summary>

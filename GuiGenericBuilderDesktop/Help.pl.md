@@ -2,7 +2,7 @@
 
 ## Witamy w GUI-Generic Builder
 
-Ta aplikacja pomaga kompilować i wgrywać oprogramowanie dla urządzeń inteligentnego domu Supla przy użyciu frameworka GUI-Generic.
+Ta aplikacja pomaga kompilować i wgrywać oprogramowanie dla urządzeń Supla przy użyciu frameworka GUI-Generic.
 
 ---
 
@@ -13,7 +13,7 @@ Ta aplikacja pomaga kompilować i wgrywać oprogramowanie dla urządzeń intelig
 Przed kompilacją jakiegokolwiek oprogramowania musisz pobrać repozytorium GUI-Generic:
 
 1. Kliknij przycisk **"1. Aktualizuj Gui-Generic"**
-2. Poczekaj na zakończenie pobierania (sygnalizowane komunikatem ✓)
+2. Poczekaj na zakończenie pobierania (sygnalizowane komunikatem)
 3. Repozytorium zawiera wszystkie niezbędne pliki źródłowe do kompilacji
 
 **Uwaga**: Ten krok jest wymagany tylko raz lub gdy chcesz zaktualizować do najnowszej wersji.
@@ -24,7 +24,7 @@ Przed kompilacją jakiegokolwiek oprogramowania musisz pobrać repozytorium GUI-
 
 Aby automatycznie wykryć podłączone urządzenie ESP:
 
-1. Podłącz swoje urządzenie ESP32/ESP8266 przez USB
+1. Podłącz swoje urządzenie ESP32 przez USB
 2. Kliknij przycisk **"2. Sprawdź urządzenie"**
 3. Aplikacja:
    - Automatycznie wykryje port COM
@@ -48,7 +48,7 @@ Flagi kompilacji kontrolują, które funkcje są uwzględnione w Twoim oprogramo
 #### Wybór flag
 - Przeglądaj sekcje flag (zorganizowane według funkcjonalności)
 - Zaznacz pola wyboru dla funkcji, które chcesz włączyć
-- Kliknij przycisk **"Parametry..."**, aby skonfigurować parametry flag
+- Kliknij przycisk **"Parametry..."**, aby skonfigurować parametry flag, jeśli istnieją
 
 #### Pola wyboru sekcji
 - Kliknij pole wyboru obok nazwy sekcji, aby włączyć/wyłączyć wszystkie flagi w tej sekcji
@@ -66,7 +66,6 @@ Niektóre flagi mają zależności od innych flag:
 #### Kompatybilność platformy
 Nie wszystkie flagi działają na wszystkich platformach:
 - Niekompatybilne flagi są automatycznie wyłączane po wybraniu płytki
-- Czerwone ostrzeżenie pojawia się, gdy próbujesz włączyć niekompatybilną flagę
 - Walidacja przed kompilacją zapobiega nieprawidłowym konfiguracjom
 
 ---
@@ -95,7 +94,7 @@ Po skonfigurowaniu flag:
 2. Wybierz opcje kompilacji:
    - **Wgraj**: Wgraj oprogramowanie na urządzenie po kompilacji
    - **Kopia zapasowa**: Utwórz kopię zapasową aktualnego oprogramowania przed wgraniem
-   - **Wyczyść pamięć**: Wyczyść pamięć flash przed wgraniem (zalecane dla czystej instalacji)
+   - **Wymaż pamięć**: Wyczyść pamięć flash przed wgraniem (zalecane dla czystej instalacji)
 3. Kliknij przycisk **"3. Kompiluj"**
 
 #### Proces kompilacji
@@ -110,8 +109,9 @@ Po skonfigurowaniu flag:
 Po udanej kompilacji:
 - Konfiguracja jest automatycznie zapisywana
 - Plik binarny oprogramowania jest przechowywany w katalogu `configurations/`
+- Kopia zapasowa jest zapisana w katalogu `backup` pod nazwą `Config_YYYYMMDD_HHMMSS.bin` (z tym samym znacznikiem czasu co konfiguracja)
 - Okno wyników kompilacji pokazuje:
-  - Zakodowany ciąg konfiguracji (do udostępniania)
+  - Zakodowaną konfigurajcę (do udostępniania)
   - Lokalizację pliku kopii zapasowej (jeśli utworzono)
   - Lokalizację skompilowanego oprogramowania
   - Przyciski do otwierania folderów i kopiowania ścieżek
@@ -141,13 +141,12 @@ Po udanej kompilacji:
 3. Kliknij **"Wczytaj"** lub kliknij dwukrotnie konfigurację
 4. Wszystkie flagi i ustawienia są przywracane
 
-### Zakodowane ciągi konfiguracji
+### Zakodowana konfiguracja
 
 Każda konfiguracja ma zakodowany ciąg zawierający wszystkie wybrane flagi:
 
 **Funkcje**:
 - Odwracalny: Może być zdekodowany z powrotem do oryginalnych flag
-- Kompaktowy: Używa kompresji GZip
 - Możliwy do udostępniania: Kopiuj i wklej, aby udostępnić konfiguracje
 - Bezpieczny dla URL: Może być używany w adresach URL
 
@@ -270,14 +269,6 @@ Udostępniaj swoje konfiguracje:
 3. Inni użytkownicy mogą zaimportować Twoją konfigurację
 4. Doskonałe do udostępniania działających konfiguracji
 
-### Wiersz poleceń
-
-W przypadku zaawansowanych użytkowników:
-- Aplikacja używa PlatformIO Core
-- Dostęp do szczegółowych opcji kompilacji
-- Dostosuj środowiska kompilacji
-- Zintegruj z systemami CI/CD
-
 ---
 
 ## Skróty klawiszowe
@@ -294,7 +285,7 @@ W przypadku zaawansowanych użytkowników:
 
 ### Linki
 
-- **Dokumentacja GUI-Generic**: [github.com/krycha88/GUI-Generic](https://github.com/krycha88/GUI-Generic)
+- **Dokumentacja GUI-Generic**: [github.com/rkalwak/GUI-Generic](https://github.com/rkalwak/GUI-Generic)
 - **Forum SUPLA**: [forum.supla.org](https://forum.supla.org)
 - **Dokumentacja PlatformIO**: [docs.platformio.org](https://docs.platformio.org)
 
@@ -306,11 +297,16 @@ Jeśli napotkasz problemy:
 3. Zgłoś błędy na GitHub
 4. Skontaktuj się ze społecznością
 
+**Logi aplikacji**:
+- Logi aplikacji są przechowywane w katalogu `logs/`
+- Dołącz pliki logów do postów na forum, jeśli zostaniesz o to poproszony przez dewelopera
+- Logi zawierają szczegółowe informacje o procesie kompilacji i błędach
+
 ---
 
 ## O aplikacji
 
-**GUI-Generic Builder** został stworzony, aby uprościć proces kompilacji oprogramowania dla urządzeń inteligentnego domu SUPLA.
+**GUI-Generic Builder** został stworzony, aby uprościć proces kompilacji oprogramowania SUPLA.
 
 **Funkcje**:
 - ✓ Automatyczne wykrywanie urządzeń
@@ -328,4 +324,4 @@ Jeśli napotkasz problemy:
 
 ---
 
-*Ostatnia aktualizacja: 2024*
+*Ostatnia aktualizacja: 2026*

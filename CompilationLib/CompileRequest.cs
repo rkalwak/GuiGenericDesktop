@@ -22,4 +22,9 @@ public class CompileRequest
 
     public GlobalSettings GlobalSettings { get; set; } = new GlobalSettings();
     public string Board { get; set; }
+    
+    /// <summary>
+    /// Configuration timestamp in format yyyyMMdd_HHmmss for consistent naming of backup and config files
+    /// </summary>
+    public string ConfigTimestamp { get; set; }
 }
