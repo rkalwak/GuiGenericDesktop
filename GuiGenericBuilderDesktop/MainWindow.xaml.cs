@@ -639,8 +639,10 @@ namespace GuiGenericBuilderDesktop
 
         private async void UpdateGG_Click(object sender, RoutedEventArgs e)
         {
-            // Disable button and show status
+            // Disable all buttons and show status
             updateGGButton.IsEnabled = false;
+            compileButton.IsEnabled = false;
+            checkDeviceButton.IsEnabled = false;
             statusText.Text = LocalizationManager.Get("DownloadingRepository");
             statusText.Visibility = Visibility.Visible;
 
@@ -692,8 +694,10 @@ namespace GuiGenericBuilderDesktop
             }
             finally
             {
-                // Re-enable button
+                // Re-enable all buttons
                 updateGGButton.IsEnabled = true;
+                compileButton.IsEnabled = true;
+                checkDeviceButton.IsEnabled = true;
             }
         }
 
@@ -868,6 +872,10 @@ namespace GuiGenericBuilderDesktop
 
             // Change button text to "Stop"
             compileButton.Content = LocalizationManager.Get("StopCompilation");
+            
+            // Disable other buttons during compilation
+            checkDeviceButton.IsEnabled = false;
+            updateGGButton.IsEnabled = false;
 
             // Track compilation time
             var compilationStopwatch = System.Diagnostics.Stopwatch.StartNew();
@@ -1062,6 +1070,10 @@ namespace GuiGenericBuilderDesktop
             {
                 // Restore button text to "3. Compile"
                 compileButton.Content = LocalizationManager.Get("Compile");
+                
+                // Re-enable other buttons
+                checkDeviceButton.IsEnabled = true;
+                updateGGButton.IsEnabled = true;
 
                 // Clean up cancellation token source
                 _compilationCancellation?.Dispose();
@@ -1072,8 +1084,10 @@ namespace GuiGenericBuilderDesktop
 
         private async void CheckConnectedDevice_Click(object sender, RoutedEventArgs e)
         {
-            // Disable button and show status
+            // Disable all buttons and show status
             checkDeviceButton.IsEnabled = false;
+            compileButton.IsEnabled = false;
+            updateGGButton.IsEnabled = false;
             statusText.Text = LocalizationManager.Get("DetectingDevice");
             statusText.Visibility = Visibility.Visible;
             statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
@@ -1159,8 +1173,10 @@ namespace GuiGenericBuilderDesktop
                             MessageBoxImage.Information);
                     }
 
-                    // Re-enable button
+                    // Re-enable all buttons
                     checkDeviceButton.IsEnabled = true;
+                    compileButton.IsEnabled = true;
+                    updateGGButton.IsEnabled = true;
                 });
             }
             catch (Exception ex)
@@ -1172,8 +1188,11 @@ namespace GuiGenericBuilderDesktop
                     // Error status
                     statusText.Text = LocalizationManager.Get("DeviceDetectionError");
                     statusText.Foreground = System.Windows.Media.Brushes.Red;
-                    // Re-enable button
+                    
+                    // Re-enable all buttons
                     checkDeviceButton.IsEnabled = true;
+                    compileButton.IsEnabled = true;
+                    updateGGButton.IsEnabled = true;
 
                     MessageBox.Show(
                         LocalizationManager.GetFormat("DeviceDetectionErrorMessage", ex.Message),
