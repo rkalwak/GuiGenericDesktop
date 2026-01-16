@@ -165,6 +165,85 @@ namespace CompilationLib
         }
 
         /// <summary>
+        /// Encodes options from BuildFlagItem objects into a reversible string, excluding sensitive flags.
+        /// </summary>
+        /// <param name="buildFlags">List of build flags.</param>
+        /// <returns>Reversible encoded string representation without sensitive data.</returns>
+        public static string EncodeOptionsWithoutSensitiveData(IEnumerable<BuildFlagItem> buildFlags)
+        {
+            if (buildFlags == null)
+            {
+                return string.Empty;
+            }
+
+            var nonSensitiveFlags = buildFlags
+                .Where(f => !string.IsNullOrEmpty(f?.Key) && !IsSensitiveFlag(f))
+                .Select(f => f.Key)
+                .ToArray();
+
+            return EncodeOptions(nonSensitiveFlags);
+        }
+
+        /// <summary>
+        /// Determines if a build flag contains sensitive information that should not be shared.
+        /// </summary>
+        /// <param name="flag">The build flag to check.</param>
+        /// <returns>True if the flag contains sensitive information (password, email, WiFi credentials).</returns>
+        public static bool IsSensitiveFlag(BuildFlagItem flag)
+        {
+            if (flag == null)
+            {
+                return false;
+            }
+
+            // Check if flag key contains sensitive keywords
+            var sensitiveKeywords = new[] { "WIFIPASS", "WIFISSID", "PASSWORD", "LOGIN", "EMAIL", "SERVER" };
+            var keyUpper = flag.Key?.ToUpperInvariant() ?? string.Empty;
+            
+            if (sensitiveKeywords.Any(keyword => keyUpper.Contains(keyword)))
+            {
+                return true;
+            }
+
+            // Check if any parameter has a sensitive type
+            if (flag.Parameters != null && flag.Parameters.Any())
+            {
+                var sensitiveTypes = new[] { "password", "email" };
+                if (flag.Parameters.Any(p => sensitiveTypes.Contains(p.Type?.ToLowerInvariant())))
+                {
+                    return true;
+                }
+
+                // Check if any parameter key/name contains sensitive keywords
+                foreach (var param in flag.Parameters)
+                {
+                    var paramIdentifier = (param.Key ?? param.Name ?? string.Empty).ToUpperInvariant();
+                    if (sensitiveKeywords.Any(keyword => paramIdentifier.Contains(keyword)))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Gets a list of sensitive flags from the provided collection.
+        /// </summary>
+        /// <param name="buildFlags">List of build flags to filter.</param>
+        /// <returns>List of flags that contain sensitive information.</returns>
+        public static List<BuildFlagItem> GetSensitiveFlags(IEnumerable<BuildFlagItem> buildFlags)
+        {
+            if (buildFlags == null)
+            {
+                return new List<BuildFlagItem>();
+            }
+
+            return buildFlags.Where(IsSensitiveFlag).ToList();
+        }
+
+        /// <summary>
         /// Converts byte array to URL-safe base64 string.
         /// </summary>
         private static string ToBase64Url(byte[] data)

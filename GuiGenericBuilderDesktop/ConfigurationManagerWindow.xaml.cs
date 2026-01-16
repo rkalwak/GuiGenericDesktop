@@ -156,7 +156,38 @@ namespace GuiGenericBuilderDesktop
             DetailComPortText.Text = config.ComPort ?? "N/A";
             DetailFlashSizeText.Text = config.FlashSize ?? "N/A";
             DetailSavedDateText.Text = config.SavedDate.ToString("yyyy-MM-dd HH:mm:ss");
-            DetailEncodedText.Text = config.EncodedConfig ?? "N/A";
+            
+            // Display sanitized encoded config (without sensitive data) for sharing
+            // The full config with sensitive data remains in the file
+            if (!string.IsNullOrEmpty(config.EncodedConfig))
+            {
+                // Decode the full config to get all flags
+                var allFlagKeys = BuildConfigurationHasher.DecodeOptions(config.EncodedConfig);
+                if (allFlagKeys != null && allFlagKeys.Any())
+                {
+                    // Get the actual flag objects to check for sensitive data
+                    var flags = _allFlags.Where(f => allFlagKeys.Contains(f.Key)).ToList();
+                    var sanitizedEncoded = BuildConfigurationHasher.EncodeOptionsWithoutSensitiveData(flags);
+                    var sensitiveFlags = BuildConfigurationHasher.GetSensitiveFlags(flags);
+                    
+                    if (sensitiveFlags.Any())
+                    {
+                        DetailEncodedText.Text = $"{sanitizedEncoded}\n\n?? {sensitiveFlags.Count} sensitive flag(s) excluded from display";
+                    }
+                    else
+                    {
+                        DetailEncodedText.Text = sanitizedEncoded;
+                    }
+                }
+                else
+                {
+                    DetailEncodedText.Text = config.EncodedConfig;
+                }
+            }
+            else
+            {
+                DetailEncodedText.Text = "N/A";
+            }
             
             // Show or hide firmware folder button based on whether firmware file exists
             if (!string.IsNullOrEmpty(config.FirmwareFileName))
@@ -207,12 +238,52 @@ namespace GuiGenericBuilderDesktop
                 {
                     if (!string.IsNullOrWhiteSpace(config.EncodedConfig))
                     {
-                        Clipboard.SetText(config.EncodedConfig);
-                        MessageBox.Show(
-                            LocalizationManager.Get("EncodedCopied"),
-                            LocalizationManager.Get("CopySuccess"),
-                            MessageBoxButton.OK,
-                            MessageBoxImage.Information);
+                        // Decode the full config (which includes sensitive data) from the saved file
+                        var allFlagKeys = BuildConfigurationHasher.DecodeOptions(config.EncodedConfig);
+                        
+                        if (allFlagKeys != null && allFlagKeys.Any())
+                        {
+                            // Get the actual flag objects
+                            var flags = _allFlags.Where(f => allFlagKeys.Contains(f.Key)).ToList();
+                            
+                            // Generate sanitized encoded string (without sensitive data) for sharing
+                            var safeEncoded = BuildConfigurationHasher.EncodeOptionsWithoutSensitiveData(flags);
+                            var sensitiveFlags = BuildConfigurationHasher.GetSensitiveFlags(flags);
+                            
+                            Clipboard.SetText(safeEncoded);
+                            
+                            if (sensitiveFlags.Any())
+                            {
+                                var flagNames = string.Join(", ", sensitiveFlags.Select(f => f.Key));
+                                MessageBox.Show(
+                                    $"Encoded configuration copied to clipboard!\n\n" +
+                                    $"?? {sensitiveFlags.Count} sensitive flag(s) were excluded from the shareable string:\n" +
+                                    $"{flagNames}\n\n" +
+                                    $"These flags contain passwords, email, or WiFi credentials.\n" +
+                                    $"The complete configuration (including sensitive data) remains safely stored in your local file.",
+                                    "Copied (Sensitive Data Excluded)",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Information);
+                            }
+                            else
+                            {
+                                MessageBox.Show(
+                                    LocalizationManager.Get("EncodedCopied"),
+                                    LocalizationManager.Get("CopySuccess"),
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Information);
+                            }
+                        }
+                        else
+                        {
+                            // Fallback if decoding fails
+                            Clipboard.SetText(config.EncodedConfig);
+                            MessageBox.Show(
+                                LocalizationManager.Get("EncodedCopied"),
+                                LocalizationManager.Get("CopySuccess"),
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Information);
+                        }
                     }
                     else
                     {
@@ -542,15 +613,22 @@ namespace GuiGenericBuilderDesktop
                         return;
                     }
 
-                    // Save the configuration asynchronously
+                    // Save the FULL configuration (including ALL flags with sensitive data) to local file
+                    // This ensures you can fully restore the configuration later
                     await _configManager.SaveConfigurationAsync(enabledFlags, configName, _currentPlatform, _currentComPort, firmwareFilePath: null, buildOutputDirectory: null, flashSize: _currentFlashSize);
 
-                    // Generate encoded string for display
-                    var encoded = BuildConfigurationHasher.EncodeOptions(enabledFlags);
+                    // Generate sanitized encoded string for SHARING (excludes sensitive data)
+                    var encoded = BuildConfigurationHasher.EncodeOptionsWithoutSensitiveData(enabledFlags);
+                    
+                    // Check if any sensitive flags were excluded from the shareable string
+                    var sensitiveFlags = BuildConfigurationHasher.GetSensitiveFlags(enabledFlags);
+                    var excludedCount = sensitiveFlags.Count;
 
                     // Update UI with success message
                     SavedNameText.Text = configName;
-                    SavedFlagCountText.Text = LocalizationManager.GetFormat("FlagsCount", enabledFlags.Count);
+                    SavedFlagCountText.Text = excludedCount > 0 
+                        ? LocalizationManager.GetFormat("FlagsCount", enabledFlags.Count) + $" ({excludedCount} sensitive excluded from shareable string)"
+                        : LocalizationManager.GetFormat("FlagsCount", enabledFlags.Count);
                     SavedPlatformText.Text = string.IsNullOrEmpty(_currentPlatform) ? LocalizationManager.Get("NotSpecified") : _currentPlatform;
                     SavedComPortText.Text = string.IsNullOrEmpty(_currentComPort) ? LocalizationManager.Get("NotSpecified") : _currentComPort;
                     SavedEncodedTextBox.Text = encoded;
@@ -568,6 +646,21 @@ namespace GuiGenericBuilderDesktop
                     
                     // Hide empty state
                     EmptyStateText.Visibility = Visibility.Collapsed;
+                    
+                    // Show informational message about what was saved
+                    if (excludedCount > 0)
+                    {
+                        var sensitiveList = string.Join(", ", sensitiveFlags.Select(f => f.Key));
+                        MessageBox.Show(
+                            $"? Configuration saved successfully!\n\n" +
+                            $"?? LOCAL FILE: Contains ALL {enabledFlags.Count} flags (including sensitive data) for full restoration\n\n" +
+                            $"?? SHAREABLE STRING: {excludedCount} sensitive flag(s) excluded:\n{sensitiveList}\n\n" +
+                            $"?? Your complete configuration (including passwords, email, WiFi) is safely stored locally.\n" +
+                            $"The shareable encoded string above excludes sensitive data for public sharing.",
+                            "Configuration Saved",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Information);
+                    }
                 }
             }
             catch (Exception ex)
