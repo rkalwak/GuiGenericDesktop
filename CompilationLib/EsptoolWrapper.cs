@@ -1,15 +1,110 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace CompilationLib
 {
     public  class EsptoolWrapper : IEsptoolWrapper
     {
-        private string _esptoolPath = "esptool.exe";
+        private readonly string _esptoolPath;
         string errors = string.Empty;
         string logs = string.Empty;
         public event EventHandler<string> OutputLine;
         public event EventHandler<string> ErrorLine;
+        
+        public EsptoolWrapper()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                _esptoolPath = "esptool.exe";
+            }
+            else
+            {
+                // On Linux/macOS, search for esptool in common locations
+                _esptoolPath = FindEsptoolPath();
+            }
+            
+            Console.WriteLine($"Using esptool path: {_esptoolPath}");
+        }
+        
+        /// <summary>
+        /// Searches for esptool executable in common Linux/macOS installation locations
+        /// </summary>
+        private static string FindEsptoolPath()
+        {
+            var homeDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            
+            // Common esptool installation paths on Linux/macOS
+            var searchPaths = new[]
+            {
+                "esptool",                                                           // Check PATH first
+                "esptool.py",                                                        // Python script name
+                "/usr/local/bin/esptool",
+                "/usr/local/bin/esptool.py",
+                "/usr/bin/esptool",
+                "/usr/bin/esptool.py",
+                Path.Combine(homeDir, ".local", "bin", "esptool"),
+                Path.Combine(homeDir, ".local", "bin", "esptool.py"),
+                Path.Combine(homeDir, ".platformio", "penv", "bin", "esptool"),
+                Path.Combine(homeDir, ".platformio", "penv", "bin", "esptool.py"),
+            };
+            
+            foreach (var path in searchPaths)
+            {
+                // If it's just a command name (no path separators), check if it's in PATH
+                if (!path.Contains(Path.DirectorySeparatorChar) && !path.Contains(Path.AltDirectorySeparatorChar))
+                {
+                    if (IsCommandAvailable(path))
+                    {
+                        Console.WriteLine($"Found esptool in PATH: {path}");
+                        return path;
+                    }
+                }
+                // Otherwise check if the file exists at that specific path
+                else if (File.Exists(path))
+                {
+                    Console.WriteLine($"Found esptool at: {path}");
+                    return path;
+                }
+            }
+            
+            // Fallback to just "esptool" and let the system try to find it
+            Console.WriteLine("⚠ Warning: esptool not found in common locations, using 'esptool' (must be in PATH)");
+            return "esptool";
+        }
+        
+        /// <summary>
+        /// Checks if a command is available in the system PATH
+        /// </summary>
+        private static bool IsCommandAvailable(string command)
+        {
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "where" : "which",
+                    Arguments = command,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                
+                using var process = Process.Start(psi);
+                if (process != null)
+                {
+                    process.WaitForExit(1000); // 1 second timeout
+                    return process.ExitCode == 0;
+                }
+                
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        
         public async Task<EsptoolResult> ReadChipId(string comPort, CancellationToken cancellation = default)
             => await RunEsptoolAsync($"--port {EscapeArgument(comPort)} chip-id", cancellation);
 

@@ -1,5 +1,6 @@
 using CompilationLib;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 public class PlatformioCliHandler : ICompileHandler
 {
@@ -19,7 +20,21 @@ public class PlatformioCliHandler : ICompileHandler
 
     public PlatformioCliHandler()
     {
-        _platformioCliPath = $"{Environment.ExpandEnvironmentVariables("%USERPROFILE%")}/.platformio/penv/Scripts/platformio.exe";
+        var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            _platformioCliPath = Path.Combine(userProfile, ".platformio", "penv", "Scripts", "platformio.exe");
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            _platformioCliPath = Path.Combine(userProfile, ".platformio", "penv", "bin", "platformio");
+        }
+        else
+        {
+            // Fallback for unknown platforms - try Linux-style path
+            _platformioCliPath = Path.Combine(userProfile, ".platformio", "penv", "bin", "platformio");
+        }
     }
 
     public async Task<CompileResponse> Handle(CompileRequest request, CancellationToken cancellationToken)
@@ -46,7 +61,7 @@ public class PlatformioCliHandler : ICompileHandler
         SetPartitionScheme(request.ProjectDirectory, request.EnvironmentName, request.FlashSize, request.Board);
       
         // PlatformIO uses 'run' command for compilation
-        CommentUnlistedFlagsBetweenMarkers($"{request.ProjectDirectory}/platformio.ini", request.BuildFlags, request.GlobalSettings);
+        CommentUnlistedFlagsBetweenMarkers(Path.Combine(request.ProjectDirectory, "platformio.ini"), request.BuildFlags, request.GlobalSettings);
 
         // Create backup before deployment if both deploying and backup are enabled
         if (request.ShouldDeploy && request.ShouldBackup && !string.IsNullOrEmpty(request.PortCom))
@@ -146,9 +161,9 @@ public class PlatformioCliHandler : ICompileHandler
             stopwatch.Stop();
             compileResponse.IsSuccessful = process.ExitCode == 0;
             compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
-            compileResponse.OutputDirectory = $"{request.ProjectDirectory}/.pio/build/{request.EnvironmentName}";
+            compileResponse.OutputDirectory = Path.Combine(request.ProjectDirectory, ".pio", "build", request.EnvironmentName);
             compileResponse.OutputFile = $"firmware.bin";
-            compileResponse.Logs = "Errors:\r\n" + errors;
+            compileResponse.Logs = "Errors:" + Environment.NewLine + errors;
         }
 
         return compileResponse;
@@ -409,7 +424,7 @@ public class PlatformioCliHandler : ICompileHandler
                 }
             }
 
-            var partitionsValue = $"board_build.partitions = partitions/{scheme.FileName}";
+            var partitionsValue = $"board_build.partitions = partitions/{scheme.FileName}"; // PlatformIO expects forward slashes in config
 
             if (partitionsIndex != -1)
             {
@@ -439,7 +454,7 @@ public class PlatformioCliHandler : ICompileHandler
         Console.WriteLine(e.Data); // Log the output to the console
         Debug.WriteLine(e.Data);
         var line = e.Data ?? string.Empty;
-        errors += line + "\r\n";
+        errors += line + Environment.NewLine;
         ErrorLine?.Invoke(this, line);
     }
 
@@ -448,7 +463,7 @@ public class PlatformioCliHandler : ICompileHandler
         Console.WriteLine(e.Data); // Log the output to the console
         Debug.WriteLine(e.Data);
         var line = e.Data ?? string.Empty;
-        logs += line + "\r\n";
+        logs += line + Environment.NewLine;
         OutputLine?.Invoke(this, line);
     }
 }

@@ -12,10 +12,17 @@ public class CompileHandler : ICompileHandler
     {
         var compileResponse = new CompileResponse();
         string buildFlagsString = BuildFlagsStringForCompilation(request.BuildFlags);
-        string arguments = $"compile {request.ProjectPath}{(request.LibrariesPath != null ? " --libraries " + request.LibrariesPath : string.Empty)} --fqbn {request.EnvironmentName} --verbose --log --build-property build.flags=\"{buildFlagsString}\" --output-dir \"{request.ProjectDirectory}/build\"";
+        var buildDir = Path.Combine(request.ProjectDirectory, "build");
+        string arguments = $"compile {request.ProjectPath}{(request.LibrariesPath != null ? " --libraries " + request.LibrariesPath : string.Empty)} --fqbn {request.EnvironmentName} --verbose --log --build-property build.flags=\"{buildFlagsString}\" --output-dir \"{buildDir}\"";
+        
+        // Arduino CLI executable name depends on platform
+        var arduinoCliExe = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows) 
+            ? "arduino-cli.exe" 
+            : "arduino-cli";
+        
         var processStartInfo = new ProcessStartInfo
         {
-            FileName = @"arduino-cli.exe",
+            FileName = arduinoCliExe,
             WorkingDirectory = request.ProjectDirectory,
             Arguments = arguments,
             RedirectStandardOutput = true,
@@ -25,9 +32,9 @@ public class CompileHandler : ICompileHandler
         };
         Console.WriteLine($"Compiling:{processStartInfo.FileName} {arguments}");
 
-        if (Directory.Exists($"{request.ProjectDirectory}/build"))
+        if (Directory.Exists(buildDir))
         {
-            Directory.Delete($"{request.ProjectDirectory}/build", recursive: true);
+            Directory.Delete(buildDir, recursive: true);
         }
 
         using (var process = new Process { StartInfo = processStartInfo })
@@ -52,7 +59,7 @@ public class CompileHandler : ICompileHandler
 
             compileResponse.IsSuccessful = process.ExitCode==0;
             compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
-            compileResponse.OutputDirectory = $"{request.ProjectDirectory}/build";
+            compileResponse.OutputDirectory = Path.Combine(request.ProjectDirectory, "build");
         }
 
         return compileResponse;
