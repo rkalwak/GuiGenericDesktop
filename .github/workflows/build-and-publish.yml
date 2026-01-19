@@ -16,56 +16,56 @@ env:
   BUILD_CONFIGURATION: 'Release'
 
 jobs:
-build:
-  name: Build and Test (${{ matrix.os }})
-  runs-on: ${{ matrix.os }}
-  strategy:
-    matrix:
-      os: [windows-latest, ubuntu-latest]
-      include:
-        - os: windows-latest
-          runtime: win-x64
-          artifact-name: windows
-        - os: ubuntu-latest
-          runtime: linux-x64
-          artifact-name: linux
+  build:
+    name: Build and Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            runtime: win-x64
+            artifact-name: windows
+          - os: ubuntu-latest
+            runtime: linux-x64
+            artifact-name: linux
     
-  steps:
-  - name: Checkout code
-    uses: actions/checkout@v4
-    with:
-      fetch-depth: 0
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
-  - name: Setup .NET
-    uses: actions/setup-dotnet@v4
-    with:
-      dotnet-version: ${{ env.DOTNET_VERSION }}
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
     
-  - name: Restore dependencies
-    run: dotnet restore ${{ env.SOLUTION_PATH }}
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
     
-  - name: Build solution
-    run: dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
+    - name: Build solution
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore
     
-  - name: Run tests
-    run: dotnet test ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --filter "Category!=Integration"
+    - name: Run tests
+      run: dotnet test ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --filter "Category!=Integration"
     
-  - name: Upload test results
-    uses: actions/upload-artifact@v4
-    if: always()
-    with:
-      name: test-results-${{ matrix.artifact-name }}
-      path: '**/test-results.trx'
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.artifact-name }}
+        path: '**/test-results.trx'
     
-  - name: Publish application
-    run: dotnet publish ${{ env.PROJECT_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --runtime ${{ matrix.runtime }} --self-contained false --output ./publish
+    - name: Publish application
+      run: dotnet publish ${{ env.PROJECT_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --runtime ${{ matrix.runtime }} --self-contained false --output ./publish
     
-  - name: Upload build artifacts
-    uses: actions/upload-artifact@v4
-    with:
-      name: gui-generic-builder-${{ matrix.artifact-name }}-${{ github.sha }}
-      path: ./publish/
-      retention-days: 30
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: gui-generic-builder-${{ matrix.artifact-name }}-${{ github.sha }}
+        path: ./publish/
+        retention-days: 30
 
   package:
     name: Create Release Package (${{ matrix.platform }})
@@ -85,14 +85,14 @@ build:
             runtime: linux-x64
             artifact-name: linux
             archive-ext: tar.gz
-    
+
     steps:
     - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
         name: gui-generic-builder-${{ matrix.artifact-name }}-${{ github.sha }}
         path: ./publish
-    
+
     - name: Create release archive (Windows)
       if: matrix.platform == 'windows'
       run: |
@@ -101,7 +101,7 @@ build:
         Compress-Archive -Path ./publish/* -DestinationPath $archiveName
         echo "ARCHIVE_NAME=$archiveName" >> $env:GITHUB_ENV
       shell: pwsh
-    
+
     - name: Create release archive (Linux)
       if: matrix.platform == 'linux'
       run: |
@@ -110,7 +110,7 @@ build:
         tar -czf "$archiveName" -C ./publish .
         echo "ARCHIVE_NAME=$archiveName" >> $GITHUB_ENV
       shell: bash
-    
+
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
@@ -139,14 +139,14 @@ build:
             runtime: linux-x64
             artifact-name: linux
             archive-ext: tar.gz
-    
+
     steps:
     - name: Download artifacts
       uses: actions/download-artifact@v4
       with:
         name: gui-generic-builder-${{ matrix.artifact-name }}-${{ github.sha }}
         path: ./publish
-    
+
     - name: Create nightly archive (Windows)
       if: matrix.platform == 'windows'
       run: |
@@ -155,7 +155,7 @@ build:
         Compress-Archive -Path ./publish/* -DestinationPath $archiveName
         echo "ARCHIVE_NAME=$archiveName" >> $env:GITHUB_ENV
       shell: pwsh
-    
+
     - name: Create nightly archive (Linux)
       if: matrix.platform == 'linux'
       run: |
@@ -164,7 +164,7 @@ build:
         tar -czf "$archiveName" -C ./publish .
         echo "ARCHIVE_NAME=$archiveName" >> $GITHUB_ENV
       shell: bash
-    
+
     - name: Upload to artifacts
       uses: actions/upload-artifact@v4
       with:
