@@ -67,105 +67,104 @@ jobs:
         else
           echo "VERSION=${{ steps.get_version_linux.outputs.VERSION }}" >> $GITHUB_OUTPUT
         fi
-      shell: bash   
-      - name: Restore dependencies
-        run: dotnet restore ${{ env.SOLUTION_PATH }}
+      shell: bash
     
-      - name: Build
-        run: dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore -p:Version=${{ steps.get_version.outputs.VERSION }}
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
     
-      - name: Run tests
-        run: dotnet test ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal --filter "Category!=Integration"
+    - name: Build
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-restore -p:Version=${{ steps.get_version.outputs.VERSION }}
     
-      - name: Publish Self-Contained
-        run: |
-          dotnet publish ${{ env.PROJECT_PATH }} \
-            --configuration ${{ env.BUILD_CONFIGURATION }} \
-            --runtime ${{ matrix.runtime }} \
-            --self-contained true \
-            --output ./publish/${{ matrix.runtime }} \
-            -p:PublishSingleFile=true \
-            -p:Version=${{ steps.get_version.outputs.VERSION }}
-        shell: bash
+    - name: Run tests
+      run: dotnet test ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal --filter "Category!=Integration"
     
-      - name: Publish Framework-Dependent
-        run: |
-          dotnet publish ${{ env.PROJECT_PATH }} \
-            --configuration ${{ env.BUILD_CONFIGURATION }} \
-            --runtime ${{ matrix.runtime }} \
-            --self-contained false \
-            --output ./publish/${{ matrix.runtime }}-fd \
-            -p:Version=${{ steps.get_version.outputs.VERSION }}
-        shell: bash
+    - name: Publish Self-Contained
+      run: |
+        dotnet publish ${{ env.PROJECT_PATH }} \
+          --configuration ${{ env.BUILD_CONFIGURATION }} \
+          --runtime ${{ matrix.runtime }} \
+          --self-contained true \
+          --output ./publish/${{ matrix.runtime }} \
+          -p:PublishSingleFile=true \
+          -p:Version=${{ steps.get_version.outputs.VERSION }}
+      shell: bash
     
+    - name: Publish Framework-Dependent
+      run: |
+        dotnet publish ${{ env.PROJECT_PATH }} \
+          --configuration ${{ env.BUILD_CONFIGURATION }} \
+          --runtime ${{ matrix.runtime }} \
+          --self-contained false \
+          --output ./publish/${{ matrix.runtime }}-fd \
+          -p:Version=${{ steps.get_version.outputs.VERSION }}
+      shell: bash
     
-      - name: Copy additional files (Windows)
-        if: matrix.platform == 'windows'
-        run: |
-          Copy-Item -Path "README.md" -Destination "./publish/${{ matrix.runtime }}/" -ErrorAction SilentlyContinue
-          Copy-Item -Path "GuiGenericBuilderDesktop/readme.md" -Destination "./publish/${{ matrix.runtime }}/" -ErrorAction SilentlyContinue
-          Copy-Item -Path "LICENSE" -Destination "./publish/${{ matrix.runtime }}/" -ErrorAction SilentlyContinue
-          Copy-Item -Path "GuiGenericBuilderDesktop/builder.json" -Destination "./publish/${{ matrix.runtime }}/" -ErrorAction SilentlyContinue
+    - name: Copy additional files (Windows)
+      if: matrix.platform == 'windows'
+      run: |
+        Copy-Item -Path "README.md" -Destination "./publish/${{ matrix.runtime }}/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "GuiGenericBuilderDesktop/readme.md" -Destination "./publish/${{ matrix.runtime }}/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "LICENSE" -Destination "./publish/${{ matrix.runtime }}/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "GuiGenericBuilderDesktop/builder.json" -Destination "./publish/${{ matrix.runtime }}/" -ErrorAction SilentlyContinue
         
-          Copy-Item -Path "README.md" -Destination "./publish/${{ matrix.runtime }}-fd/" -ErrorAction SilentlyContinue
-          Copy-Item -Path "GuiGenericBuilderDesktop/readme.md" -Destination "./publish/${{ matrix.runtime }}-fd/" -ErrorAction SilentlyContinue
-          Copy-Item -Path "LICENSE" -Destination "./publish/${{ matrix.runtime }}-fd/" -ErrorAction SilentlyContinue
-          Copy-Item -Path "GuiGenericBuilderDesktop/builder.json" -Destination "./publish/${{ matrix.runtime }}-fd/" -ErrorAction SilentlyContinue
-        shell: pwsh
+        Copy-Item -Path "README.md" -Destination "./publish/${{ matrix.runtime }}-fd/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "GuiGenericBuilderDesktop/readme.md" -Destination "./publish/${{ matrix.runtime }}-fd/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "LICENSE" -Destination "./publish/${{ matrix.runtime }}-fd/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "GuiGenericBuilderDesktop/builder.json" -Destination "./publish/${{ matrix.runtime }}-fd/" -ErrorAction SilentlyContinue
+      shell: pwsh
     
-      - name: Copy additional files (Linux)
-        if: matrix.platform == 'linux'
-        run: |
-          cp -f README.md "./publish/${{ matrix.runtime }}/" 2>/dev/null || true
-          cp -f GuiGenericBuilderDesktop/readme.md "./publish/${{ matrix.runtime }}/" 2>/dev/null || true
-          cp -f LICENSE "./publish/${{ matrix.runtime }}/" 2>/dev/null || true
-          cp -f GuiGenericBuilderDesktop/builder.json "./publish/${{ matrix.runtime }}/" 2>/dev/null || true
+    - name: Copy additional files (Linux)
+      if: matrix.platform == 'linux'
+      run: |
+        cp -f README.md "./publish/${{ matrix.runtime }}/" 2>/dev/null || true
+        cp -f GuiGenericBuilderDesktop/readme.md "./publish/${{ matrix.runtime }}/" 2>/dev/null || true
+        cp -f LICENSE "./publish/${{ matrix.runtime }}/" 2>/dev/null || true
+        cp -f GuiGenericBuilderDesktop/builder.json "./publish/${{ matrix.runtime }}/" 2>/dev/null || true
         
-          cp -f README.md "./publish/${{ matrix.runtime }}-fd/" 2>/dev/null || true
-          cp -f GuiGenericBuilderDesktop/readme.md "./publish/${{ matrix.runtime }}-fd/" 2>/dev/null || true
-          cp -f LICENSE "./publish/${{ matrix.runtime }}-fd/" 2>/dev/null || true
-          cp -f GuiGenericBuilderDesktop/builder.json "./publish/${{ matrix.runtime }}-fd/" 2>/dev/null || true
-        shell: bash
+        cp -f README.md "./publish/${{ matrix.runtime }}-fd/" 2>/dev/null || true
+        cp -f GuiGenericBuilderDesktop/readme.md "./publish/${{ matrix.runtime }}-fd/" 2>/dev/null || true
+        cp -f LICENSE "./publish/${{ matrix.runtime }}-fd/" 2>/dev/null || true
+        cp -f GuiGenericBuilderDesktop/builder.json "./publish/${{ matrix.runtime }}-fd/" 2>/dev/null || true
+      shell: bash
     
+    - name: Create release archives (Windows)
+      if: matrix.platform == 'windows'
+      run: |
+        $version = "${{ steps.get_version.outputs.VERSION }}"
+        
+        # Self-contained archive
+        Compress-Archive -Path ./publish/${{ matrix.runtime }}/* -DestinationPath "GuiGenericBuilder-v$version-${{ matrix.runtime }}.zip"
+        
+        # Framework-dependent archive
+        Compress-Archive -Path ./publish/${{ matrix.runtime }}-fd/* -DestinationPath "GuiGenericBuilder-v$version-${{ matrix.runtime }}-framework-dependent.zip"
+        
+        echo "ARCHIVE_SC=GuiGenericBuilder-v$version-${{ matrix.runtime }}.zip" >> $env:GITHUB_ENV
+        echo "ARCHIVE_FD=GuiGenericBuilder-v$version-${{ matrix.runtime }}-framework-dependent.zip" >> $env:GITHUB_ENV
+      shell: pwsh
     
-      - name: Create release archives (Windows)
-        if: matrix.platform == 'windows'
-        run: |
-          $version = "${{ steps.get_version.outputs.VERSION }}"
+    - name: Create release archives (Linux)
+      if: matrix.platform == 'linux'
+      run: |
+        version="${{ steps.get_version.outputs.VERSION }}"
         
-          # Self-contained archive
-          Compress-Archive -Path ./publish/${{ matrix.runtime }}/* -DestinationPath "GuiGenericBuilder-v$version-${{ matrix.runtime }}.zip"
+        # Self-contained archive
+        tar -czf "GuiGenericBuilder-v$version-${{ matrix.runtime }}.tar.gz" -C ./publish/${{ matrix.runtime }} .
         
-          # Framework-dependent archive
-          Compress-Archive -Path ./publish/${{ matrix.runtime }}-fd/* -DestinationPath "GuiGenericBuilder-v$version-${{ matrix.runtime }}-framework-dependent.zip"
+        # Framework-dependent archive
+        tar -czf "GuiGenericBuilder-v$version-${{ matrix.runtime }}-framework-dependent.tar.gz" -C ./publish/${{ matrix.runtime }}-fd .
         
-          echo "ARCHIVE_SC=GuiGenericBuilder-v$version-${{ matrix.runtime }}.zip" >> $env:GITHUB_ENV
-          echo "ARCHIVE_FD=GuiGenericBuilder-v$version-${{ matrix.runtime }}-framework-dependent.zip" >> $env:GITHUB_ENV
-        shell: pwsh
+        echo "ARCHIVE_SC=GuiGenericBuilder-v$version-${{ matrix.runtime }}.tar.gz" >> $GITHUB_ENV
+        echo "ARCHIVE_FD=GuiGenericBuilder-v$version-${{ matrix.runtime }}-framework-dependent.tar.gz" >> $GITHUB_ENV
+      shell: bash
     
-      - name: Create release archives (Linux)
-        if: matrix.platform == 'linux'
-        run: |
-          version="${{ steps.get_version.outputs.VERSION }}"
-        
-          # Self-contained archive
-          tar -czf "GuiGenericBuilder-v$version-${{ matrix.runtime }}.tar.gz" -C ./publish/${{ matrix.runtime }} .
-        
-          # Framework-dependent archive
-          tar -czf "GuiGenericBuilder-v$version-${{ matrix.runtime }}-framework-dependent.tar.gz" -C ./publish/${{ matrix.runtime }}-fd .
-        
-          echo "ARCHIVE_SC=GuiGenericBuilder-v$version-${{ matrix.runtime }}.tar.gz" >> $GITHUB_ENV
-          echo "ARCHIVE_FD=GuiGenericBuilder-v$version-${{ matrix.runtime }}-framework-dependent.tar.gz" >> $GITHUB_ENV
-        shell: bash
-    
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-${{ matrix.platform }}-${{ github.sha }}
-          path: |
-            ${{ env.ARCHIVE_SC }}
-            ${{ env.ARCHIVE_FD }}
-          retention-days: 7
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-${{ matrix.platform }}-${{ github.sha }}
+        path: |
+          ${{ env.ARCHIVE_SC }}
+          ${{ env.ARCHIVE_FD }}
+        retention-days: 7
 
   create-release:
     name: Create GitHub Release
@@ -173,16 +172,16 @@ jobs:
     needs: build-release
     permissions:
       contents: write
-  
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-  
+    
     - name: Download all artifacts
       uses: actions/download-artifact@v4
       with:
         path: ./artifacts
-  
+    
     - name: Get version from tag
       id: get_version
       run: |
@@ -191,59 +190,58 @@ jobs:
         echo "VERSION=$version" >> $GITHUB_OUTPUT
         echo "Building version: $version"
       shell: bash
-  
-  
+    
     - name: Generate changelog
       id: changelog
       run: |
         cat > changelog.txt << 'EOF'
         ## What's New in ${{ github.ref_name }}
-      
+        
         ### Installation
-      
+        
         #### Windows
-      
+        
         **Self-Contained (Recommended)**
         - Download: `GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64.zip`
         - No .NET installation required
         - Larger file size (~150MB)
-      
+        
         **Framework-Dependent**
         - Download: `GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64-framework-dependent.zip`
         - Requires .NET 10 Runtime installed
         - Smaller file size (~10MB)
-      
+        
         #### Linux
-      
+        
         **Self-Contained (Recommended)**
         - Download: `GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz`
         - No .NET installation required
         - Larger file size (~150MB)
         - Extract: `tar -xzf GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz`
-      
+        
         **Framework-Dependent**
         - Download: `GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-linux-x64-framework-dependent.tar.gz`
         - Requires .NET 10 Runtime installed
         - Smaller file size (~10MB)
         - Extract: `tar -xzf GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-linux-x64-framework-dependent.tar.gz`
-      
+        
         ### Prerequisites
         - **PlatformIO** must be installed
         - **Windows**: Windows 10/11 (x64)
         - **Linux**: Ubuntu 20.04+ or compatible distribution (x64)
-      
+        
         ### Features
         See [Changelog](./GuiGenericBuilderDesktop/Changelog.md) for detailed changes.
         EOF
       shell: bash
-  
+    
     - name: Collect release files
       run: |
         mkdir -p release-files
         find ./artifacts -type f \( -name "*.zip" -o -name "*.tar.gz" \) -exec cp {} release-files/ \;
         ls -lah release-files/
       shell: bash
-  
+    
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
