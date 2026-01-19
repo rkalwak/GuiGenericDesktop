@@ -12,62 +12,31 @@ env:
   BUILD_CONFIGURATION: 'Release'
 
 jobs:
-  build-release:
-    name: Build Release (${{ matrix.platform }})
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: write
-    strategy:
-      matrix:
-        include:
-          - platform: windows
-            os: windows-latest
-            runtime: win-x64
-            archive-ext: zip
-          - platform: linux
-            os: ubuntu-latest
-            runtime: linux-x64
-            archive-ext: tar.gz
+build-release:
+  name: Build Release (Windows)
+  runs-on: windows-latest
+  permissions:
+    contents: write
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+  steps:
+  - name: Checkout code
+    uses: actions/checkout@v4
+    with:
+      fetch-depth: 0
     
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
+  - name: Setup .NET
+    uses: actions/setup-dotnet@v4
+    with:
+      dotnet-version: ${{ env.DOTNET_VERSION }}
     
-    - name: Get version from tag (Windows)
-      if: matrix.platform == 'windows'
-      id: get_version_win
-      run: |
-        $version = "${{ github.ref_name }}" -replace '^v', ''
-        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
-        echo "Building version: $version"
-      shell: pwsh
+  - name: Get version from tag
+    id: get_version
+    run: |
+      $version = "${{ github.ref_name }}" -replace '^v', ''
+      echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+      echo "Building version: $version"
+    shell: pwsh
     
-    - name: Get version from tag (Linux)
-      if: matrix.platform == 'linux'
-      id: get_version_linux
-      run: |
-        version="${{ github.ref_name }}"
-        version="${version#v}"
-        echo "VERSION=$version" >> $GITHUB_OUTPUT
-        echo "Building version: $version"
-      shell: bash
-    
-    - name: Set version output
-      id: get_version
-      run: |
-        if [ "${{ matrix.platform }}" = "windows" ]; then
-          echo "VERSION=${{ steps.get_version_win.outputs.VERSION }}" >> $GITHUB_OUTPUT
-        else
-          echo "VERSION=${{ steps.get_version_linux.outputs.VERSION }}" >> $GITHUB_OUTPUT
-        fi
-      shell: bash
     
     - name: Restore dependencies
       run: dotnet restore ${{ env.SOLUTION_PATH }}
@@ -78,97 +47,63 @@ jobs:
     - name: Run tests
       run: dotnet test ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal --filter "Category!=Integration"
     
-    - name: Publish Self-Contained
+    - name: Publish Self-Contained (win-x64)
       run: |
-        dotnet publish ${{ env.PROJECT_PATH }} \
-          --configuration ${{ env.BUILD_CONFIGURATION }} \
-          --runtime ${{ matrix.runtime }} \
-          --self-contained true \
-          --output ./publish/${{ matrix.runtime }} \
-          -p:PublishSingleFile=true \
+        dotnet publish ${{ env.PROJECT_PATH }} `
+          --configuration ${{ env.BUILD_CONFIGURATION }} `
+          --runtime win-x64 `
+          --self-contained true `
+          --output ./publish/win-x64 `
+          -p:PublishSingleFile=true `
           -p:Version=${{ steps.get_version.outputs.VERSION }}
-      shell: bash
-    
-    - name: Publish Framework-Dependent
-      run: |
-        dotnet publish ${{ env.PROJECT_PATH }} \
-          --configuration ${{ env.BUILD_CONFIGURATION }} \
-          --runtime ${{ matrix.runtime }} \
-          --self-contained false \
-          --output ./publish/${{ matrix.runtime }}-fd \
-          -p:Version=${{ steps.get_version.outputs.VERSION }}
-      shell: bash
-    
-    - name: Copy additional files (Windows)
-      if: matrix.platform == 'windows'
-      run: |
-        Copy-Item -Path "README.md" -Destination "./publish/${{ matrix.runtime }}/" -ErrorAction SilentlyContinue
-        Copy-Item -Path "GuiGenericBuilderDesktop/readme.md" -Destination "./publish/${{ matrix.runtime }}/" -ErrorAction SilentlyContinue
-        Copy-Item -Path "LICENSE" -Destination "./publish/${{ matrix.runtime }}/" -ErrorAction SilentlyContinue
-        Copy-Item -Path "GuiGenericBuilderDesktop/builder.json" -Destination "./publish/${{ matrix.runtime }}/" -ErrorAction SilentlyContinue
-        
-        Copy-Item -Path "README.md" -Destination "./publish/${{ matrix.runtime }}-fd/" -ErrorAction SilentlyContinue
-        Copy-Item -Path "GuiGenericBuilderDesktop/readme.md" -Destination "./publish/${{ matrix.runtime }}-fd/" -ErrorAction SilentlyContinue
-        Copy-Item -Path "LICENSE" -Destination "./publish/${{ matrix.runtime }}-fd/" -ErrorAction SilentlyContinue
-        Copy-Item -Path "GuiGenericBuilderDesktop/builder.json" -Destination "./publish/${{ matrix.runtime }}-fd/" -ErrorAction SilentlyContinue
       shell: pwsh
     
-    - name: Copy additional files (Linux)
-      if: matrix.platform == 'linux'
+    - name: Publish Framework-Dependent (win-x64)
       run: |
-        cp -f README.md "./publish/${{ matrix.runtime }}/" 2>/dev/null || true
-        cp -f GuiGenericBuilderDesktop/readme.md "./publish/${{ matrix.runtime }}/" 2>/dev/null || true
-        cp -f LICENSE "./publish/${{ matrix.runtime }}/" 2>/dev/null || true
-        cp -f GuiGenericBuilderDesktop/builder.json "./publish/${{ matrix.runtime }}/" 2>/dev/null || true
-        
-        cp -f README.md "./publish/${{ matrix.runtime }}-fd/" 2>/dev/null || true
-        cp -f GuiGenericBuilderDesktop/readme.md "./publish/${{ matrix.runtime }}-fd/" 2>/dev/null || true
-        cp -f LICENSE "./publish/${{ matrix.runtime }}-fd/" 2>/dev/null || true
-        cp -f GuiGenericBuilderDesktop/builder.json "./publish/${{ matrix.runtime }}-fd/" 2>/dev/null || true
-      shell: bash
+        dotnet publish ${{ env.PROJECT_PATH }} `
+          --configuration ${{ env.BUILD_CONFIGURATION }} `
+          --runtime win-x64 `
+          --self-contained false `
+          --output ./publish/win-x64-fd `
+          -p:Version=${{ steps.get_version.outputs.VERSION }}
+      shell: pwsh
     
-    - name: Create release archives (Windows)
-      if: matrix.platform == 'windows'
+    - name: Copy additional files
+      run: |
+        Copy-Item -Path "README.md" -Destination "./publish/win-x64/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "GuiGenericBuilderDesktop/readme.md" -Destination "./publish/win-x64/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "LICENSE" -Destination "./publish/win-x64/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "GuiGenericBuilderDesktop/builder.json" -Destination "./publish/win-x64/" -ErrorAction SilentlyContinue
+        
+        Copy-Item -Path "README.md" -Destination "./publish/win-x64-fd/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "GuiGenericBuilderDesktop/readme.md" -Destination "./publish/win-x64-fd/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "LICENSE" -Destination "./publish/win-x64-fd/" -ErrorAction SilentlyContinue
+        Copy-Item -Path "GuiGenericBuilderDesktop/builder.json" -Destination "./publish/win-x64-fd/" -ErrorAction SilentlyContinue
+      shell: pwsh
+    
+    - name: Create release archives
       run: |
         $version = "${{ steps.get_version.outputs.VERSION }}"
         
         # Self-contained archive
-        Compress-Archive -Path ./publish/${{ matrix.runtime }}/* -DestinationPath "GuiGenericBuilder-v$version-${{ matrix.runtime }}.zip"
+        Compress-Archive -Path ./publish/win-x64/* -DestinationPath "GuiGenericBuilder-v$version-win-x64.zip"
         
         # Framework-dependent archive
-        Compress-Archive -Path ./publish/${{ matrix.runtime }}-fd/* -DestinationPath "GuiGenericBuilder-v$version-${{ matrix.runtime }}-framework-dependent.zip"
-        
-        echo "ARCHIVE_SC=GuiGenericBuilder-v$version-${{ matrix.runtime }}.zip" >> $env:GITHUB_ENV
-        echo "ARCHIVE_FD=GuiGenericBuilder-v$version-${{ matrix.runtime }}-framework-dependent.zip" >> $env:GITHUB_ENV
+        Compress-Archive -Path ./publish/win-x64-fd/* -DestinationPath "GuiGenericBuilder-v$version-win-x64-framework-dependent.zip"
       shell: pwsh
-    
-    - name: Create release archives (Linux)
-      if: matrix.platform == 'linux'
-      run: |
-        version="${{ steps.get_version.outputs.VERSION }}"
-        
-        # Self-contained archive
-        tar -czf "GuiGenericBuilder-v$version-${{ matrix.runtime }}.tar.gz" -C ./publish/${{ matrix.runtime }} .
-        
-        # Framework-dependent archive
-        tar -czf "GuiGenericBuilder-v$version-${{ matrix.runtime }}-framework-dependent.tar.gz" -C ./publish/${{ matrix.runtime }}-fd .
-        
-        echo "ARCHIVE_SC=GuiGenericBuilder-v$version-${{ matrix.runtime }}.tar.gz" >> $GITHUB_ENV
-        echo "ARCHIVE_FD=GuiGenericBuilder-v$version-${{ matrix.runtime }}-framework-dependent.tar.gz" >> $GITHUB_ENV
-      shell: bash
     
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: release-${{ matrix.platform }}-${{ github.sha }}
+        name: release-windows-${{ github.sha }}
         path: |
-          ${{ env.ARCHIVE_SC }}
-          ${{ env.ARCHIVE_FD }}
+          GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64.zip
+          GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64-framework-dependent.zip
         retention-days: 7
 
   create-release:
     name: Create GitHub Release
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: build-release
     permissions:
       contents: write
@@ -185,62 +120,48 @@ jobs:
     - name: Get version from tag
       id: get_version
       run: |
-        version="${{ github.ref_name }}"
-        version="${version#v}"
-        echo "VERSION=$version" >> $GITHUB_OUTPUT
+        $version = "${{ github.ref_name }}" -replace '^v', ''
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
         echo "Building version: $version"
-      shell: bash
+      shell: pwsh
     
     - name: Generate changelog
-      id: changelog
       run: |
-        cat > changelog.txt << 'EOF'
+        $changelog = @"
         ## What's New in ${{ github.ref_name }}
         
         ### Installation
         
-        #### Windows
-        
         **Self-Contained (Recommended)**
-        - Download: `GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64.zip`
+        - Download: ``GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64.zip``
         - No .NET installation required
         - Larger file size (~150MB)
         
         **Framework-Dependent**
-        - Download: `GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64-framework-dependent.zip`
+        - Download: ``GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64-framework-dependent.zip``
         - Requires .NET 10 Runtime installed
         - Smaller file size (~10MB)
-        
-        #### Linux
-        
-        **Self-Contained (Recommended)**
-        - Download: `GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz`
-        - No .NET installation required
-        - Larger file size (~150MB)
-        - Extract: `tar -xzf GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-linux-x64.tar.gz`
-        
-        **Framework-Dependent**
-        - Download: `GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-linux-x64-framework-dependent.tar.gz`
-        - Requires .NET 10 Runtime installed
-        - Smaller file size (~10MB)
-        - Extract: `tar -xzf GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-linux-x64-framework-dependent.tar.gz`
         
         ### Prerequisites
         - **PlatformIO** must be installed
         - **Windows**: Windows 10/11 (x64)
-        - **Linux**: Ubuntu 20.04+ or compatible distribution (x64)
         
         ### Features
         See [Changelog](./GuiGenericBuilderDesktop/Changelog.md) for detailed changes.
-        EOF
-      shell: bash
+        
+        ### Note
+        This is a Windows-only application (WPF). For Linux support, please use the CompilationLib directly or wait for a CLI version.
+        "@
+        
+        $changelog | Out-File -FilePath changelog.txt -Encoding utf8
+      shell: pwsh
     
     - name: Collect release files
       run: |
-        mkdir -p release-files
-        find ./artifacts -type f \( -name "*.zip" -o -name "*.tar.gz" \) -exec cp {} release-files/ \;
-        ls -lah release-files/
-      shell: bash
+        New-Item -ItemType Directory -Force -Path release-files
+        Get-ChildItem -Path ./artifacts -Recurse -Include *.zip | Copy-Item -Destination release-files/
+        Get-ChildItem -Path release-files/
+      shell: pwsh
     
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
