@@ -12,31 +12,30 @@ env:
   BUILD_CONFIGURATION: 'Release'
 
 jobs:
-build-release:
-  name: Build Release (Windows)
-  runs-on: windows-latest
-  permissions:
-    contents: write
+  create-release:
+    name: Create Release
+    runs-on: windows-latest
+    permissions:
+      contents: write
     
-  steps:
-  - name: Checkout code
-    uses: actions/checkout@v4
-    with:
-      fetch-depth: 0
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     
-  - name: Setup .NET
-    uses: actions/setup-dotnet@v4
-    with:
-      dotnet-version: ${{ env.DOTNET_VERSION }}
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
     
-  - name: Get version from tag
-    id: get_version
-    run: |
-      $version = "${{ github.ref_name }}" -replace '^v', ''
-      echo "VERSION=$version" >> $env:GITHUB_OUTPUT
-      echo "Building version: $version"
-    shell: pwsh
-    
+    - name: Get version from tag
+      id: get_version
+      run: |
+        $version = "${{ github.ref_name }}" -replace '^v', ''
+        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
+        echo "Building version: $version"
+      shell: pwsh
     
     - name: Restore dependencies
       run: dotnet restore ${{ env.SOLUTION_PATH }}
@@ -47,7 +46,7 @@ build-release:
     - name: Run tests
       run: dotnet test ${{ env.SOLUTION_PATH }} --configuration ${{ env.BUILD_CONFIGURATION }} --no-build --verbosity normal --filter "Category!=Integration"
     
-    - name: Publish Self-Contained (win-x64)
+    - name: Publish Windows x64
       run: |
         dotnet publish ${{ env.PROJECT_PATH }} `
           --configuration ${{ env.BUILD_CONFIGURATION }} `
@@ -56,9 +55,8 @@ build-release:
           --output ./publish/win-x64 `
           -p:PublishSingleFile=true `
           -p:Version=${{ steps.get_version.outputs.VERSION }}
-      shell: pwsh
     
-    - name: Publish Framework-Dependent (win-x64)
+    - name: Publish Windows x64 (Framework-dependent)
       run: |
         dotnet publish ${{ env.PROJECT_PATH }} `
           --configuration ${{ env.BUILD_CONFIGURATION }} `
@@ -66,7 +64,6 @@ build-release:
           --self-contained false `
           --output ./publish/win-x64-fd `
           -p:Version=${{ steps.get_version.outputs.VERSION }}
-      shell: pwsh
     
     - name: Copy additional files
       run: |
@@ -92,40 +89,8 @@ build-release:
         Compress-Archive -Path ./publish/win-x64-fd/* -DestinationPath "GuiGenericBuilder-v$version-win-x64-framework-dependent.zip"
       shell: pwsh
     
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: release-windows-${{ github.sha }}
-        path: |
-          GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64.zip
-          GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64-framework-dependent.zip
-        retention-days: 7
-
-  create-release:
-    name: Create GitHub Release
-    runs-on: windows-latest
-    needs: build-release
-    permissions:
-      contents: write
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: ./artifacts
-    
-    - name: Get version from tag
-      id: get_version
-      run: |
-        $version = "${{ github.ref_name }}" -replace '^v', ''
-        echo "VERSION=$version" >> $env:GITHUB_OUTPUT
-        echo "Building version: $version"
-      shell: pwsh
-    
     - name: Generate changelog
+      id: changelog
       run: |
         $changelog = @"
         ## What's New in ${{ github.ref_name }}
@@ -143,34 +108,25 @@ build-release:
         - Smaller file size (~10MB)
         
         ### Prerequisites
-        - **PlatformIO** must be installed
-        - **Windows**: Windows 10/11 (x64)
+        - Platform.IO must be installed
+        - Windows 10/11 (x64)
         
         ### Features
         See [Changelog](./GuiGenericBuilderDesktop/Changelog.md) for detailed changes.
-        
-        ### Note
-        This is a Windows-only application (WPF). For Linux support, please use the CompilationLib directly or wait for a CLI version.
         "@
         
         $changelog | Out-File -FilePath changelog.txt -Encoding utf8
       shell: pwsh
     
-    - name: Collect release files
-      run: |
-        New-Item -ItemType Directory -Force -Path release-files
-        Get-ChildItem -Path ./artifacts -Recurse -Include *.zip | Copy-Item -Destination release-files/
-        Get-ChildItem -Path release-files/
-      shell: pwsh
-    
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        files: release-files/*
+        files: |
+          GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64.zip
+          GuiGenericBuilder-v${{ steps.get_version.outputs.VERSION }}-win-x64-framework-dependent.zip
         body_path: changelog.txt
         draft: false
         prerelease: ${{ contains(github.ref, 'alpha') || contains(github.ref, 'beta') || contains(github.ref, 'rc') }}
         generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  
