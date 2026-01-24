@@ -1,6 +1,6 @@
 ﻿{
   "version": "6.0.2",
-  "GlobalSettings": {
+  "GLOBALSETTINGS": {
     "Parameters": [
       {
         "Key": "SCL",
@@ -182,7 +182,7 @@
             "esp32-c6"
           ]
         },
-        "SUPLA_INITIAL_CONFIG_MODE": {
+        "SUPLA_INITIALCONFIG": {
           "name": "Tryb początkowy urządzenia",
           "desc": "Określa sposób uruchomienia urządzenia przy pierwszym włączeniu z ustawieniami fabrycznymi. Pozwala wybrać czy urządzenie ma uruchomić punkt dostępowy (AP) i tryb konfiguracji, czy od razu przejść w tryb offline.",
           "defOn": false,

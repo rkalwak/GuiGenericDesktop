@@ -12,7 +12,7 @@ namespace GuiGenericBuilderDesktop
         [JsonProperty("version")]
         public string Version { get; set; }
 
-        [JsonProperty("GlobalSettings")]
+        [JsonProperty("GLOBALSETTINGS")]
         public GlobalSettings GlobalSettings { get; set; } = new GlobalSettings();
     }
 
