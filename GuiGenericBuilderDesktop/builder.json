@@ -1,6 +1,6 @@
 ﻿{
   "version": "6.0.2",
-  "GlobalSettings": {
+  "GLOBALSETTINGS": {
     "Parameters": [
       {
         "Key": "SCL",
@@ -182,13 +182,13 @@
             "esp32-c6"
           ]
         },
-        "SUPLA_INITIAL_CONFIG_MODE": {
+        "SUPLA_INITIALCONFIG": {
           "name": "Tryb początkowy urządzenia",
           "desc": "Określa sposób uruchomienia urządzenia przy pierwszym włączeniu z ustawieniami fabrycznymi. Pozwala wybrać czy urządzenie ma uruchomić punkt dostępowy (AP) i tryb konfiguracji, czy od razu przejść w tryb offline.",
           "defOn": false,
           "translations": {
             "en": {
-              "name": "Initial Configuration Mode",
+              "name": "Initial Configuration",
               "desc": "Specifies how the device starts when powered on for the first time with factory defaults. Allows you to choose whether the device should start an access point (AP) and config mode, or go directly to offline mode."
             }
           },
@@ -2307,23 +2307,6 @@
             "en": {
               "name": "DEBUG",
               "desc": "Logs additional diagnostic information related to communication (SUPLA_DEBUG_MODE)."
-            }
-          },
-          "Parameters": [
-
-          ]
-        },
-        "SUPLA_DEBUG": {
-          "name": "DEBUG in development",
-          "desc": "Pozwala testować opcję parametrów bez fizycznych sensorów",
-          "defOn": true,
-          "depRel": [
-
-          ],
-          "translations": {
-            "en": {
-              "name": "DEBUG in development",
-              "desc": "DEBUG in development"
             }
           },
           "Parameters": [
