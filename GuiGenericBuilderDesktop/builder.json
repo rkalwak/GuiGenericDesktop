@@ -705,6 +705,27 @@
           },
           "Parameters": [
             {
+              "Key": "Altitude",
+              "Name": "Wysokość n.p.m.",
+              "Type": "number",
+              "IsRequired": true,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "Altitude above sea level"
+                },
+                "es": {
+                  "Name": "Altitud sobre el nivel del mar"
+                },
+                "de": {
+                  "Name": "Höhe über dem Meeresspiegel"
+                },
+                "fr": {
+                  "Name": "Altitude au-dessus du niveau de la mer"
+                }
+              }
+            },
+            {
               "Key": "SCL",
               "Name": "Pin SCL",
               "Type": "number",
@@ -741,6 +762,27 @@
             }
           },
           "Parameters": [
+            {
+              "Key": "Altitude",
+              "Name": "Wysokość n.p.m.",
+              "Type": "number",
+              "IsRequired": true,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "Altitude above sea level"
+                },
+                "es": {
+                  "Name": "Altitud sobre el nivel del mar"
+                },
+                "de": {
+                  "Name": "Höhe über dem Meeresspiegel"
+                },
+                "fr": {
+                  "Name": "Altitude au-dessus du niveau de la mer"
+                }
+              }
+            },
             {
               "Key": "SCL",
               "Name": "Pin SCL",
