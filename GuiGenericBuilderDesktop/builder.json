@@ -2379,6 +2379,19 @@
               "Type": "bool"
             }
           ]
+        },
+        "SUPLA_INCREASE_LIMIT": {
+          "name": "Zwiększenie limitu kanałów",
+          "desc": "Zwiększa limit kanałów urządzenia do 64 (SUPLA_INCREASE_LIMIT).",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "Increase channel limit",
+              "desc": "Increases the device channel limit to 64 (SUPLA_INCREASE_LIMIT)."
+            }
+          },
+          "Parameters": [
+          ]
         }
       }
     },
