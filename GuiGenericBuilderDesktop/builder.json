@@ -2069,6 +2069,20 @@
 
           ]
         },
+        "SUPLA_PZEM_ADR": {
+          "name": "Licznik energii PZEM V3",
+          "desc": "Ustawienia urządzenia->Inne. Umożliwia obsługę licznika energii PZEM V3 wraz z ustawianiem adresu.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "Energy meter PZEM V3",
+              "desc": "Device settings->Other. It enables the operation of the energy meter PZEM V3 with address setting."
+            }
+          },
+          "Parameters": [
+
+          ]
+        },
         "SUPLA_CSE7766": {
           "name": "Licznik energii CSE7766",
           "desc": "Ustawienia urządzenia->Inne. Umożliwia obsługę licznika energii CSE7766.",
