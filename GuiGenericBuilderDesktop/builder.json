@@ -2138,6 +2138,20 @@
           "Parameters": [
 
           ]
+        },
+        "SUPLA_MODBUS_SDM_72_V2": {
+          "name": "Licznik energii SDM 72 Modbus 3F",
+          "desc": "Umożliwia obsługę licznika energii za pomoca protokołu Modbus.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "Energy meter SDM 72 Modbus 3F",
+              "desc": "It enables the operation of the energy meter SDM 72 Modbus 3F."
+            }
+          },
+          "Parameters": [
+
+          ]
         }
       }
     },
