@@ -1,6 +1,7 @@
 using CompilationLib;
 using GuiGenericBuilderDesktop.Localization;
 using Serilog;
+using System.Runtime.InteropServices;
 
 namespace GuiGenericBuilderDesktop.Services
 {
@@ -10,6 +11,7 @@ namespace GuiGenericBuilderDesktop.Services
     public class ValidationService
     {
         private readonly ILogger _logger;
+        private static bool _platformioWarningShown = false;
 
         public ValidationService(ILogger logger)
         {
@@ -139,6 +141,75 @@ namespace GuiGenericBuilderDesktop.Services
             }
 
             return null; // No errors
+        }
+
+        /// <summary>
+        /// Validates that PlatformIO is installed in the default location
+        /// Returns true if PlatformIO is found, false otherwise
+        /// </summary>
+        public bool ValidatePlatformIOInstallation()
+        {
+            try
+            {
+                var platformioPath = GetPlatformIOPath();
+                
+                if (!System.IO.File.Exists(platformioPath))
+                {
+                    _logger.Warning("PlatformIO executable not found at: {Path}", platformioPath);
+                    return false;
+                }
+                
+                _logger.Information("PlatformIO found at: {Path}", platformioPath);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error checking PlatformIO installation");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets the expected PlatformIO executable path based on the operating system
+        /// </summary>
+        private string GetPlatformIOPath()
+        {
+            var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return System.IO.Path.Combine(userProfile, ".platformio", "penv", "Scripts", "platformio.exe");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) || RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return System.IO.Path.Combine(userProfile, ".platformio", "penv", "bin", "platformio");
+            }
+            else
+            {
+                // Fallback for unknown platforms - try Linux-style path
+                return System.IO.Path.Combine(userProfile, ".platformio", "penv", "bin", "platformio");
+            }
+        }
+
+        /// <summary>
+        /// Shows a warning message if PlatformIO is not installed (only once per session)
+        /// </summary>
+        public void ShowPlatformIOWarningIfNeeded()
+        {
+            if (_platformioWarningShown)
+                return;
+
+            if (!ValidatePlatformIOInstallation())
+            {
+                _platformioWarningShown = true;
+                var platformioPath = GetPlatformIOPath();
+                
+                System.Windows.MessageBox.Show(
+                    LocalizationManager.GetFormat("PlatformIONotFoundMessage", platformioPath),
+                    LocalizationManager.Get("PlatformIONotFoundTitle"),
+                    System.Windows.MessageBoxButton.OK,
+                    System.Windows.MessageBoxImage.Warning);
+            }
         }
     }
 }

@@ -98,6 +98,28 @@ Available platforms:
 � ESP32-C6
 � ESP32-S3</system:String>
     <system:String x:Key="PlatformRequiredTitle">Platform Required</system:String>
+    <system:String x:Key="PlatformIONotFoundTitle">PlatformIO Not Found</system:String>
+    <system:String x:Key="PlatformIONotFoundMessage">
+		PlatformIO was not found at the default installation location:
+
+		{0}
+
+		The application requires PlatformIO to compile firmware.
+
+		Please install PlatformIO using one of these methods:
+
+		• Install via Python pip:
+		    pip install platformio
+
+		• Download from official website:
+		    https://platformio.org/install
+
+		• Install via Visual Studio Code extension:
+		    https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide
+
+		After installation, restart this application.
+
+		Note: If PlatformIO is installed in a custom location, compilation may still fail.</system:String>
     <system:String x:Key="PlatformCompatibilityError">The following flags are not compatible with selected platform ({0}):
 
 {1}

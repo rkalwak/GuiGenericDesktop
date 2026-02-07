@@ -88,6 +88,9 @@ namespace GuiGenericBuilderDesktop
             var (suplaVersion, ggVersion) = _versionService.GetVersions();
             Title = _versionService.GenerateWindowTitle(suplaVersion, ggVersion);
 
+            // Validate PlatformIO installation on startup
+            _validationService.ShowPlatformIOWarningIfNeeded();
+
             _logger.Information("MainWindow initialized successfully");
         }
 
