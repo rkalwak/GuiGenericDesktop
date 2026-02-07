@@ -1,6 +1,6 @@
 ﻿{
   "version": "6.0.2",
-  "GLOBALSETTINGS": {
+  "GLOBALPARAMETERS": {
     "Parameters": [
       {
         "Key": "SCL",
@@ -23,6 +23,78 @@
         "Translations": {
           "en": {
             "Name": "SDA Pin"
+          }
+        }
+      },
+      {
+        "Key": "MISO",
+        "Name": "Pin MISO",
+        "Type": "number",
+        "IsRequired": false,
+        "DefaultValue": "",
+        "Translations": {
+          "en": {
+            "Name": "MISO Pin"
+          }
+        }
+      },
+      {
+        "Key": "MOSI",
+        "Name": "Pin MOSI",
+        "Type": "number",
+        "IsRequired": false,
+        "DefaultValue": "",
+        "Translations": {
+          "en": {
+            "Name": "MOSI Pin"
+          }
+        }
+      },
+      {
+        "Key": "CLK",
+        "Name": "Pin CLK",
+        "Type": "number",
+        "IsRequired": false,
+        "DefaultValue": "",
+        "Translations": {
+          "en": {
+            "Name": "CLK Pin"
+          }
+        }
+      },
+      {
+        "Key": "CS",
+        "Name": "Pin CS",
+        "Type": "number",
+        "IsRequired": false,
+        "DefaultValue": "",
+        "Translations": {
+          "en": {
+            "Name": "CS Pin"
+          }
+        }
+      },
+      {
+        "Key": "GDO0",
+        "Name": "Pin GDO0",
+        "Type": "number",
+        "IsRequired": false,
+        "DefaultValue": "",
+        "Translations": {
+          "en": {
+            "Name": "GDO0 Pin"
+          }
+        }
+      },
+      {
+        "Key": "GDO2",
+        "Name": "Pin GDO2",
+        "Type": "number",
+        "IsRequired": false,
+        "DefaultValue": "",
+        "Translations": {
+          "en": {
+            "Name": "GDO2 Pin"
           }
         }
       }
@@ -1981,6 +2053,78 @@
           },
           "Parameters": [
             {
+              "Key": "MISO",
+              "Name": "Pin MISO",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "MISO Pin"
+                }
+              }
+            },
+            {
+              "Key": "MOSI",
+              "Name": "Pin MOSI",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "MOSI Pin"
+                }
+              }
+            },
+            {
+              "Key": "CLK",
+              "Name": "Pin CLK",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "CLK Pin"
+                }
+              }
+            },
+            {
+              "Key": "CS",
+              "Name": "Pin CS",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "CS Pin"
+                }
+              }
+            },
+            {
+              "Key": "GDO0",
+              "Name": "Pin GDO0",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GDO0 Pin"
+                }
+              }
+            },
+            {
+              "Key": "GDO2",
+              "Name": "Pin GDO2",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GDO2 Pin"
+                }
+              }
+            },
+            {
               "Key": "Enabled1",
               "Name": "Włącz obsługę czujnika CC1101 #1",
               "Type": "enum",
@@ -2475,7 +2619,7 @@
               }
             },
             {
-              "Key": "SUPLA_CC1101_SensorProperty2",
+              "Key": "SensorProperty2",
               "Name": "Właściwość czujnika CC1101 #2",
               "Type": "enum",
               "EnumValues": [

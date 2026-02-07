@@ -7,6 +7,7 @@ public class PlatformioCliHandler : ICompileHandler
     string errors = string.Empty;
     string logs = string.Empty;
     string _platformioCliPath = string.Empty;
+    string _globalParameterPrefix= "GLOBALPARAMETERS_";
     List<string> _excludedBuildFlagsFromManipulation = new List<string>
                 {
                     "SUPLA_EXCLUDE_LITTLEFS_CONFIG",
@@ -259,8 +260,8 @@ public class PlatformioCliHandler : ICompileHandler
                     string.Equals(paramType, "enum", StringComparison.OrdinalIgnoreCase))
                     value = string.IsNullOrEmpty(valueToUse) ? "0" : valueToUse;
                 else
-                    value = $"'\"{valueToUse}\"'";// Global parameters use GlobalParameter_ prefix
-                var paramDefineName = $"GlobalParameter_{identifier}";
+                    value = $"'\"{valueToUse}\"'";// Global parameters use GLOBALPARAMETERS_ prefix
+                var paramDefineName = $"{_globalParameterPrefix}{identifier}";
                 var indexOfExistingParameter = lines.FindIndex(line => line.Contains(paramDefineName));
                 var define = $" -D {paramDefineName}={value}";
 
