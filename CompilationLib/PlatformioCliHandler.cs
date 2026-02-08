@@ -141,30 +141,92 @@ public class PlatformioCliHandler : ICompileHandler
         };
         Console.WriteLine($"Compiling: {processStartInfo.FileName} {arguments}");
 
-        using (var process = new Process { StartInfo = processStartInfo })
+        // Retry logic for deployment with boot mode errors
+        const int maxRetries = 5;
+        int attemptNumber = 0;
+        bool isSuccessful = false;
+        Stopwatch totalStopwatch = Stopwatch.StartNew();
+
+        while (attemptNumber < maxRetries)
         {
-            process.EnableRaisingEvents = true;
+            attemptNumber++;
+            
+            // Reset error and log buffers for each attempt
+            errors = string.Empty;
+            logs = string.Empty;
 
-            process.Exited += (sender, e) =>
+            if (attemptNumber > 1)
             {
-                Console.WriteLine($"Process exited with code: {process.ExitCode}");
-                Debug.WriteLine($"Process exited with code: {process.ExitCode}");
-            };
-            process.OutputDataReceived += Process_OutputDataReceived;
-            process.ErrorDataReceived += Process_ErrorDataReceived;
+                Console.WriteLine($"? Retry attempt {attemptNumber}/{maxRetries} for deployment...");
+                // Add a small delay between retries to allow device to reset
+                await Task.Delay(2000, cancellationToken);
+            }
 
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            process.Start();
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
+            using (var process = new Process { StartInfo = processStartInfo })
+            {
+                process.EnableRaisingEvents = true;
 
-            await process.WaitForExitAsync(cancellationToken);
-            stopwatch.Stop();
-            compileResponse.IsSuccessful = process.ExitCode == 0;
-            compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
-            compileResponse.OutputDirectory = Path.Combine(request.ProjectDirectory, ".pio", "build", request.EnvironmentName);
-            compileResponse.OutputFile = $"firmware.bin";
-            compileResponse.Logs = "Errors:" + Environment.NewLine + errors;
+                process.Exited += (sender, e) =>
+                {
+                    Console.WriteLine($"Process exited with code: {process.ExitCode}");
+                    Debug.WriteLine($"Process exited with code: {process.ExitCode}");
+                };
+                process.OutputDataReceived += Process_OutputDataReceived;
+                process.ErrorDataReceived += Process_ErrorDataReceived;
+
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                process.Start();
+                process.BeginOutputReadLine();
+                process.BeginErrorReadLine();
+
+                await process.WaitForExitAsync(cancellationToken);
+                stopwatch.Stop();
+                
+                isSuccessful = process.ExitCode == 0;
+                compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
+                compileResponse.OutputDirectory = Path.Combine(request.ProjectDirectory, ".pio", "build", request.EnvironmentName);
+                compileResponse.OutputFile = $"firmware.bin";
+                compileResponse.Logs = "Errors:" + Environment.NewLine + errors;
+
+                // Check if we should retry due to wrong boot mode error
+                if (!isSuccessful && request.ShouldDeploy)
+                {
+                    // Check for the specific boot mode error
+                    bool hasBootModeError = errors.Contains("Wrong boot mode detected (0x13)", StringComparison.OrdinalIgnoreCase) ||
+                                           errors.Contains("Wrong boot mode detected", StringComparison.OrdinalIgnoreCase) ||
+                                           logs.Contains("Wrong boot mode detected (0x13)", StringComparison.OrdinalIgnoreCase) ||
+                                           logs.Contains("Wrong boot mode detected", StringComparison.OrdinalIgnoreCase);
+
+                    if (hasBootModeError && attemptNumber < maxRetries)
+                    {
+                        Console.WriteLine($"? Wrong boot mode detected. Device may not be in bootloader mode.");
+                        Console.WriteLine($"? This will be automatically retried ({attemptNumber}/{maxRetries})...");
+                        continue; // Retry
+                    }
+                    
+                    // If it's a different error or we've exhausted retries, break
+                    if (hasBootModeError && attemptNumber >= maxRetries)
+                    {
+                        Console.WriteLine($"? Failed after {maxRetries} attempts due to boot mode error.");
+                        Console.WriteLine($"? Please manually put the device into bootloader mode:");
+                        Console.WriteLine($"?   - Hold BOOT button while pressing RESET button");
+                        Console.WriteLine($"?   - Or try reconnecting the USB cable");
+                    }
+                    break; // Don't retry for other errors
+                }
+                
+                // Success or compilation-only mode, exit retry loop
+                break;
+            }
+        }
+
+        totalStopwatch.Stop();
+        compileResponse.IsSuccessful = isSuccessful;
+        compileResponse.ElapsedTimeInSeconds = totalStopwatch.Elapsed.TotalSeconds;
+
+        if (isSuccessful && attemptNumber > 1)
+        {
+            Console.WriteLine($"? Deployment successful on attempt {attemptNumber}/{maxRetries}");
         }
 
         return compileResponse;
