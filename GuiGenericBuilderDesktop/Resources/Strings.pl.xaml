@@ -185,6 +185,12 @@ Wybierz flagi kompilacji ręcznie.</system:String>
     <!-- Compilation Results Window -->
     <system:String x:Key="CompilationSuccessTitle">Kompilacja Zakończona Sukcesem</system:String>
     <system:String x:Key="CompilationFailedTitle">Kompilacja Nie Powiodła Się</system:String>
+    <system:String x:Key="CompilationInProgress">Kompilacja W Toku</system:String>
+    <system:String x:Key="CompilationOutput">Wynik Kompilacji</system:String>
+    <system:String x:Key="CompilationSuccessMessage">Kompilacja Zakończona Pomyślnie</system:String>
+    <system:String x:Key="CompilationSuccessDescription">Firmware został skompilowany i jest gotowy do użycia.</system:String>
+    <system:String x:Key="CompilationFailedMessage">Kompilacja Nie Powiodła Się</system:String>
+    <system:String x:Key="CompilationFailedDescription">Proces kompilacji napotkał błędy. Sprawdź logi poniżej, aby uzyskać szczegóły.</system:String>
     <system:String x:Key="BuildConfiguration">Konfiguracja Kompilacji:</system:String>
     <system:String x:Key="BuildConfigurationDescription">Ten zakodowany ciąg zawiera Twoją pełną konfigurację kompilacji i może być udostępniony lub ponownie użyty.</system:String>
     <system:String x:Key="BackupFile">Plik Kopii Zapasowej:</system:String>

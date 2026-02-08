@@ -912,10 +912,23 @@ namespace GuiGenericBuilderDesktop
                 }
             }, timerCancellation.Token);
 
+            // Create the results window outside try block so it's accessible in catch blocks
+            CompilationResultsWindow resultsWindow = null;
+
             try
             {
                 // Generate timestamp once for both backup and configuration files to ensure consistency
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                
+                // Create the results window for live log streaming
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    resultsWindow = new CompilationResultsWindow
+                    {
+                        Owner = this
+                    };
+                    resultsWindow.Show(); // Show as non-modal so compilation can proceed
+                });
                 
                 var ggRequest = new CompileRequest
                 {
@@ -933,9 +946,14 @@ namespace GuiGenericBuilderDesktop
                     GlobalSettings = _builderConfig.GlobalSettings,
                     ConfigTimestamp = timestamp
                 };
+                
                 var handler = new PlatformioCliHandler();
-                ICompileHandler compiler = new PlatformioCliHandler();
-                var result = await compiler.Handle(ggRequest, _compilationCancellation.Token);
+                
+                // Subscribe to output events for live log streaming
+                handler.OutputLine += (s, line) => resultsWindow?.AppendLog(line);
+                handler.ErrorLine += (s, line) => resultsWindow?.AppendLog(line);
+                
+                var result = await handler.Handle(ggRequest, _compilationCancellation.Token);
 
                 // Stop the timer and stopwatch
                 timerCancellation.Cancel();
@@ -959,6 +977,9 @@ namespace GuiGenericBuilderDesktop
                     statusText.Text = LocalizationManager.GetFormat("CompilationStopped", compilationTime.TotalSeconds);
                     statusText.Foreground = System.Windows.Media.Brushes.Black;
                     statusText.FontStyle = FontStyles.Oblique;
+                    
+                    // Finalize window with cancelled status (treat as failure)
+                    resultsWindow?.FinalizeCompilation(false);
 
                     MessageBox.Show(
                         LocalizationManager.GetFormat("CompilationStoppedMessage", compilationTime.TotalSeconds),
@@ -987,21 +1008,16 @@ namespace GuiGenericBuilderDesktop
                         System.Diagnostics.Debug.WriteLine($"Failed to save configuration: {ex.Message}");
                     }
 
-                    // Show success results with encoded configuration string and backup path
                     // Use the copy in configurations directory instead of the build directory
                     var configurationsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "configurations");
-
                     var firmwareInConfigsPath = Path.Combine(configurationsDir, $"{configBaseName}.bin");
 
-                    var resultsWindow = new CompilationResultsWindow(
-                        encodedConfig,
+                    // Finalize the results window with success details
+                    resultsWindow?.FinalizeCompilation(
                         true,
+                        encodedConfig,
                         result.BackupFilePath,
-                        firmwareInConfigsPath)
-                    {
-                        Owner = this
-                    };
-                    resultsWindow.ShowDialog();
+                        firmwareInConfigsPath);
                 }
 
                 else
@@ -1011,12 +1027,8 @@ namespace GuiGenericBuilderDesktop
                     statusText.Foreground = System.Windows.Media.Brushes.Red;
                     // DO NOT hide the status - keep it visible
 
-                    // Show detailed logs in modal window
-                    var resultsWindow = new CompilationResultsWindow(result.Logs)
-                    {
-                        Owner = this
-                    };
-                    resultsWindow.ShowDialog();
+                    // Finalize window with failure status
+                    resultsWindow?.FinalizeCompilation(false);
                 }
             }
             catch (OperationCanceledException)
@@ -1037,6 +1049,9 @@ namespace GuiGenericBuilderDesktop
 
                 statusText.Text = LocalizationManager.GetFormat("CompilationStopped", compilationStopwatch.Elapsed.TotalSeconds);
                 statusText.Foreground = System.Windows.Media.Brushes.Orange;
+
+                // Finalize window with cancelled status
+                resultsWindow?.FinalizeCompilation(false);
 
                 MessageBox.Show(
                     LocalizationManager.GetFormat("CompilationStoppedMessage", compilationStopwatch.Elapsed.TotalSeconds),
@@ -1062,6 +1077,9 @@ namespace GuiGenericBuilderDesktop
                 statusText.Text = LocalizationManager.GetFormat("CompilationError", compilationStopwatch.Elapsed.TotalSeconds);
                 statusText.Foreground = System.Windows.Media.Brushes.Red;
                 // DO NOT hide the status - keep it visible
+
+                // Finalize window with error status
+                resultsWindow?.FinalizeCompilation(false);
 
                 MessageBox.Show(
                     LocalizationManager.GetFormat("CompilationErrorMessage", ex.Message),

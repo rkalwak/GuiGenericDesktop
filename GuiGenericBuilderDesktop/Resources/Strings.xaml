@@ -186,6 +186,12 @@ Select compilation flags manually.</system:String>
     <!-- Compilation Results Window -->
     <system:String x:Key="CompilationSuccessTitle">Compilation Successful</system:String>
     <system:String x:Key="CompilationFailedTitle">Compilation Failed</system:String>
+    <system:String x:Key="CompilationInProgress">Compilation In Progress</system:String>
+    <system:String x:Key="CompilationOutput">Compilation Output</system:String>
+    <system:String x:Key="CompilationSuccessMessage">Compilation Completed Successfully</system:String>
+    <system:String x:Key="CompilationSuccessDescription">The firmware has been compiled and is ready to use.</system:String>
+    <system:String x:Key="CompilationFailedMessage">Compilation Failed</system:String>
+    <system:String x:Key="CompilationFailedDescription">The compilation process encountered errors. Check the logs below for details.</system:String>
     <system:String x:Key="BuildConfiguration">Build Configuration:</system:String>
     <system:String x:Key="BuildConfigurationDescription">This encoded string contains your complete build configuration and can be shared or reused.</system:String>
     <system:String x:Key="BackupFile">Backup File:</system:String>
