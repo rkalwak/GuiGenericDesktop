@@ -61,7 +61,7 @@ namespace CompilationLib.Tests
                     line7.Should().StartWith(" ").And.Contain("SUPLA_CONFIG");
 
                     var lineBeforeLast = result[end - 1];
-                    lineBeforeLast.Should().StartWith(" ").And.Contain("SUPLA_MS5611_Altitude=253.3");
+                    lineBeforeLast.Should().StartWith(" ").And.Contain("Parameter_SUPLA_MS5611_Altitude=253.3");
                 }
             }
             finally
@@ -136,7 +136,7 @@ namespace CompilationLib.Tests
 
                 using (new AssertionScope())
                 {
-                    result.Should().Contain(" -D SUPLA_INITIAL_CONFIG_MODE_Mode=2");
+                    result.Should().Contain(" -D Parameter_SUPLA_INITIAL_CONFIG_MODE_Mode=2");
                     result.Should().NotContain("'\"2\"'");
                 }
             }
@@ -178,7 +178,7 @@ namespace CompilationLib.Tests
 
                 using (new AssertionScope())
                 {
-                    result.Should().Contain(" -D SUPLA_MS5611_Altitude=150");
+                    result.Should().Contain(" -D Parameter_SUPLA_MS5611_Altitude=150");
                     result.Should().NotContain("'\"150\"'");
                 }
             }
@@ -218,7 +218,7 @@ namespace CompilationLib.Tests
 
                 var result = File.ReadAllText(temp);
 
-                result.Should().Contain(" -D SUPLA_DEVICE_NAME='\"MyDevice\"'");
+                result.Should().Contain(" -D Parameter_SUPLA_DEVICE_NAME='\"MyDevice\"'");
             }
             finally
             {
@@ -256,7 +256,7 @@ namespace CompilationLib.Tests
 
                 var result = File.ReadAllText(temp);
 
-                result.Should().Contain(" -D SUPLA_FLAG_MODE=0");
+                result.Should().Contain(" -D Parameter_SUPLA_FLAG_MODE=0");
             }
             finally
             {
@@ -294,7 +294,7 @@ namespace CompilationLib.Tests
 
                 var result = File.ReadAllText(temp);
 
-                result.Should().Contain(" -D SUPLA_FLAG_TIMEOUT=0");
+                result.Should().Contain(" -D Parameter_SUPLA_FLAG_TIMEOUT=0");
             }
             finally
             {
@@ -308,7 +308,7 @@ namespace CompilationLib.Tests
             var iniContent = @"[env:test]
 ;flagsstart
  -D SUPLA_FLAG
- -D SUPLA_FLAG_MODE=1
+ -D Parameter_SUPLA_FLAG_MODE=1
 ;flagsend
 ";
             var temp = Path.GetTempFileName();
@@ -335,8 +335,8 @@ namespace CompilationLib.Tests
 
                 using (new AssertionScope())
                 {
-                    result.Should().Contain(" -D SUPLA_FLAG_MODE=3");
-                    result.Should().NotContain(" -D SUPLA_FLAG_MODE=1");
+                    result.Should().Contain(" -D Parameter_SUPLA_FLAG_MODE=3");
+                    result.Should().NotContain(" -D Parameter_SUPLA_FLAG_MODE=1");
                 }
             }
             finally
@@ -379,9 +379,9 @@ namespace CompilationLib.Tests
 
                 using (new AssertionScope())
                 {
-                    result.Should().Contain(" -D SUPLA_COMPLEX_FLAG_MODE=2");
-                    result.Should().Contain(" -D SUPLA_COMPLEX_FLAG_TIMEOUT=500");
-                    result.Should().Contain(" -D SUPLA_COMPLEX_FLAG_NAME='\"Device1\"'");
+                    result.Should().Contain(" -D Parameter_SUPLA_COMPLEX_FLAG_MODE=2");
+                    result.Should().Contain(" -D Parameter_SUPLA_COMPLEX_FLAG_TIMEOUT=500");
+                    result.Should().Contain(" -D Parameter_SUPLA_COMPLEX_FLAG_NAME='\"Device1\"'");
                 }
             }
             finally
@@ -430,7 +430,7 @@ namespace CompilationLib.Tests
 
                 // When Value is empty and IsRequired is true, it should use "0" not DefaultValue in the handler
                 // The DefaultValue should be used to initialize Value in the UI layer
-                result.Should().Contain(" -D SUPLA_INITIAL_CONFIG_MODE_Mode=0");
+                result.Should().Contain(" -D Parameter_SUPLA_INITIAL_CONFIG_MODE_Mode=0");
             }
             finally
             {
@@ -475,7 +475,7 @@ namespace CompilationLib.Tests
 
                 var result = File.ReadAllText(temp);
 
-                result.Should().Contain(" -D SUPLA_INITIAL_CONFIG_MODE_Mode=3");
+                result.Should().Contain(" -D Parameter_SUPLA_INITIAL_CONFIG_MODE_Mode=3");
             }
             finally
             {
@@ -519,7 +519,7 @@ namespace CompilationLib.Tests
 
                 var result = File.ReadAllText(temp);
 
-                result.Should().Contain(" -D SUPLA_TEST_FLAG_OldParamName=123");
+                result.Should().Contain(" -D Parameter_SUPLA_TEST_FLAG_OldParamName=123");
             }
             finally
             {
@@ -567,7 +567,7 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     result.Should().Contain(" -D SUPLA_FLAG");
-                    result.Should().NotContain("SUPLA_FLAG_OptionalParam");
+                    result.Should().NotContain("Parameter_SUPLA_FLAG_OptionalParam");
                 }
             }
             finally
@@ -616,7 +616,7 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     result.Should().Contain(" -D SUPLA_FLAG");
-                    result.Should().Contain(" -D SUPLA_FLAG_OptionalParam=42");
+                    result.Should().Contain(" -D Parameter_SUPLA_FLAG_OptionalParam=42");
                 }
             }
             finally
@@ -665,7 +665,7 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     result.Should().Contain(" -D SUPLA_FLAG");
-                    result.Should().Contain(" -D SUPLA_FLAG_RequiredParam=0");
+                    result.Should().Contain(" -D Parameter_SUPLA_FLAG_RequiredParam=0");
                 }
             }
             finally
@@ -680,7 +680,7 @@ namespace CompilationLib.Tests
             var iniContent = @"[env:test]
 ;flagsstart
  -D SUPLA_FLAG
- -D SUPLA_FLAG_OptionalParam=100
+ -D Parameter_SUPLA_FLAG_OptionalParam=100
 ;flagsend
 ";
             var temp = Path.GetTempFileName();
@@ -715,8 +715,8 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     result.Should().Contain(" -D SUPLA_FLAG");
-                    result.Should().Contain(";-D SUPLA_FLAG_OptionalParam=100");
-                    result.Should().NotContain("\n -D SUPLA_FLAG_OptionalParam=");
+                    result.Should().Contain(";-D Parameter_SUPLA_FLAG_OptionalParam=100");
+                    result.Should().NotContain("\n -D Parameter_SUPLA_FLAG_OptionalParam=");
                 }
             }
             finally
@@ -731,7 +731,7 @@ namespace CompilationLib.Tests
             var iniContent = @"[env:test]
 ;flagsstart
  -D SUPLA_FLAG
-;-D SUPLA_FLAG_OptionalParam=100
+;-D Parameter_SUPLA_FLAG_OptionalParam=100
 ;flagsend
 ";
             var temp = Path.GetTempFileName();
@@ -766,7 +766,7 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     result.Should().Contain(" -D SUPLA_FLAG");
-                    result.Should().Contain(";-D SUPLA_FLAG_OptionalParam=100");
+                    result.Should().Contain(";-D Parameter_SUPLA_FLAG_OptionalParam=100");
                 }
             }
             finally
@@ -827,9 +827,9 @@ namespace CompilationLib.Tests
 
                 using (new AssertionScope())
                 {
-                    result.Should().Contain(" -D SUPLA_COMPLEX_RequiredMode=1");
-                    result.Should().NotContain("SUPLA_COMPLEX_OptionalTimeout");
-                    result.Should().Contain(" -D SUPLA_COMPLEX_OptionalName='\"MyName\"'");
+                    result.Should().Contain(" -D Parameter_SUPLA_COMPLEX_RequiredMode=1");
+                    result.Should().NotContain("Parameter_SUPLA_COMPLEX_OptionalTimeout");
+                    result.Should().Contain(" -D Parameter_SUPLA_COMPLEX_OptionalName='\"MyName\"'");
                 }
             }
             finally
@@ -874,7 +874,7 @@ namespace CompilationLib.Tests
 
                 var result = File.ReadAllText(temp);
 
-                result.Should().NotContain("SUPLA_FLAG_OptionalMode");
+                result.Should().NotContain("Parameter_SUPLA_FLAG_OptionalMode");
             }
             finally
             {
@@ -918,7 +918,7 @@ namespace CompilationLib.Tests
 
                 var result = File.ReadAllText(temp);
 
-                result.Should().NotContain("SUPLA_FLAG_OptionalText");
+                result.Should().NotContain("Parameter_SUPLA_FLAG_OptionalText");
             }
             finally
             {
@@ -1025,10 +1025,10 @@ namespace CompilationLib.Tests
                     result.Should().Contain(" -D GlobalParameter_SDA=21", "global SDA parameter should use GlobalParameter_ prefix when I2C flags are present");
 
                     // Individual flag parameters should NOT be written (deduplicated)
-                    result.Should().NotContain("SUPLA_BME280_SCL", "SCL is a global parameter and should not be duplicated per flag");
-                    result.Should().NotContain("SUPLA_BME280_SDA", "SDA is a global parameter and should not be duplicated per flag");
-                    result.Should().NotContain("SUPLA_SHT3x_SCL", "SCL is a global parameter and should not be duplicated per flag");
-                    result.Should().NotContain("SUPLA_SHT3x_SDA", "SDA is a global parameter and should not be duplicated per flag");
+                    result.Should().NotContain("Parameter_SUPLA_BME280_SCL", "SCL is a global parameter and should not be duplicated per flag");
+                    result.Should().NotContain("Parameter_SUPLA_BME280_SDA", "SDA is a global parameter and should not be duplicated per flag");
+                    result.Should().NotContain("Parameter_SUPLA_SHT3x_SCL", "SCL is a global parameter and should not be duplicated per flag");
+                    result.Should().NotContain("Parameter_SUPLA_SHT3x_SDA", "SDA is a global parameter and should not be duplicated per flag");
                 }
             }
             finally
@@ -1078,10 +1078,10 @@ namespace CompilationLib.Tests
                     result.Should().Contain(" -D GlobalParameter_SDA=21", "global parameters should be written when defined in globalSettings");
 
                     // Non-I2C flags should not have SCL/SDA parameters
-                    result.Should().NotContain("SUPLA_RELAY_SCL");
-                    result.Should().NotContain("SUPLA_RELAY_SDA");
-                    result.Should().NotContain("SUPLA_BUTTON_SCL");
-                    result.Should().NotContain("SUPLA_BUTTON_SDA");
+                    result.Should().NotContain("Parameter_SUPLA_RELAY_SCL");
+                    result.Should().NotContain("Parameter_SUPLA_RELAY_SDA");
+                    result.Should().NotContain("Parameter_SUPLA_BUTTON_SCL");
+                    result.Should().NotContain("Parameter_SUPLA_BUTTON_SDA");
                 }
             }
             finally
@@ -1149,14 +1149,14 @@ namespace CompilationLib.Tests
                     result.Should().Contain(" -D GlobalParameter_SDA=21");
 
                     // I2C devices should NOT have individual SCL/SDA (they use global)
-                    result.Should().NotContain("SUPLA_BME280_SCL");
-                    result.Should().NotContain("SUPLA_BME280_SDA");
-                    result.Should().NotContain("SUPLA_SHT3x_SCL");
-                    result.Should().NotContain("SUPLA_SHT3x_SDA");
+                    result.Should().NotContain("Parameter_SUPLA_BME280_SCL");
+                    result.Should().NotContain("Parameter_SUPLA_BME280_SDA");
+                    result.Should().NotContain("Parameter_SUPLA_SHT3x_SCL");
+                    result.Should().NotContain("Parameter_SUPLA_SHT3x_SDA");
 
                     // Non-I2C device should NOT have SCL/SDA parameters at all
-                    result.Should().NotContain("SUPLA_RELAY_SCL");
-                    result.Should().NotContain("SUPLA_RELAY_SDA");
+                    result.Should().NotContain("Parameter_SUPLA_RELAY_SCL");
+                    result.Should().NotContain("Parameter_SUPLA_RELAY_SDA");
 
                     // Verify only one occurrence of each global parameter
                     var sclCount = System.Text.RegularExpressions.Regex.Matches(result, @"-D GlobalParameter_SCL=").Count;
@@ -1216,10 +1216,10 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     // Without global settings, each I2C device should write its own parameters
-                    result.Should().Contain(" -D SUPLA_BME280_SCL=22", "without global settings, flags should write own SCL parameter");
-                    result.Should().Contain(" -D SUPLA_BME280_SDA=21", "without global settings, flags should write own SDA parameter");
-                    result.Should().Contain(" -D SUPLA_SHT3x_SCL=22", "without global settings, flags should write own SCL parameter");
-                    result.Should().Contain(" -D SUPLA_SHT3x_SDA=21", "without global settings, flags should write own SDA parameter");
+                    result.Should().Contain(" -D Parameter_SUPLA_BME280_SCL=22", "without global settings, flags should write own SCL parameter");
+                    result.Should().Contain(" -D Parameter_SUPLA_BME280_SDA=21", "without global settings, flags should write own SDA parameter");
+                    result.Should().Contain(" -D Parameter_SUPLA_SHT3x_SCL=22", "without global settings, flags should write own SCL parameter");
+                    result.Should().Contain(" -D Parameter_SUPLA_SHT3x_SDA=21", "without global settings, flags should write own SDA parameter");
 
                     // Global parameters should NOT be written
                     result.Should().NotContain("GlobalParameter_SCL", "no global parameters without global settings");
@@ -1271,8 +1271,8 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     // With empty global settings, flag should write its own parameters
-                    result.Should().Contain(" -D SUPLA_BME280_SCL=22", "with empty global settings, flag should write own parameters");
-                    result.Should().Contain(" -D SUPLA_BME280_SDA=21", "with empty global settings, flag should write own parameters");
+                    result.Should().Contain(" -D Parameter_SUPLA_BME280_SCL=22", "with empty global settings, flag should write own parameters");
+                    result.Should().Contain(" -D Parameter_SUPLA_BME280_SDA=21", "with empty global settings, flag should write own parameters");
 
                     // No global parameters should be written
                     result.Should().NotContain("GlobalParameter_", "no global parameters with empty settings");
@@ -1345,10 +1345,10 @@ namespace CompilationLib.Tests
                     result.Should().NotContain("GlobalParameter_SDA=88", "should not use DefaultValue from GlobalSettings");
 
                     // Individual flag parameters should NOT be written
-                    result.Should().NotContain("SUPLA_BME280_SCL");
-                    result.Should().NotContain("SUPLA_BME280_SDA");
-                    result.Should().NotContain("SUPLA_SHT3x_SCL");
-                    result.Should().NotContain("SUPLA_SHT3x_SDA");
+                    result.Should().NotContain("Parameter_SUPLA_BME280_SCL");
+                    result.Should().NotContain("Parameter_SUPLA_BME280_SDA");
+                    result.Should().NotContain("Parameter_SUPLA_SHT3x_SCL");
+                    result.Should().NotContain("Parameter_SUPLA_SHT3x_SDA");
                 }
             }
             finally
@@ -1396,8 +1396,8 @@ namespace CompilationLib.Tests
                     result.Should().Contain(" -D GlobalParameter_SDA=21", "should fallback to GlobalSettings.Value");
 
                     // Non-I2C flag should not have SCL/SDA
-                    result.Should().NotContain("SUPLA_RELAY_SCL");
-                    result.Should().NotContain("SUPLA_RELAY_SDA");
+                    result.Should().NotContain("Parameter_SUPLA_RELAY_SCL");
+                    result.Should().NotContain("Parameter_SUPLA_RELAY_SDA");
                 }
             }
             finally
@@ -1479,9 +1479,9 @@ namespace CompilationLib.Tests
                     result.Should().NotContain("GlobalParameter_SDA=88");
 
                     // No flag-specific parameters should be written
-                    result.Should().NotContain("SUPLA_BME280_SCL");
-                    result.Should().NotContain("SUPLA_SHT3x_SCL");
-                    result.Should().NotContain("SUPLA_HDC1080_SCL");
+                    result.Should().NotContain("Parameter_SUPLA_BME280_SCL");
+                    result.Should().NotContain("Parameter_SUPLA_SHT3x_SCL");
+                    result.Should().NotContain("Parameter_SUPLA_HDC1080_SCL");
                 }
             }
             finally

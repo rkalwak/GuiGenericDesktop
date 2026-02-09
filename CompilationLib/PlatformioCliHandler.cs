@@ -369,7 +369,7 @@ public class PlatformioCliHandler : ICompileHandler
                 // Check if parameter is optional and has no value
                 bool isOptionalWithoutValue = !p.IsRequired && string.IsNullOrEmpty(raw);
 
-                var paramDefineName = $"{flag.Key}_{identifier}";
+                var paramDefineName = $"Parameter_{flag.Key}_{identifier}";
                 var indexOfExistingParameter = lines.FindIndex(line => line.Contains(paramDefineName));
 
                 if (isOptionalWithoutValue)
@@ -402,7 +402,7 @@ public class PlatformioCliHandler : ICompileHandler
                 else // treat everything else as string
                     value = $"'\"{raw}\"'";
 
-                // define is FLAGNAME_ParamIdentifier=Value
+                // define is Parameter_FLAGNAME_ParamIdentifier=Value
                 var define = $" -D {paramDefineName}={value}";
 
                 if (indexOfExistingParameter != -1)
