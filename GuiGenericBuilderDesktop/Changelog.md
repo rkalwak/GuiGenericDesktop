@@ -1,5 +1,15 @@
 ﻿# Changelog
 
+## [2026-02-09] - Version 2.0.11
+
+**Live Compilation Progress**
+- Added real-time compilation output display.
+- Timer shows elapsed compilation time.
+- Logs stream live during build process.
+- Final status displays success or failure with color coding.
+- Added CC1101 flag support, with parameters.
+- Added missing build flags.
+
 ## [2026-01-15] - Version 2.0.10
 
 **Changelog & Help**
