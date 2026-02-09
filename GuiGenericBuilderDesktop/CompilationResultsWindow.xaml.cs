@@ -4,6 +4,7 @@ using System.Windows.Media;
 using Microsoft.Win32;
 using GuiGenericBuilderDesktop.Localization;
 using System.Text;
+using System.Diagnostics;
 
 namespace GuiGenericBuilderDesktop
 {
@@ -15,6 +16,11 @@ namespace GuiGenericBuilderDesktop
         private string _firmwareFilePath;
         private bool _isSuccess;
         private bool _isLiveMode = false;
+        
+        // Timer fields
+        private Stopwatch _compilationStopwatch;
+        private CancellationTokenSource _timerCancellation;
+        private Task _timerTask;
 
         public CompilationResultsWindow(string logs)
         {
@@ -89,6 +95,67 @@ namespace GuiGenericBuilderDesktop
             CopyHashButton.Visibility = Visibility.Collapsed;
             CopyLogsButton.Visibility = Visibility.Collapsed;
             SaveButton.Visibility = Visibility.Collapsed;
+            
+            // Show and start the timer
+            TimerText.Visibility = Visibility.Visible;
+            StartTimer();
+        }
+
+        public void StartTimer()
+        {
+            _compilationStopwatch = Stopwatch.StartNew();
+            _timerCancellation = new CancellationTokenSource();
+            
+            _timerTask = Task.Run(async () =>
+            {
+                try
+                {
+                    while (!_timerCancellation.Token.IsCancellationRequested)
+                    {
+                        await Task.Delay(100, _timerCancellation.Token);
+
+                        var elapsed = _compilationStopwatch.Elapsed.TotalSeconds;
+                        Dispatcher.Invoke(() =>
+                        {
+                            TimerText.Text = $"? {elapsed:F1}s";
+                        });
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    // Timer cancelled, this is expected
+                }
+            }, _timerCancellation.Token);
+        }
+
+        public void StopTimer()
+        {
+            if (_timerCancellation != null && !_timerCancellation.IsCancellationRequested)
+            {
+                _timerCancellation.Cancel();
+            }
+            
+            if (_compilationStopwatch != null)
+            {
+                _compilationStopwatch.Stop();
+            }
+
+            if (_timerTask != null)
+            {
+                try
+                {
+                    _timerTask.Wait(1000); // Wait max 1 second for cleanup
+                }
+                catch (AggregateException)
+                {
+                    // Expected if task was cancelled
+                }
+            }
+        }
+
+        public double GetElapsedSeconds()
+        {
+            return _compilationStopwatch?.Elapsed.TotalSeconds ?? 0;
         }
 
         public void AppendLog(string line)
@@ -108,11 +175,19 @@ namespace GuiGenericBuilderDesktop
         {
             Dispatcher.Invoke(() =>
             {
+                // Stop the timer first
+                StopTimer();
+                
                 _isSuccess = success;
                 _encodedConfig = encodedConfig;
                 _backupFilePath = backupPath;
                 _firmwareFilePath = firmwarePath;
                 _isLiveMode = false;
+
+                // Update timer text to show final time
+                var finalTime = GetElapsedSeconds();
+                TimerText.Text = $"? {finalTime:F1}s";
+                TimerText.Foreground = new SolidColorBrush(_isSuccess ? Color.FromRgb(46, 125, 50) : Color.FromRgb(198, 40, 40));
 
                 ShowFinalStatus();
 

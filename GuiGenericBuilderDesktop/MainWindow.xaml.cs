@@ -880,37 +880,11 @@ namespace GuiGenericBuilderDesktop
             checkDeviceButton.IsEnabled = false;
             updateGGButton.IsEnabled = false;
 
-            // Track compilation time
-            var compilationStopwatch = System.Diagnostics.Stopwatch.StartNew();
-
-            // Show status indicator with initial time
+            // Show status indicator
             statusText.Text = LocalizationManager.GetFormat("CompilingFirmware", 0.0);
             statusText.Foreground = System.Windows.Media.Brushes.Black;
             statusText.FontStyle = FontStyles.Oblique;
             statusText.Visibility = Visibility.Visible;
-
-            // Start a timer to update elapsed time
-            var timerCancellation = new CancellationTokenSource();
-            var timerTask = Task.Run(async () =>
-            {
-                try
-                {
-                    while (!timerCancellation.Token.IsCancellationRequested)
-                    {
-                        await Task.Delay(100, timerCancellation.Token); // Update every 100ms for smooth display
-
-                        var elapsed = compilationStopwatch.Elapsed.TotalSeconds;
-                        Dispatcher.Invoke(() =>
-                        {
-                            statusText.Text = LocalizationManager.GetFormat("CompilingFirmware", elapsed);
-                        });
-                    }
-                }
-                catch (TaskCanceledException)
-                {
-                    // Timer cancelled, this is expected
-                }
-            }, timerCancellation.Token);
 
             // Create the results window outside try block so it's accessible in catch blocks
             CompilationResultsWindow resultsWindow = null;
@@ -955,26 +929,15 @@ namespace GuiGenericBuilderDesktop
                 
                 var result = await handler.Handle(ggRequest, _compilationCancellation.Token);
 
-                // Stop the timer and stopwatch
-                timerCancellation.Cancel();
-                compilationStopwatch.Stop();
-                try
-                {
-                    await timerTask;
-                }
-                catch (TaskCanceledException)
-                {
-                    // Expected
-                }
-
-                var compilationTime = compilationStopwatch.Elapsed;
+                // Get elapsed time from results window
+                var compilationTime = resultsWindow?.GetElapsedSeconds() ?? 0;
 
                 // Check if compilation was cancelled
                 if (_compilationCancellation.IsCancellationRequested)
                 {
                     _logger.Information("Compilation cancelled by user");
 
-                    statusText.Text = LocalizationManager.GetFormat("CompilationStopped", compilationTime.TotalSeconds);
+                    statusText.Text = LocalizationManager.GetFormat("CompilationStopped", compilationTime);
                     statusText.Foreground = System.Windows.Media.Brushes.Black;
                     statusText.FontStyle = FontStyles.Oblique;
                     
@@ -982,7 +945,7 @@ namespace GuiGenericBuilderDesktop
                     resultsWindow?.FinalizeCompilation(false);
 
                     MessageBox.Show(
-                        LocalizationManager.GetFormat("CompilationStoppedMessage", compilationTime.TotalSeconds),
+                        LocalizationManager.GetFormat("CompilationStoppedMessage", compilationTime),
                         LocalizationManager.Get("CompilationStoppedTitle"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
@@ -990,7 +953,7 @@ namespace GuiGenericBuilderDesktop
                 else if (result.IsSuccessful)
                 {
                     // Success status with compilation time - KEEP IT VISIBLE
-                    statusText.Text = LocalizationManager.GetFormat("CompilationSuccessful", compilationTime.TotalSeconds);
+                    statusText.Text = LocalizationManager.GetFormat("CompilationSuccessful", compilationTime);
                     statusText.Foreground = System.Windows.Media.Brushes.Black;
                     statusText.FontStyle = FontStyles.Oblique;
 
@@ -1023,7 +986,7 @@ namespace GuiGenericBuilderDesktop
                 else
                 {
                     // Error status with compilation time - KEEP IT VISIBLE
-                    statusText.Text = LocalizationManager.GetFormat("CompilationFailed", compilationTime.TotalSeconds);
+                    statusText.Text = LocalizationManager.GetFormat("CompilationFailed", compilationTime);
                     statusText.Foreground = System.Windows.Media.Brushes.Red;
                     // DO NOT hide the status - keep it visible
 
@@ -1033,48 +996,26 @@ namespace GuiGenericBuilderDesktop
             }
             catch (OperationCanceledException)
             {
-                // Stop the timer and stopwatch
-                timerCancellation.Cancel();
-                compilationStopwatch.Stop();
-                try
-                {
-                    await timerTask;
-                }
-                catch (TaskCanceledException)
-                {
-                    // Expected
-                }
-
                 _logger.Information("Compilation cancelled (OperationCanceledException caught)");
 
-                statusText.Text = LocalizationManager.GetFormat("CompilationStopped", compilationStopwatch.Elapsed.TotalSeconds);
+                var compilationTime = resultsWindow?.GetElapsedSeconds() ?? 0;
+                statusText.Text = LocalizationManager.GetFormat("CompilationStopped", compilationTime);
                 statusText.Foreground = System.Windows.Media.Brushes.Orange;
 
                 // Finalize window with cancelled status
                 resultsWindow?.FinalizeCompilation(false);
 
                 MessageBox.Show(
-                    LocalizationManager.GetFormat("CompilationStoppedMessage", compilationStopwatch.Elapsed.TotalSeconds),
+                    LocalizationManager.GetFormat("CompilationStoppedMessage", compilationTime),
                     LocalizationManager.Get("CompilationStoppedTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                // Stop the timer and stopwatch
-                timerCancellation.Cancel();
-                compilationStopwatch.Stop();
-                try
-                {
-                    await timerTask;
-                }
-                catch (TaskCanceledException)
-                {
-                    // Expected
-                }
-
                 // Error status with time - KEEP IT VISIBLE
-                statusText.Text = LocalizationManager.GetFormat("CompilationError", compilationStopwatch.Elapsed.TotalSeconds);
+                var compilationTime = resultsWindow?.GetElapsedSeconds() ?? 0;
+                statusText.Text = LocalizationManager.GetFormat("CompilationError", compilationTime);
                 statusText.Foreground = System.Windows.Media.Brushes.Red;
                 // DO NOT hide the status - keep it visible
 

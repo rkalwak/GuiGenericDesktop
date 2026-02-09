@@ -24,7 +24,18 @@
                Text="{DynamicResource CompilationSuccessTitle}" 
                FontSize="16" 
                FontWeight="Bold" 
-               Margin="0,0,0,12"/>
+               Margin="0,0,0,4"/>
+
+    <!-- Timer Display (shown during compilation) -->
+    <TextBlock x:Name="TimerText"
+               Grid.Row="0"
+               HorizontalAlignment="Right"
+               VerticalAlignment="Center"
+               FontSize="14"
+               FontWeight="SemiBold"
+               Foreground="#666666"
+               Margin="0,0,0,4"
+               Visibility="Collapsed"/>
 
     <!-- Status Message Section (Success/Failure indicator) -->
     <Border x:Name="StatusSection"
