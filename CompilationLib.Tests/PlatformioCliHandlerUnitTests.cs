@@ -1020,9 +1020,9 @@ namespace CompilationLib.Tests
 
                 using (new AssertionScope())
                 {
-                    // Global parameters SHOULD be written with GlobalParameter_ prefix when I2C flags are present
-                    result.Should().Contain(" -D GlobalParameter_SCL=22", "global SCL parameter should use GlobalParameter_ prefix when I2C flags are present");
-                    result.Should().Contain(" -D GlobalParameter_SDA=21", "global SDA parameter should use GlobalParameter_ prefix when I2C flags are present");
+                    // Global parameters SHOULD be written with GLOBALPARAMETERS_ prefix when I2C flags are present
+                    result.Should().Contain(" -D GLOBALPARAMETERS_SCL=22", "global SCL parameter should use GLOBALPARAMETERS_ prefix when I2C flags are present");
+                    result.Should().Contain(" -D GLOBALPARAMETERS_SDA=21", "global SDA parameter should use GLOBALPARAMETERS_ prefix when I2C flags are present");
 
                     // Individual flag parameters should NOT be written (deduplicated)
                     result.Should().NotContain("Parameter_SUPLA_BME280_SCL", "SCL is a global parameter and should not be duplicated per flag");
@@ -1074,8 +1074,8 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     // Global parameters should still be written (they're in globalSettings)
-                    result.Should().Contain(" -D GlobalParameter_SCL=22", "global parameters should be written when defined in globalSettings");
-                    result.Should().Contain(" -D GlobalParameter_SDA=21", "global parameters should be written when defined in globalSettings");
+                    result.Should().Contain(" -D GLOBALPARAMETERS_SCL=22", "global parameters should be written when defined in globalSettings");
+                    result.Should().Contain(" -D GLOBALPARAMETERS_SDA=21", "global parameters should be written when defined in globalSettings");
 
                     // Non-I2C flags should not have SCL/SDA parameters
                     result.Should().NotContain("Parameter_SUPLA_RELAY_SCL");
@@ -1145,8 +1145,8 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     // Global parameters written once
-                    result.Should().Contain(" -D GlobalParameter_SCL=22");
-                    result.Should().Contain(" -D GlobalParameter_SDA=21");
+                    result.Should().Contain(" -D GLOBALPARAMETERS_SCL=22");
+                    result.Should().Contain(" -D GLOBALPARAMETERS_SDA=21");
 
                     // I2C devices should NOT have individual SCL/SDA (they use global)
                     result.Should().NotContain("Parameter_SUPLA_BME280_SCL");
@@ -1159,8 +1159,8 @@ namespace CompilationLib.Tests
                     result.Should().NotContain("Parameter_SUPLA_RELAY_SDA");
 
                     // Verify only one occurrence of each global parameter
-                    var sclCount = System.Text.RegularExpressions.Regex.Matches(result, @"-D GlobalParameter_SCL=").Count;
-                    var sdaCount = System.Text.RegularExpressions.Regex.Matches(result, @"-D GlobalParameter_SDA=").Count;
+                    var sclCount = System.Text.RegularExpressions.Regex.Matches(result, @"-D GLOBALPARAMETERS_SCL=").Count;
+                    var sdaCount = System.Text.RegularExpressions.Regex.Matches(result, @"-D GLOBALPARAMETERS_SDA=").Count;
                     sclCount.Should().Be(1);
                     sdaCount.Should().Be(1);
                 }
@@ -1222,8 +1222,8 @@ namespace CompilationLib.Tests
                     result.Should().Contain(" -D Parameter_SUPLA_SHT3x_SDA=21", "without global settings, flags should write own SDA parameter");
 
                     // Global parameters should NOT be written
-                    result.Should().NotContain("GlobalParameter_SCL", "no global parameters without global settings");
-                    result.Should().NotContain("GlobalParameter_SDA", "no global parameters without global settings");
+                    result.Should().NotContain("GLOBALPARAMETERS_SCL", "no global parameters without global settings");
+                    result.Should().NotContain("GLOBALPARAMETERS_SDA", "no global parameters without global settings");
                 }
             }
             finally
@@ -1275,7 +1275,7 @@ namespace CompilationLib.Tests
                     result.Should().Contain(" -D Parameter_SUPLA_BME280_SDA=21", "with empty global settings, flag should write own parameters");
 
                     // No global parameters should be written
-                    result.Should().NotContain("GlobalParameter_", "no global parameters with empty settings");
+                    result.Should().NotContain("GLOBALPARAMETERS_", "no global parameters with empty settings");
                 }
             }
             finally
@@ -1337,12 +1337,12 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     // Global parameters should use values from BuildFlags (22, 21), not DefaultValue (99, 88)
-                    result.Should().Contain(" -D GlobalParameter_SCL=22", "should use value from BuildFlag, not DefaultValue");
-                    result.Should().Contain(" -D GlobalParameter_SDA=21", "should use value from BuildFlag, not DefaultValue");
+                    result.Should().Contain(" -D GLOBALPARAMETERS_SCL=22", "should use value from BuildFlag, not DefaultValue");
+                    result.Should().Contain(" -D GLOBALPARAMETERS_SDA=21", "should use value from BuildFlag, not DefaultValue");
                     
                     // Should not use the default values
-                    result.Should().NotContain("GlobalParameter_SCL=99", "should not use DefaultValue from GlobalSettings");
-                    result.Should().NotContain("GlobalParameter_SDA=88", "should not use DefaultValue from GlobalSettings");
+                    result.Should().NotContain("GLOBALPARAMETERS_SCL=99", "should not use DefaultValue from GlobalSettings");
+                    result.Should().NotContain("GLOBALPARAMETERS_SDA=88", "should not use DefaultValue from GlobalSettings");
 
                     // Individual flag parameters should NOT be written
                     result.Should().NotContain("Parameter_SUPLA_BME280_SCL");
@@ -1392,8 +1392,8 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     // Global parameters should use values from GlobalSettings since no BuildFlag provides them
-                    result.Should().Contain(" -D GlobalParameter_SCL=22", "should fallback to GlobalSettings.Value");
-                    result.Should().Contain(" -D GlobalParameter_SDA=21", "should fallback to GlobalSettings.Value");
+                    result.Should().Contain(" -D GLOBALPARAMETERS_SCL=22", "should fallback to GlobalSettings.Value");
+                    result.Should().Contain(" -D GLOBALPARAMETERS_SDA=21", "should fallback to GlobalSettings.Value");
 
                     // Non-I2C flag should not have SCL/SDA
                     result.Should().NotContain("Parameter_SUPLA_RELAY_SCL");
@@ -1469,14 +1469,14 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     // Should use the first matching BuildFlag value (from SUPLA_BME280)
-                    result.Should().Contain(" -D GlobalParameter_SCL=22", "should use first BuildFlag value found");
-                    result.Should().Contain(" -D GlobalParameter_SDA=21", "should use first BuildFlag value found");
+                    result.Should().Contain(" -D GLOBALPARAMETERS_SCL=22", "should use first BuildFlag value found");
+                    result.Should().Contain(" -D GLOBALPARAMETERS_SDA=21", "should use first BuildFlag value found");
 
                     // Should not use values from second flag or defaults
-                    result.Should().NotContain("GlobalParameter_SCL=33");
-                    result.Should().NotContain("GlobalParameter_SDA=44");
-                    result.Should().NotContain("GlobalParameter_SCL=99");
-                    result.Should().NotContain("GlobalParameter_SDA=88");
+                    result.Should().NotContain("GLOBALPARAMETERS_SCL=33");
+                    result.Should().NotContain("GLOBALPARAMETERS_SDA=44");
+                    result.Should().NotContain("GLOBALPARAMETERS_SCL=99");
+                    result.Should().NotContain("GLOBALPARAMETERS_SDA=88");
 
                     // No flag-specific parameters should be written
                     result.Should().NotContain("Parameter_SUPLA_BME280_SCL");
