@@ -142,7 +142,7 @@ public class PlatformioCliHandler : ICompileHandler
         Console.WriteLine($"Compiling: {processStartInfo.FileName} {arguments}");
 
         // Retry logic for deployment with boot mode errors
-        const int maxRetries = 5;
+        const int maxRetries = 1;
         int attemptNumber = 0;
         bool isSuccessful = false;
         Stopwatch totalStopwatch = Stopwatch.StartNew();
@@ -186,7 +186,7 @@ public class PlatformioCliHandler : ICompileHandler
                 compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
                 compileResponse.OutputDirectory = Path.Combine(request.ProjectDirectory, ".pio", "build", request.EnvironmentName);
                 compileResponse.OutputFile = $"firmware.bin";
-                compileResponse.Logs = "Errors:" + Environment.NewLine + errors;
+                compileResponse.Logs = "Errors:" + Environment.NewLine + errors.ToString();
 
                 // Check if we should retry due to wrong boot mode error
                 if (!isSuccessful && request.ShouldDeploy)

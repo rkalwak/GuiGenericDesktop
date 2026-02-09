@@ -5,6 +5,7 @@ using Microsoft.Win32;
 using GuiGenericBuilderDesktop.Localization;
 using System.Text;
 using System.Diagnostics;
+using System.Linq.Expressions;
 
 namespace GuiGenericBuilderDesktop
 {
@@ -16,7 +17,7 @@ namespace GuiGenericBuilderDesktop
         private string _firmwareFilePath;
         private bool _isSuccess;
         private bool _isLiveMode = false;
-        
+
         // Timer fields
         private Stopwatch _compilationStopwatch;
         private CancellationTokenSource _timerCancellation;
@@ -53,7 +54,7 @@ namespace GuiGenericBuilderDesktop
             _backupFilePath = backupFilePath;
             ConfigureForSuccess();
         }
-        
+
         public CompilationResultsWindow(string encodedConfig, bool isSuccess, string backupFilePath, string firmwareFilePath)
         {
             InitializeComponent();
@@ -70,7 +71,7 @@ namespace GuiGenericBuilderDesktop
             _encodedConfig = encodedConfig;
             _logsBuilder.Append(logs);
             _isSuccess = isSuccess;
-            
+
             if (isSuccess)
                 ConfigureForSuccess();
             else
@@ -81,21 +82,21 @@ namespace GuiGenericBuilderDesktop
         {
             Title = LocalizationManager.Get("CompilationInProgress");
             TitleText.Text = LocalizationManager.Get("CompilationInProgress");
-            
+
             HashSection.Visibility = Visibility.Collapsed;
             BackupSection.Visibility = Visibility.Collapsed;
             FirmwareSection.Visibility = Visibility.Collapsed;
             StatusSection.Visibility = Visibility.Collapsed;
-            
+
             LogSectionTitle.Text = LocalizationManager.Get("CompilationOutput");
             LogSectionTitle.Visibility = Visibility.Visible;
             LogSection.Visibility = Visibility.Visible;
             LogTextBox.Text = "";
-            
+
             CopyHashButton.Visibility = Visibility.Collapsed;
             CopyLogsButton.Visibility = Visibility.Collapsed;
             SaveButton.Visibility = Visibility.Collapsed;
-            
+
             // Show and start the timer
             TimerText.Visibility = Visibility.Visible;
             StartTimer();
@@ -105,7 +106,7 @@ namespace GuiGenericBuilderDesktop
         {
             _compilationStopwatch = Stopwatch.StartNew();
             _timerCancellation = new CancellationTokenSource();
-            
+
             _timerTask = Task.Run(async () =>
             {
                 try
@@ -134,7 +135,7 @@ namespace GuiGenericBuilderDesktop
             {
                 _timerCancellation.Cancel();
             }
-            
+
             if (_compilationStopwatch != null)
             {
                 _compilationStopwatch.Stop();
@@ -162,14 +163,22 @@ namespace GuiGenericBuilderDesktop
         {
             if (!string.IsNullOrEmpty(line))
             {
-                Dispatcher.Invoke(() =>
+                try
                 {
-                    _logsBuilder.AppendLine(line);
-                    LogTextBox.AppendText(line + Environment.NewLine);
-                    LogScrollViewer.ScrollToEnd();
-                });
+                    Dispatcher.Invoke(() =>
+                    {
+                        _logsBuilder.AppendLine(line);
+                        LogTextBox.AppendText(line + Environment.NewLine);
+                        LogScrollViewer.ScrollToEnd();
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"? Error while appending log: {ex.Message}");
+                }
             }
         }
+
 
         public void FinalizeCompilation(bool success, string encodedConfig = null, string backupPath = null, string firmwarePath = null)
         {
@@ -177,7 +186,7 @@ namespace GuiGenericBuilderDesktop
             {
                 // Stop the timer first
                 StopTimer();
-                
+
                 _isSuccess = success;
                 _encodedConfig = encodedConfig;
                 _backupFilePath = backupPath;
@@ -234,7 +243,7 @@ namespace GuiGenericBuilderDesktop
         private void ShowFinalStatus()
         {
             StatusSection.Visibility = Visibility.Visible;
-            
+
             if (_isSuccess)
             {
                 StatusSection.BorderBrush = new SolidColorBrush(Color.FromRgb(76, 175, 80));
@@ -263,32 +272,32 @@ namespace GuiGenericBuilderDesktop
         {
             Title = (string)FindResource("CompilationSuccessTitle");
             TitleText.Text = (string)FindResource("CompilationSuccessTitle");
-            
+
             ShowFinalStatus();
-            
+
             HashSection.Visibility = Visibility.Visible;
             HashTextBox.Text = _encodedConfig ?? LocalizationManager.Get("NoConfigurationAvailable");
             CopyHashButton.Visibility = Visibility.Visible;
-            
+
             if (!string.IsNullOrEmpty(_backupFilePath) && File.Exists(_backupFilePath))
             {
                 BackupSection.Visibility = Visibility.Visible;
                 BackupFileNameText.Text = Path.GetFileName(_backupFilePath);
                 BackupPathText.Text = _backupFilePath;
             }
-            
+
             if (!string.IsNullOrEmpty(_firmwareFilePath) && File.Exists(_firmwareFilePath))
             {
                 FirmwareSection.Visibility = Visibility.Visible;
                 FirmwareFileNameText.Text = Path.GetFileName(_firmwareFilePath);
                 FirmwarePathText.Text = _firmwareFilePath;
             }
-            
+
             LogSectionTitle.Text = (string)FindResource("BuildOutput");
             LogSectionTitle.Visibility = Visibility.Visible;
             LogSection.Visibility = Visibility.Visible;
             LogTextBox.Text = _logsBuilder.ToString();
-            
+
             CopyLogsButton.Visibility = Visibility.Visible;
             SaveButton.Visibility = Visibility.Visible;
         }
@@ -297,20 +306,20 @@ namespace GuiGenericBuilderDesktop
         {
             Title = (string)FindResource("CompilationFailedTitle");
             TitleText.Text = (string)FindResource("CompilationFailedTitle");
-            
+
             ShowFinalStatus();
-            
+
             HashSection.Visibility = Visibility.Collapsed;
             BackupSection.Visibility = Visibility.Collapsed;
             FirmwareSection.Visibility = Visibility.Collapsed;
-            
+
             LogSectionTitle.Text = (string)FindResource("ErrorLogs");
             LogSectionTitle.Visibility = Visibility.Visible;
             LogSection.Visibility = Visibility.Visible;
-            
+
             var logs = _logsBuilder.ToString();
             LogTextBox.Text = string.IsNullOrWhiteSpace(logs) ? LocalizationManager.Get("NoLogsAvailable") : logs;
-            
+
             CopyLogsButton.Visibility = Visibility.Visible;
             SaveButton.Visibility = Visibility.Visible;
         }
@@ -347,7 +356,7 @@ namespace GuiGenericBuilderDesktop
                 if (!string.IsNullOrWhiteSpace(logs))
                 {
                     Clipboard.SetText(logs);
-                    var message = _isSuccess 
+                    var message = _isSuccess
                         ? LocalizationManager.Get("OutputCopied")
                         : LocalizationManager.Get("LogsCopied");
                     MessageBox.Show(
@@ -382,12 +391,12 @@ namespace GuiGenericBuilderDesktop
                 if (saveFileDialog.ShowDialog() == true)
                 {
                     var contentToSave = _logsBuilder.ToString();
-                    
+
                     if (!string.IsNullOrWhiteSpace(_encodedConfig))
                     {
                         contentToSave = $"{LocalizationManager.Get("BuildConfigurationString")}:\n{_encodedConfig}\n\n{new string('=', 80)}\n\n{contentToSave}";
                     }
-                    
+
                     File.WriteAllText(saveFileDialog.FileName, contentToSave);
                     MessageBox.Show(
                         LocalizationManager.GetFormat("LogsSaved", saveFileDialog.FileName),
