@@ -1,13 +1,15 @@
 using CompilationLib;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 
 public class PlatformioCliHandler : ICompileHandler
 {
-    string errors = string.Empty;
-    string logs = string.Empty;
+    StringBuilder _errors = new StringBuilder();
+    StringBuilder _logs = new StringBuilder();
     string _platformioCliPath = string.Empty;
     string _globalParameterPrefix= "GLOBALPARAMETERS_";
+    const int MaxLogSize = 10 * 1024 * 1024;
     List<string> _excludedBuildFlagsFromManipulation = new List<string>
                 {
                     "SUPLA_EXCLUDE_LITTLEFS_CONFIG",
@@ -127,7 +129,7 @@ public class PlatformioCliHandler : ICompileHandler
         }
 
         // Add verbose flag
-        arguments += " --verbose";
+        // arguments += " --verbose";
 
         var processStartInfo = new ProcessStartInfo
         {
@@ -152,8 +154,8 @@ public class PlatformioCliHandler : ICompileHandler
             attemptNumber++;
             
             // Reset error and log buffers for each attempt
-            errors = string.Empty;
-            logs = string.Empty;
+            _errors.Clear();
+            _logs.Clear();
 
             if (attemptNumber > 1)
             {
@@ -186,16 +188,19 @@ public class PlatformioCliHandler : ICompileHandler
                 compileResponse.ElapsedTimeInSeconds = stopwatch.Elapsed.TotalSeconds;
                 compileResponse.OutputDirectory = Path.Combine(request.ProjectDirectory, ".pio", "build", request.EnvironmentName);
                 compileResponse.OutputFile = $"firmware.bin";
-                compileResponse.Logs = "Errors:" + Environment.NewLine + errors.ToString();
+                compileResponse.Logs = "Errors:" + Environment.NewLine + _errors.ToString();
 
                 // Check if we should retry due to wrong boot mode error
                 if (!isSuccessful && request.ShouldDeploy)
                 {
+                    var errorsText = _errors.ToString();
+                    var logsText = _logs.ToString();
+                    
                     // Check for the specific boot mode error
-                    bool hasBootModeError = errors.Contains("Wrong boot mode detected (0x13)", StringComparison.OrdinalIgnoreCase) ||
-                                           errors.Contains("Wrong boot mode detected", StringComparison.OrdinalIgnoreCase) ||
-                                           logs.Contains("Wrong boot mode detected (0x13)", StringComparison.OrdinalIgnoreCase) ||
-                                           logs.Contains("Wrong boot mode detected", StringComparison.OrdinalIgnoreCase);
+                    bool hasBootModeError = errorsText.Contains("Wrong boot mode detected (0x13)", StringComparison.OrdinalIgnoreCase) ||
+                                           errorsText.Contains("Wrong boot mode detected", StringComparison.OrdinalIgnoreCase) ||
+                                           logsText.Contains("Wrong boot mode detected (0x13)", StringComparison.OrdinalIgnoreCase) ||
+                                           logsText.Contains("Wrong boot mode detected", StringComparison.OrdinalIgnoreCase);
 
                     if (hasBootModeError && attemptNumber < maxRetries)
                     {
@@ -514,19 +519,31 @@ public class PlatformioCliHandler : ICompileHandler
 
     private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
     {
-        Console.WriteLine(e.Data); // Log the output to the console
-        Debug.WriteLine(e.Data);
         var line = e.Data ?? string.Empty;
-        errors += line + Environment.NewLine;
+        Console.WriteLine(line);
+        Debug.WriteLine(line);
+        
+        // Prevent unbounded memory growth
+        if (_errors.Length < MaxLogSize)
+        {
+            _errors.AppendLine(line);
+        }
+        
         ErrorLine?.Invoke(this, line);
     }
 
     private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
     {
-        Console.WriteLine(e.Data); // Log the output to the console
-        Debug.WriteLine(e.Data);
         var line = e.Data ?? string.Empty;
-        logs += line + Environment.NewLine;
+        Console.WriteLine(line);
+        Debug.WriteLine(line);
+        
+        // Prevent unbounded memory growth
+        if (_logs.Length < MaxLogSize)
+        {
+            _logs.AppendLine(line);
+        }
+        
         OutputLine?.Invoke(this, line);
     }
 }

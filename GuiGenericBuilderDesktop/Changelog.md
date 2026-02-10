@@ -1,5 +1,10 @@
 ﻿# Changelog
 
+## [2026-02-10] - Vertion 2.0.12
+
+**Optimized memory usage due to displaying logs online**
+- Used StringBuilder and removed --verbose logging of compilation process
+
 ## [2026-02-09] - Version 2.0.11
 
 **Live Compilation Progress**
