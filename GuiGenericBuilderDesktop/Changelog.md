@@ -1,5 +1,10 @@
 ﻿# Changelog
 
+## [2026-02-12] - Version 2.0.13
+
+**ESP32-S2 Support**
+- Added support for ESP32-S2 platform
+
 ## [2026-02-10] - Vertion 2.0.12
 
 **Optimized memory usage due to displaying logs online**

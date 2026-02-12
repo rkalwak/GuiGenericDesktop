@@ -56,6 +56,18 @@ namespace CompilationLib
                     ["16MB"] = new PartitionScheme { FileName = "min_spiffs_16mb.csv", FlashSize = "16MB", HasOTA = true },
                     ["32MB"] = new PartitionScheme { FileName = "min_spiffs_32mb.csv", FlashSize = "32MB", HasOTA = true }
                 }
+            },
+            ["esp32-s2"] = new PlatformPartitionInfo
+            {
+                ChipName = "esp32-s2",
+                DefaultFlashSize = "4MB",
+                SupportedFlashSizes = new[] { "4MB", "8MB", "16MB" },
+                PartitionSchemes = new Dictionary<string, PartitionScheme>
+                {
+                    ["4MB"] = new PartitionScheme { FileName = "min_spiffs_4mb.csv", FlashSize = "4MB", HasOTA = true },
+                    ["8MB"] = new PartitionScheme { FileName = "min_spiffs_8mb.csv", FlashSize = "8MB", HasOTA = true },
+                    ["16MB"] = new PartitionScheme { FileName = "min_spiffs_16mb.csv", FlashSize = "16MB", HasOTA = true }
+                }
             }
         };
 

@@ -203,6 +203,7 @@ namespace GuiGenericBuilderDesktop
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C3", Tag = "GUI_Generic_ESP32C3" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C6", Tag = "GUI_Generic_ESP32C6" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-S3", Tag = "GUI_Generic_ESP32S3" });
+            boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-S2", Tag = "GUI_Generic_ESP32S2" });
 
             boardSelector.SelectionChanged += (s, e) =>
             {
