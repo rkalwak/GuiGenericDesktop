@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Net.Http;
 using System.Reflection;
 using Octokit;
@@ -190,104 +189,45 @@ namespace GuiGenericBuilderDesktop.Services
         }
 
         /// <summary>
-        /// Creates a PowerShell script to apply the update after the application closes
+        /// Copies the bundled update script to a temp location and launches it with all required parameters.
         /// </summary>
-        private async Task CreateUpdateScriptAsync(string downloadedFilePath, string assetName)
+        private Task CreateUpdateScriptAsync(string downloadedFilePath, string assetName)
         {
             var currentExePath = Process.GetCurrentProcess().MainModule.FileName;
-            var currentDirectory = Path.GetDirectoryName(currentExePath);
-            var backupPath = Path.Combine(currentDirectory, $"{Path.GetFileName(currentExePath)}.backup");
-            var scriptPath = Path.Combine(Path.GetTempPath(), "update_guigeneric.ps1");
+            var appDirectory   = Path.GetDirectoryName(currentExePath);
+            var exeName        = Path.GetFileName(currentExePath);
 
-            string script;
-
-            if (assetName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+            var bundledScriptPath = Path.Combine(appDirectory, "Scripts", "update.ps1");
+            if (!File.Exists(bundledScriptPath))
             {
-                // Handle ZIP file extraction
-                script = $@"
-# Wait for the application to close
-Start-Sleep -Seconds 2
-
-# Backup current installation
-Write-Host 'Creating backup...'
-Copy-Item '{currentExePath}' '{backupPath}' -Force
-
-try {{
-    # Extract ZIP file
-    Write-Host 'Extracting update...'
-    Expand-Archive -Path '{downloadedFilePath}' -DestinationPath '{currentDirectory}' -Force
-    
-    Write-Host 'Update installed successfully!'
-    Write-Host 'Restarting application...'
-    Start-Sleep -Seconds 2
-    
-    # Restart application
-    Start-Process '{currentExePath}'
-    
-    # Cleanup
-    Remove-Item '{downloadedFilePath}' -Force
-    Remove-Item '{backupPath}' -Force -ErrorAction SilentlyContinue
-}} catch {{
-    Write-Host 'Update failed. Restoring backup...'
-    Copy-Item '{backupPath}' '{currentExePath}' -Force
-    Start-Process '{currentExePath}'
-}}
-
-# Remove this script
-Remove-Item $PSCommandPath -Force
-";
-            }
-            else
-            {
-                // Handle direct EXE replacement
-                script = $@"
-# Wait for the application to close
-Start-Sleep -Seconds 2
-
-# Backup current executable
-Write-Host 'Creating backup...'
-Copy-Item '{currentExePath}' '{backupPath}' -Force
-
-try {{
-    # Replace executable
-    Write-Host 'Installing update...'
-    Copy-Item '{downloadedFilePath}' '{currentExePath}' -Force
-    
-    Write-Host 'Update installed successfully!'
-    Write-Host 'Restarting application...'
-    Start-Sleep -Seconds 2
-    
-    # Restart application
-    Start-Process '{currentExePath}'
-    
-    # Cleanup
-    Remove-Item '{downloadedFilePath}' -Force
-    Remove-Item '{backupPath}' -Force -ErrorAction SilentlyContinue
-}} catch {{
-    Write-Host 'Update failed. Restoring backup...'
-    Copy-Item '{backupPath}' '{currentExePath}' -Force
-    Start-Process '{currentExePath}'
-}}
-
-# Remove this script
-Remove-Item $PSCommandPath -Force
-";
+                _logger.Error("Bundled update script not found at: {ScriptPath}", bundledScriptPath);
+                throw new FileNotFoundException(
+                    "Update script not found. Please reinstall the application.",
+                    bundledScriptPath);
             }
 
-            await File.WriteAllTextAsync(scriptPath, script);
-            _logger.Information("Update script created: {ScriptPath}", scriptPath);
+            // Copy the script to a temp location so it is not overwritten when the ZIP is extracted
+            var tempScriptPath = Path.Combine(Path.GetTempPath(), $"update_guigeneric_{Guid.NewGuid():N}.ps1");
+            File.Copy(bundledScriptPath, tempScriptPath, overwrite: true);
+            _logger.Information("Update script copied to temp: {ScriptPath}", tempScriptPath);
 
-            // Execute the script and exit the application
+            var arguments = $"-ExecutionPolicy Bypass -WindowStyle Normal -File \"{tempScriptPath}\"" +
+                            $" -AppDirectory \"{appDirectory}\"" +
+                            $" -DownloadedFilePath \"{downloadedFilePath}\"" +
+                            $" -AssetName \"{assetName}\"" +
+                            $" -ExeName \"{exeName}\"";
+
             var psi = new ProcessStartInfo
             {
-                FileName = "powershell.exe",
-                Arguments = $"-ExecutionPolicy Bypass -WindowStyle Hidden -File \"{scriptPath}\"",
+                FileName        = "powershell.exe",
+                Arguments       = arguments,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow  = true
             };
 
             Process.Start(psi);
             _logger.Information("Update script launched. Application will now exit.");
+            return Task.CompletedTask;
         }
 
         /// <summary>

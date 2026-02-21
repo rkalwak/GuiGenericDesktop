@@ -2,7 +2,9 @@
 
 ## What Was Implemented
 
-Your GUI Generic Builder Desktop application now has a complete auto-update system that allows users to automatically receive and install updates from GitHub releases.
+Your GUI Generic Builder Desktop application has a complete auto-update system that allows users to automatically receive and install updates from GitHub releases.
+
+> **Important**: Auto-update is **disabled by default**. Users must set the environment variable `GUI_GENERIC_AUTO_UPDATE_ENABLED=true` to activate it.
 
 ## Files Created
 
@@ -10,8 +12,9 @@ Your GUI Generic Builder Desktop application now has a complete auto-update syst
 1. **GuiGenericBuilderDesktop\Services\AutoUpdateService.cs**
    - Checks GitHub for new releases using Octokit API
    - Downloads update packages
-   - Creates safe update scripts with backup/rollback capability
+   - Copies the **bundled** `Scripts\update.ps1` to a unique temp file and launches it with all required parameters
    - Handles version comparison
+   - Respects the `GUI_GENERIC_AUTO_UPDATE_ENABLED` environment variable (disabled by default)
 
 2. **GuiGenericBuilderDesktop\UpdateWindow.xaml**
    - User interface for the update dialog
@@ -27,8 +30,10 @@ Your GUI Generic Builder Desktop application now has a complete auto-update syst
 ### Documentation
 4. **AUTO_UPDATE_GUIDE.md** - Comprehensive documentation covering:
    - Architecture and how it works
+   - Enabling via environment variable
    - Configuration steps
    - GitHub release creation
+   - Update script details and preserved directories
    - Troubleshooting guide
    - Security considerations
    - Future enhancements
@@ -40,14 +45,25 @@ Your GUI Generic Builder Desktop application now has a complete auto-update syst
 
 6. **build-release.ps1** - PowerShell script to:
    - Build the application in Release mode
-   - Create release packages
-   - Generate properly named ZIP files
-   - Provide next steps for GitHub release
+   - Remove debug artifacts (`.pdb`, `.xml`, `.deps.json`)
+   - Create properly named ZIP packages under `releases\`
+   - Provide next steps for GitHub release (tagging, upload URL)
+   - Optionally open the releases folder in Explorer
+   - Supports `-SkipBuild` and `-OpenFolder` parameters
 
 ## Changes to Existing Files
 
 ### GuiGenericBuilderDesktop.csproj
 - Added `Octokit` NuGet package (v13.0.1) for GitHub API integration
+
+### GuiGenericBuilderDesktop/Scripts/update.ps1 (bundled)
+- PowerShell script shipped with every release
+- Accepts `AppDirectory`, `DownloadedFilePath`, `AssetName`, and `ExeName` parameters
+- Preserves user directories: `logs`, `configurations`, `repo`, `backup`
+- `builder.json` is intentionally **not** preserved (updated per release)
+- Backs up the current executable before replacing files; restores on failure
+- Waits **3 seconds** for the application to fully close
+- Self-deletes the temp copy of itself after completion
 
 ### MainWindow.xaml.cs
 - Added `AutoUpdateService` field
@@ -147,17 +163,17 @@ _autoUpdateService = new AutoUpdateService("rkalwak", "GuiGenericDesktop", _logg
 ### Dependencies
 - **Octokit (v13.0.1)**: GitHub API client
 - **.NET 10**: Target framework
-- **PowerShell**: Update script execution (built into Windows)
+- **PowerShell**: Update script execution — bundled script at `Scripts/update.ps1` (built into Windows)
 
 ### Update Package Requirements
 The auto-update service looks for release assets that match:
 - File extension: `.zip` or `.exe`
-- Name pattern: Must contain "win" (case-insensitive)
+- Name pattern: Must contain `win` (case-insensitive)
 - Preference: Self-contained over framework-dependent
 
-**Your Current Pattern:**
-- ? `GuiGenericBuilder-v2.0.10-win-x64.zip` (self-contained - **Preferred**)
-- ? `GuiGenericBuilder-v2.0.10-win-x64-framework-dependent.zip` (also supported)
+**Current release pattern:**
+- ? `GuiGenericBuilder-v2.0.1-win-x64.zip` (self-contained — **Preferred**)
+- ? `GuiGenericBuilder-v2.0.1-win-x64-framework-dependent.zip` (also supported)
 
 ### GitHub API Rate Limits
 - **Unauthenticated**: 60 requests/hour
@@ -215,6 +231,7 @@ For normal usage (checking on startup), the unauthenticated limit is sufficient.
 ---
 
 **Implementation Date**: 2025-01-15  
+**Last Updated**: 2026-02-21  
 **Status**: Complete and Ready for Testing  
 **Build**: Successful  
 

@@ -39,6 +39,7 @@
     <None Remove="Changelog.md" />
     <None Remove="Help.md" />
     <None Remove="Help.pl.md" />
+    <None Remove="Scripts\update.ps1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -55,6 +56,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="supla-logo.ico" />
+    <Content Include="Scripts\update.ps1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

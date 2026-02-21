@@ -2,6 +2,20 @@
 
 ## For Users
 
+### Enabling Auto-Update
+
+Auto-update is **off by default**. To turn it on, set the environment variable before launching the app:
+
+```powershell
+$env:GUI_GENERIC_AUTO_UPDATE_ENABLED = "true"
+.\GuiGenericBuilderDesktop.exe
+```
+
+To enable it permanently for your Windows user account:
+```powershell
+[System.Environment]::SetEnvironmentVariable("GUI_GENERIC_AUTO_UPDATE_ENABLED", "true", "User")
+```
+
 ### Checking for Updates
 
 1. **Automatic Check**: The app checks for updates when you start it
@@ -19,8 +33,8 @@ When an update is available:
 ### Requirements
 
 - Internet connection
-- Windows 7 or later
-- Administrator rights (for the first update only)
+- Windows 10 or later (PowerShell 5.1+)
+- `GUI_GENERIC_AUTO_UPDATE_ENABLED` environment variable set to `true`
 
 ## For Developers
 
@@ -40,22 +54,22 @@ When an update is available:
    ```csharp
    // In MainWindow.xaml.cs
    _autoUpdateService = new AutoUpdateService("username", "repo-name", _logger);
+   // Feature is gated by GUI_GENERIC_AUTO_UPDATE_ENABLED env var
    ```
 
 ### Publishing a Release
 
-```bash
+```powershell
 # 1. Update version in .csproj
 <Version>2.2.0.0</Version>
 
-# 2. Build
-dotnet build -c Release
+# 2. Build and package (reads version automatically, outputs to releases\)
+.\build-release.ps1
+# Creates: releases\GuiGenericBuilder-v2.2.0-win-x64.zip
 
-# 3. Create ZIP from bin/Release/net10.0-windows/
-
-# 4. Create GitHub Release
+# 3. Create GitHub Release
 - Tag: v2.2.0
-- Upload ZIP file
+- Upload: releases\GuiGenericBuilder-v2.2.0-win-x64.zip
 - Include release notes
 ```
 
@@ -72,10 +86,12 @@ dotnet build -c Release
 
 | Problem | Solution |
 |---------|----------|
+| Update check silently skipped | Set `GUI_GENERIC_AUTO_UPDATE_ENABLED=true` env var |
 | "Failed to check for updates" | Check internet connection |
 | "Rate limit exceeded" | Wait 1 hour or add GitHub token |
-| "No update package found" | Ensure release has `.zip` or `.exe` file |
-| Update doesn't install | Check PowerShell execution policy |
+| "No update package found" | Ensure release has a `.zip` or `.exe` with `win` in the name |
+| "Bundled update script not found" | Reinstall the app; `Scripts/update.ps1` is missing |
+| Update doesn't apply | Check antivirus isn't blocking the temp PowerShell script |
 
 ## Next Steps
 

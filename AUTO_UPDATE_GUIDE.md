@@ -12,6 +12,33 @@ The GUI Generic Builder Desktop application now includes an automatic update fea
 - **Release Notes Display**: Users can view the changelog before installing
 - **Safe Update Process**: Creates backups before updating and can rollback if something goes wrong
 - **Progress Indicator**: Shows download progress during update installation
+- **Opt-in by Default**: Auto-update is disabled unless explicitly enabled via an environment variable
+- **User Data Preservation**: Update preserves user directories (`logs`, `configurations`, `repo`, `backup`)
+
+## Enabling Auto-Update
+
+Auto-update is **disabled by default**. To enable it, set the environment variable:
+
+```
+GUI_GENERIC_AUTO_UPDATE_ENABLED=true
+```
+
+Accepted values: `1`, `true`, `yes` (case-insensitive). Any other value (or absence of the variable) keeps the feature disabled.
+
+### Setting the Variable
+
+**Per-session (PowerShell):**
+```powershell
+$env:GUI_GENERIC_AUTO_UPDATE_ENABLED = "true"
+.\GuiGenericBuilderDesktop.exe
+```
+
+**Persistently (System or User scope):**
+```powershell
+[System.Environment]::SetEnvironmentVariable("GUI_GENERIC_AUTO_UPDATE_ENABLED", "true", "User")
+```
+
+When disabled, all update checks silently return "no update available" and nothing is downloaded.
 
 ## How It Works
 
@@ -47,14 +74,18 @@ The auto-update system consists of three main components:
    - Saves to temporary location
 
 3. **Apply Update**:
-   - Creates PowerShell script to handle the update
-   - Backs up current executable
-   - Extracts/replaces files after application closes
-   - Restarts application automatically
-   - Cleans up temporary files
+   - Copies the **bundled** `Scripts/update.ps1` script to a unique temp file
+   - Launches the script and exits the application
+   - Script waits 3 seconds for the app to close
+   - Preserves user data directories (`logs`, `configurations`, `repo`, `backup`)
+   - **`builder.json` is intentionally NOT preserved** — it is part of the release and gets updated
+   - Backs up the current executable before replacing files
+   - Extracts/replaces files, restores preserved data, then restarts the app
+   - Temp script self-deletes after completion
 
 4. **Rollback on Failure**:
-   - If update fails, restores from backup
+   - If anything fails, restores the backed-up executable
+   - Restores preserved user data even on failure
    - Restarts the application with the previous version
 
 ## Configuration
@@ -76,13 +107,13 @@ To change the repository:
 The application version is set in `GuiGenericBuilderDesktop.csproj`:
 
 ```xml
-<Version>2.1.0.0</Version>
+<Version>2.0.1.0</Version>
 ```
 
-**Important**: 
+**Important**:
 - Always update this version number when releasing a new version
 - Use semantic versioning (MAJOR.MINOR.PATCH)
-- The version in the project file must match the release tag format
+- The version in the project file must match the release tag format (e.g., version `2.0.1.0` maps to tag `v2.0.1`)
 
 ## Creating GitHub Releases
 
@@ -109,52 +140,43 @@ git push origin v2.1.0
 
 ### Release Asset Naming Conventions
 
-The auto-update service looks for ZIP or EXE files with these patterns:
-- Must contain "win" (case-insensitive)
-- Prefers self-contained over framework-dependent releases
+The auto-update service looks for release assets matching these rules:
+- File extension must be `.zip` or `.exe`
+- Asset name must contain `win` (case-insensitive)
+- Self-contained packages are preferred over framework-dependent ones
 
-**Your Current Release Pattern:**
-- ? `GuiGenericBuilder-v2.0.10-win-x64.zip` (self-contained - **Preferred**)
-- ? `GuiGenericBuilder-v2.0.10-win-x64-framework-dependent.zip` (framework-dependent)
+**Current release pattern:**
+- ? `GuiGenericBuilder-v2.0.1-win-x64.zip` (self-contained — **Preferred**)
+- ? `GuiGenericBuilder-v2.0.1-win-x64-framework-dependent.zip` (also supported)
+- ? `source-code.zip` (rejected — no `win` in name)
 
-The auto-update will automatically select the self-contained version as it doesn't require users to install .NET separately.
-
-Examples that will work:
-- ? `GuiGenericBuilder-v2.1.0-win-x64.zip`
-- ? `GuiGenericBuilder-win-x64.zip`
-- ? `GuiGenericBuilderDesktop.exe`
-- ? `source-code.zip` (won't be recognized - no "win" in name)
+The self-contained build is preferred because it does not require users to have .NET installed separately.
 
 ## Building and Publishing a Release
 
 ### Automated Build Script (Recommended)
 
-Create a `build-release.ps1` script:
+A `build-release.ps1` script is included at the repository root. It:
 
-```powershell
-# Build the application in Release mode
-dotnet build GuiGenericBuilderDesktop/GuiGenericBuilderDesktop.csproj -c Release
+- Reads the version from `GuiGenericBuilderDesktop.csproj` automatically
+- Builds in Release mode
+- Removes debug artifacts (`.pdb`, `.xml`, `.deps.json`)
+- Creates a properly named ZIP in `releases\vX.Y.Z\`
+- Prints next steps (tagging, GitHub release upload)
+- Opens the `releases\` folder in Explorer
 
-# Get version from project file
-$version = (Select-Xml -Path "GuiGenericBuilderDesktop/GuiGenericBuilderDesktop.csproj" -XPath "//Version").Node.InnerText
-
-# Create output directory
-$outputDir = "release-v$version"
-New-Item -ItemType Directory -Force -Path $outputDir
-
-# Copy build output
-Copy-Item "GuiGenericBuilderDesktop/bin/Release/net10.0-windows/*" -Destination $outputDir -Recurse
-
-# Create ZIP file
-Compress-Archive -Path "$outputDir/*" -DestinationPath "GuiGenericBuilder-v$version-windows.zip" -Force
-
-Write-Host "Release package created: GuiGenericBuilder-v$version-windows.zip"
-```
-
-Run the script:
+Run it:
 ```powershell
 .\build-release.ps1
 ```
+
+Optional parameters:
+```powershell
+.\build-release.ps1 -SkipBuild        # Skip the dotnet build step
+.\build-release.ps1 -OpenFolder:$false # Don't open Explorer after packaging
+```
+
+The output ZIP is named `GuiGenericBuilder-vX.Y.Z-win-x64.zip` and is placed under `releases\`.
 
 ### Manual Build Steps
 
@@ -206,6 +228,30 @@ public AutoUpdateService(string repositoryOwner, string repositoryName, ILogger 
 
 **Note**: Never hardcode tokens in your application. Use secure configuration or environment variables.
 
+## Update Script Details
+
+The update is applied by `Scripts/update.ps1`, which is bundled with every release. During the update, `AutoUpdateService` copies this script to a unique temp file (so it is not overwritten when the ZIP is extracted) and launches it with the following parameters:
+
+| Parameter | Description |
+|-----------|-------------|
+| `-AppDirectory` | Directory where the app is installed |
+| `-DownloadedFilePath` | Full path to the downloaded ZIP/EXE |
+| `-AssetName` | File name of the downloaded asset |
+| `-ExeName` | File name of the main executable |
+
+The script execution policy is bypassed automatically (`-ExecutionPolicy Bypass`). After completion the temp script **self-deletes**.
+
+### Directories preserved across updates
+
+| Directory | Contents |
+|-----------|----------|
+| `logs` | Application log files |
+| `configurations` | Saved build configurations |
+| `repo` | Downloaded platform/library repositories |
+| `backup` | Previous backup files |
+
+**`builder.json` is intentionally overwritten** — it is part of the release and contains the latest firmware parameter definitions.
+
 ## Testing the Auto-Update Feature
 
 ### Local Testing
@@ -256,10 +302,11 @@ var latestRelease = releases
 **Problem**: Update downloads but doesn't install
 
 **Solutions**:
-- Check PowerShell execution policy: `Get-ExecutionPolicy`
-- Run PowerShell as administrator if needed
-- Check antivirus isn't blocking the update script
+- Verify the environment variable `GUI_GENERIC_AUTO_UPDATE_ENABLED=true` is set
+- Check that `Scripts/update.ps1` exists in the application directory (it is bundled with the installer)
+- Check antivirus isn't blocking PowerShell or the temp script
 - Verify disk space is available
+- Check application logs for `"Bundled update script not found"`
 
 ### Application Doesn't Restart
 
@@ -349,9 +396,9 @@ Here's a complete workflow for releasing a new version:
    ```
 
 4. **Create Archive**:
-   ```bash
-   cd GuiGenericBuilderDesktop/bin/Release/net10.0-windows/
-   7z a GuiGenericBuilder-v2.2.0-windows.zip *
+```powershell
+.\build-release.ps1
+# Output: releases\GuiGenericBuilder-v2.2.0-win-x64.zip
    ```
 
 5. **Create Git Tag**:
@@ -388,5 +435,5 @@ For issues or questions about the auto-update feature:
 
 ---
 
-**Last Updated**: 2025-01-15  
-**Version**: 1.0
+**Last Updated**: 2026-02-21  
+**Version**: 2.0

@@ -21,3 +21,6 @@ Install Vistual Studio Code and then install the Platform.io extension or just P
 ## Not supported devices
 
 - ESP8266
+
+## Configuration environment variables
+- `GUI_GENERIC_AUTO_UPDATE_ENABLED` - if set to `true`, the application will check for updates on startup and automatically download and install them. Default value is `false`.
