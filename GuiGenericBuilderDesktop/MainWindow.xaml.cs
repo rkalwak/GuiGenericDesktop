@@ -47,6 +47,7 @@ namespace GuiGenericBuilderDesktop
         private DeviceManagementService _deviceManagementService;
         private VersionService _versionService;
         private UIBuilderService _uiBuilderService;
+        private AutoUpdateService _autoUpdateService;
 
         public MainWindow()
         {
@@ -77,6 +78,7 @@ namespace GuiGenericBuilderDesktop
             _deviceManagementService = new DeviceManagementService(_deviceDetector, _logger);
             _versionService = new VersionService(_repositoryPath, _logger);
             _uiBuilderService = new UIBuilderService(_builderConfig, _logger);
+            _autoUpdateService = new AutoUpdateService("rkalwak", "GuiGenericDesktop", _logger);
             InitializeBuildFlags();
             // Add the Parameters column dynamically so it's visible in the grid
             _uiBuilderService.AddParametersColumnDynamically(FlagsDataGrid, EditParameters_Click);
@@ -91,7 +93,50 @@ namespace GuiGenericBuilderDesktop
             // Validate PlatformIO installation on startup
             _validationService.ShowPlatformIOWarningIfNeeded();
 
+            // Add Window Loaded event handler for automatic update check
+            Loaded += MainWindow_Loaded;
+
             _logger.Information("MainWindow initialized successfully");
+        }
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Automatically check for updates on startup (non-blocking)
+            try
+            {
+                _logger.Information("Performing automatic update check on startup");
+                
+                var (updateAvailable, latestRelease) = await _autoUpdateService.CheckForUpdatesAsync();
+                
+                if (updateAvailable && latestRelease != null)
+                {
+                    _logger.Information("Update available on startup: {Version}", latestRelease.TagName);
+                    
+                    var result = MessageBox.Show(
+                        $"A new version ({latestRelease.TagName}) is available!\n\nWould you like to view the update details?",
+                        "Update Available",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Information);
+                    
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        var updateWindow = new UpdateWindow(_autoUpdateService, latestRelease, _logger)
+                        {
+                            Owner = this
+                        };
+                        updateWindow.ShowDialog();
+                    }
+                }
+                else
+                {
+                    _logger.Information("Application is up to date (startup check)");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, "Failed to check for updates on startup (non-critical)");
+                // Don't show error to user on startup - it's just a background check
+            }
         }
 
         private void InitializeBuildFlags()
@@ -348,6 +393,18 @@ namespace GuiGenericBuilderDesktop
             };
             changelogButton.Click += ViewChangelog_Click;
 
+            // Check for Updates button - dock to right (added third so it appears to the left of changelog button)
+            var checkUpdatesButton = new Button
+            {
+                Content = "🔄 Check for Updates",
+                Width = 150,
+                Height = 28,
+                Margin = new Thickness(4, 0, 4, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                ToolTip = "Check for application updates from GitHub"
+            };
+            checkUpdatesButton.Click += CheckForUpdates_Click;
+
             devicePanel.Children.Add(portLabel);
             devicePanel.Children.Add(comPortSelector);
             devicePanel.Children.Add(boardLabel);
@@ -362,6 +419,8 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(helpButton);
             DockPanel.SetDock(changelogButton, Dock.Right);
             devicePanel.Children.Add(changelogButton);
+            DockPanel.SetDock(checkUpdatesButton, Dock.Right);
+            devicePanel.Children.Add(checkUpdatesButton);
 
             // ===== BUTTONS PANEL (Row 1) - Action Buttons and Checkboxes =====
 
@@ -702,6 +761,62 @@ namespace GuiGenericBuilderDesktop
                 updateGGButton.IsEnabled = true;
                 compileButton.IsEnabled = true;
                 checkDeviceButton.IsEnabled = true;
+            }
+        }
+
+        private async void CheckForUpdates_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _logger.Information("User initiated update check");
+
+                statusText.Text = "Checking for updates...";
+                statusText.Visibility = Visibility.Visible;
+                statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
+
+                var (updateAvailable, latestRelease) = await _autoUpdateService.CheckForUpdatesAsync();
+
+                statusText.Visibility = Visibility.Collapsed;
+
+                if (updateAvailable && latestRelease != null)
+                {
+                    _logger.Information("Update available: {Version}", latestRelease.TagName);
+
+                    var updateWindow = new UpdateWindow(_autoUpdateService, latestRelease, _logger)
+                    {
+                        Owner = this
+                    };
+                    updateWindow.ShowDialog();
+                }
+                else
+                {
+                    _logger.Information("Application is up to date");
+                    MessageBox.Show(
+                        $"You are running the latest version ({_autoUpdateService.GetCurrentVersion()}).",
+                        "Up to Date",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information);
+                }
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("rate limit"))
+            {
+                _logger.Warning(ex, "GitHub API rate limit exceeded");
+                statusText.Visibility = Visibility.Collapsed;
+                MessageBox.Show(
+                    "GitHub API rate limit exceeded. Please try again later.",
+                    "Rate Limit Exceeded",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error checking for updates");
+                statusText.Visibility = Visibility.Collapsed;
+                MessageBox.Show(
+                    $"Failed to check for updates: {ex.Message}",
+                    "Update Check Failed",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
