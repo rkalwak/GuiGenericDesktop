@@ -354,7 +354,37 @@ Firmware file may have been deleted or moved.</system:String>
     <system:String x:Key="ViewHelpTooltip">View user guide and documentation</system:String>
     <system:String x:Key="ChangelogWindowTitle">Changelog - GUI-Generic Builder</system:String>
     <system:String x:Key="HelpWindowTitle">Help - GUI-Generic Builder</system:String>
-    
 
-    
+    <!-- Update Window -->
+    <system:String x:Key="UpdateWindowTitle">Update Available</system:String>
+    <system:String x:Key="UpdateAvailableHeader">Update Available</system:String>
+    <system:String x:Key="CurrentVersionLabel">Current Version:</system:String>
+    <system:String x:Key="NewVersionLabel">New Version:</system:String>
+    <system:String x:Key="ReleaseNotesHeader">Release Notes</system:String>
+    <system:String x:Key="LoadingReleaseNotes">Loading release notes...</system:String>
+    <system:String x:Key="NoReleaseNotes">No release notes available.</system:String>
+    <system:String x:Key="DownloadingUpdate">Downloading update...</system:String>
+    <system:String x:Key="DownloadingUpdateProgress">Downloading update... {0}%</system:String>
+    <system:String x:Key="InstallUpdate">Install Update</system:String>
+    <system:String x:Key="RemindMeLater">Remind Me Later</system:String>
+    <system:String x:Key="UpdateDownloadSuccess">Update downloaded successfully. The application will now restart to apply the update.</system:String>
+    <system:String x:Key="UpdateReady">Update Ready</system:String>
+    <system:String x:Key="UpdateDownloadFailed">Failed to download the update. Please try again later or download manually from GitHub.</system:String>
+    <system:String x:Key="UpdateInstallError">An error occurred while installing the update: {0}</system:String>
+    <system:String x:Key="UpdateErrorTitle">Update Error</system:String>
+    <system:String x:Key="CheckForUpdates">🔄 Check for Updates</system:String>
+    <system:String x:Key="CheckForUpdatesTooltip">Check for application updates from GitHub</system:String>
+    <system:String x:Key="NewVersionAvailable">A new version ({0}) is available!
+
+Would you like to view the update details?</system:String>
+    <system:String x:Key="UpdateAvailableTitle">Update Available</system:String>
+    <system:String x:Key="CheckingForUpdates">Checking for updates...</system:String>
+    <system:String x:Key="AppUpToDate">You are running the latest version ({0}).</system:String>
+    <system:String x:Key="UpToDateTitle">Up to Date</system:String>
+    <system:String x:Key="RateLimitExceeded">GitHub API rate limit exceeded. Please try again later.</system:String>
+    <system:String x:Key="RateLimitTitle">Rate Limit Exceeded</system:String>
+    <system:String x:Key="UpdateCheckFailed">Failed to check for updates: {0}</system:String>
+    <system:String x:Key="UpdateCheckFailedTitle">Update Check Failed</system:String>
+
+
 </ResourceDictionary>

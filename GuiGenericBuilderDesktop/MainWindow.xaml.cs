@@ -6,6 +6,7 @@ using System.Windows.Documents;
 using Newtonsoft.Json;
 using CompilationLib;
 using Serilog;
+using Microsoft.Extensions.Configuration;
 using GuiGenericBuilderDesktop.Localization;
 using GuiGenericBuilderDesktop.Services;
 
@@ -63,14 +64,20 @@ namespace GuiGenericBuilderDesktop
             var configDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "configurations");
             _configManager = new BuildConfigurationManager(configDir, _esptoolWrapper);
 
+            // Load application configuration from appsettings.json
+            var appConfig = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: true)
+                .Build()
+                .Get<AppConfig>() ?? new AppConfig();
 
-            if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("GGLocal")))
+            if (string.IsNullOrWhiteSpace(appConfig.GGLocal))
             {
                 _repositoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "repo", "gg");
             }
             else
             {
-                _repositoryPath = @"c:\repozytoria\platformio\GUI-Generic";
+                _repositoryPath = appConfig.GGLocal;
             }
 
             // Initialize services
@@ -78,7 +85,7 @@ namespace GuiGenericBuilderDesktop
             _deviceManagementService = new DeviceManagementService(_deviceDetector, _logger);
             _versionService = new VersionService(_repositoryPath, _logger);
             _uiBuilderService = new UIBuilderService(_builderConfig, _logger);
-            _autoUpdateService = new AutoUpdateService("rkalwak", "GuiGenericDesktop", _logger);
+            _autoUpdateService = new AutoUpdateService("rkalwak", "GuiGenericDesktop", appConfig, _logger);
             InitializeBuildFlags();
             // Add the Parameters column dynamically so it's visible in the grid
             _uiBuilderService.AddParametersColumnDynamically(FlagsDataGrid, EditParameters_Click);
@@ -113,8 +120,8 @@ namespace GuiGenericBuilderDesktop
                     _logger.Information("Update available on startup: {Version}", latestRelease.TagName);
                     
                     var result = MessageBox.Show(
-                        $"A new version ({latestRelease.TagName}) is available!\n\nWould you like to view the update details?",
-                        "Update Available",
+                        LocalizationManager.GetFormat("NewVersionAvailable", latestRelease.TagName),
+                        LocalizationManager.Get("UpdateAvailableTitle"),
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Information);
                     
@@ -396,12 +403,12 @@ namespace GuiGenericBuilderDesktop
             // Check for Updates button - dock to right (added third so it appears to the left of changelog button)
             var checkUpdatesButton = new Button
             {
-                Content = "🔄 Check for Updates",
+                Content = LocalizationManager.Get("CheckForUpdates"),
                 Width = 150,
                 Height = 28,
                 Margin = new Thickness(4, 0, 4, 0),
                 VerticalAlignment = VerticalAlignment.Center,
-                ToolTip = "Check for application updates from GitHub"
+                ToolTip = LocalizationManager.Get("CheckForUpdatesTooltip")
             };
             checkUpdatesButton.Click += CheckForUpdates_Click;
 
@@ -770,7 +777,7 @@ namespace GuiGenericBuilderDesktop
             {
                 _logger.Information("User initiated update check");
 
-                statusText.Text = "Checking for updates...";
+                statusText.Text = LocalizationManager.Get("CheckingForUpdates");
                 statusText.Visibility = Visibility.Visible;
                 statusText.Foreground = System.Windows.Media.Brushes.DarkBlue;
 
@@ -792,8 +799,8 @@ namespace GuiGenericBuilderDesktop
                 {
                     _logger.Information("Application is up to date");
                     MessageBox.Show(
-                        $"You are running the latest version ({_autoUpdateService.GetCurrentVersion()}).",
-                        "Up to Date",
+                        LocalizationManager.GetFormat("AppUpToDate", _autoUpdateService.GetCurrentVersion()),
+                        LocalizationManager.Get("UpToDateTitle"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
                 }
@@ -803,8 +810,8 @@ namespace GuiGenericBuilderDesktop
                 _logger.Warning(ex, "GitHub API rate limit exceeded");
                 statusText.Visibility = Visibility.Collapsed;
                 MessageBox.Show(
-                    "GitHub API rate limit exceeded. Please try again later.",
-                    "Rate Limit Exceeded",
+                    LocalizationManager.Get("RateLimitExceeded"),
+                    LocalizationManager.Get("RateLimitTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
             }
@@ -813,8 +820,8 @@ namespace GuiGenericBuilderDesktop
                 _logger.Error(ex, "Error checking for updates");
                 statusText.Visibility = Visibility.Collapsed;
                 MessageBox.Show(
-                    $"Failed to check for updates: {ex.Message}",
-                    "Update Check Failed",
+                    LocalizationManager.GetFormat("UpdateCheckFailed", ex.Message),
+                    LocalizationManager.Get("UpdateCheckFailedTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
             }

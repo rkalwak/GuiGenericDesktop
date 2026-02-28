@@ -353,7 +353,37 @@ Plik firmware mógł zostać usunięty lub przeniesiony.</system:String>
     <system:String x:Key="ViewHelpTooltip">Wyświetl przewodnik użytkownika i dokumentację</system:String>
     <system:String x:Key="ChangelogWindowTitle">Historia zmian - GUI-Generic Builder</system:String>
     <system:String x:Key="HelpWindowTitle">Pomoc - GUI-Generic Builder</system:String>
-    
 
-    
+    <!-- Update Window -->
+    <system:String x:Key="UpdateWindowTitle">Dostępna aktualizacja</system:String>
+    <system:String x:Key="UpdateAvailableHeader">Dostępna aktualizacja</system:String>
+    <system:String x:Key="CurrentVersionLabel">Aktualna wersja:</system:String>
+    <system:String x:Key="NewVersionLabel">Nowa wersja:</system:String>
+    <system:String x:Key="ReleaseNotesHeader">Informacje o wydaniu</system:String>
+    <system:String x:Key="LoadingReleaseNotes">Ładowanie informacji o wydaniu...</system:String>
+    <system:String x:Key="NoReleaseNotes">Brak informacji o wydaniu.</system:String>
+    <system:String x:Key="DownloadingUpdate">Pobieranie aktualizacji...</system:String>
+    <system:String x:Key="DownloadingUpdateProgress">Pobieranie aktualizacji... {0}%</system:String>
+    <system:String x:Key="InstallUpdate">Zainstaluj</system:String>
+    <system:String x:Key="RemindMeLater">Przypomnij później</system:String>
+    <system:String x:Key="UpdateDownloadSuccess">Aktualizacja pobrana pomyślnie. Aplikacja zostanie teraz uruchomiona ponownie, aby zastosować aktualizację.</system:String>
+    <system:String x:Key="UpdateReady">Aktualizacja gotowa</system:String>
+    <system:String x:Key="UpdateDownloadFailed">Nie udało się pobrać aktualizacji. Spróbuj ponownie później lub pobierz ręcznie z GitHub.</system:String>
+    <system:String x:Key="UpdateInstallError">Wystąpił błąd podczas instalacji aktualizacji: {0}</system:String>
+    <system:String x:Key="UpdateErrorTitle">Błąd aktualizacji</system:String>
+    <system:String x:Key="CheckForUpdates">🔄 Sprawdź aktualizacje</system:String>
+    <system:String x:Key="CheckForUpdatesTooltip">Sprawdź dostępność aktualizacji aplikacji z GitHub</system:String>
+    <system:String x:Key="NewVersionAvailable">Dostępna jest nowa wersja ({0})!
+
+Czy chcesz zobaczyć szczegóły aktualizacji?</system:String>
+    <system:String x:Key="UpdateAvailableTitle">Dostępna aktualizacja</system:String>
+    <system:String x:Key="CheckingForUpdates">Sprawdzanie aktualizacji...</system:String>
+    <system:String x:Key="AppUpToDate">Masz najnowszą wersję ({0}).</system:String>
+    <system:String x:Key="UpToDateTitle">Aktualna wersja</system:String>
+    <system:String x:Key="RateLimitExceeded">Przekroczono limit zapytań API GitHub. Spróbuj ponownie później.</system:String>
+    <system:String x:Key="RateLimitTitle">Przekroczono limit zapytań</system:String>
+    <system:String x:Key="UpdateCheckFailed">Nie udało się sprawdzić aktualizacji: {0}</system:String>
+    <system:String x:Key="UpdateCheckFailedTitle">Błąd sprawdzania aktualizacji</system:String>
+
+
 </ResourceDictionary>

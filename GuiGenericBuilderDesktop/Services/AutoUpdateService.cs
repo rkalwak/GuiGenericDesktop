@@ -12,34 +12,24 @@ namespace GuiGenericBuilderDesktop.Services
     /// </summary>
     public class AutoUpdateService
     {
-        private const string AutoUpdateEnvironmentVariable = "GUI_GENERIC_AUTO_UPDATE_ENABLED";
-
         private readonly ILogger _logger;
         private readonly GitHubClient _githubClient;
         private readonly string _repositoryOwner;
         private readonly string _repositoryName;
         private readonly Version _currentVersion;
+        private readonly AppConfig _config;
 
         /// <summary>
-        /// Gets whether auto-update feature is enabled via environment variable.
+        /// Gets whether auto-update feature is enabled via configuration.
         /// Default is disabled for safety.
         /// </summary>
-        public bool IsAutoUpdateEnabled
-        {
-            get
-            {
-                var envValue = Environment.GetEnvironmentVariable(AutoUpdateEnvironmentVariable);
-                return !string.IsNullOrEmpty(envValue) && 
-                       (envValue.Equals("1", StringComparison.OrdinalIgnoreCase) ||
-                        envValue.Equals("true", StringComparison.OrdinalIgnoreCase) ||
-                        envValue.Equals("yes", StringComparison.OrdinalIgnoreCase));
-            }
-        }
+        public bool IsAutoUpdateEnabled => _config.AutoUpdateEnabled;
 
-        public AutoUpdateService(string repositoryOwner, string repositoryName, ILogger logger)
+        public AutoUpdateService(string repositoryOwner, string repositoryName, AppConfig config, ILogger logger)
         {
             _repositoryOwner = repositoryOwner;
             _repositoryName = repositoryName;
+            _config = config;
             _logger = logger;
 
             // Initialize GitHub client
@@ -48,8 +38,8 @@ namespace GuiGenericBuilderDesktop.Services
             // Get current version from assembly
             _currentVersion = Assembly.GetExecutingAssembly().GetName().Version;
             _logger.Information("AutoUpdateService initialized. Current version: {Version}", _currentVersion);
-            _logger.Information("Auto-update feature enabled: {Enabled} (Environment variable: {EnvVar})", 
-                IsAutoUpdateEnabled, AutoUpdateEnvironmentVariable);
+            _logger.Information("Auto-update feature enabled: {Enabled}, MaxVersion: {MaxVersion}", 
+                IsAutoUpdateEnabled, _config.MaxVersion?.ToString() ?? "(none)");
         }
 
         /// <summary>
@@ -59,8 +49,7 @@ namespace GuiGenericBuilderDesktop.Services
         {
             if (!IsAutoUpdateEnabled)
             {
-                _logger.Information("Auto-update is disabled. Set environment variable {EnvVar}=true to enable.", 
-                    AutoUpdateEnvironmentVariable);
+                _logger.Information("Auto-update is disabled. Set GUI_GENERIC_AUTO_UPDATE_ENABLED=true in the .env file to enable.");
                 return (false, null);
             }
 
@@ -85,6 +74,36 @@ namespace GuiGenericBuilderDesktop.Services
                 if (Version.TryParse(versionString, out var latestVersion))
                 {
                     var updateAvailable = latestVersion > _currentVersion;
+
+                    if (updateAvailable && _config.MaxVersion != null && latestVersion > _config.MaxVersion)
+                    {
+                        _logger.Information(
+                            "Latest version {LatestVersion} exceeds configured MaxVersion {MaxVersion}. Looking for highest allowed release.",
+                            latestVersion, _config.MaxVersion);
+
+                        var cappedRelease = releases
+                            .Where(r => !r.Prerelease && !r.Draft)
+                            .Select(r => new
+                            {
+                                Release = r,
+                                Version = Version.TryParse(r.TagName.TrimStart('v', 'V'), out var v) ? v : null
+                            })
+                            .Where(r => r.Version != null && r.Version > _currentVersion && r.Version <= _config.MaxVersion)
+                            .OrderByDescending(r => r.Version)
+                            .FirstOrDefault();
+
+                        if (cappedRelease == null)
+                        {
+                            _logger.Information("No release found within MaxVersion {MaxVersion} that is newer than current version.", _config.MaxVersion);
+                            return (false, null);
+                        }
+
+                        _logger.Information(
+                            "Capped to version {CappedVersion} (MaxVersion: {MaxVersion})",
+                            cappedRelease.Version, _config.MaxVersion);
+                        return (true, cappedRelease.Release);
+                    }
+
                     _logger.Information(
                         "Latest version: {LatestVersion}, Current version: {CurrentVersion}, Update available: {UpdateAvailable}",
                         latestVersion, _currentVersion, updateAvailable);

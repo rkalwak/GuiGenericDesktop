@@ -1,3 +1,4 @@
+using System.Reflection;
 using CompilationLib;
 using Serilog;
 
@@ -65,6 +66,12 @@ namespace GuiGenericBuilderDesktop.Services
             const string baseTitle = "GUI-Generic Builder";
 
             var titleParts = new List<string> { baseTitle };
+
+            var appVersion = Assembly.GetEntryAssembly()?.GetName().Version;
+            if (appVersion is not null)
+            {
+                titleParts.Add($"GGBD v{appVersion.ToString(3)}");
+            }
 
             if (!string.IsNullOrEmpty(ggVersion))
             {

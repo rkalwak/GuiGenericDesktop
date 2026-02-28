@@ -1,6 +1,7 @@
 using System.Windows;
 using Octokit;
 using Serilog;
+using GuiGenericBuilderDesktop.Localization;
 using GuiGenericBuilderDesktop.Services;
 
 namespace GuiGenericBuilderDesktop
@@ -23,10 +24,19 @@ namespace GuiGenericBuilderDesktop
 
         private void LoadUpdateInformation()
         {
+            Title = LocalizationManager.Get("UpdateWindowTitle");
+            HeaderText.Text = LocalizationManager.Get("UpdateAvailableHeader");
+            CurrentVersionLabel.Text = LocalizationManager.Get("CurrentVersionLabel");
+            NewVersionLabel.Text = LocalizationManager.Get("NewVersionLabel");
+            ReleaseNotesGroup.Header = LocalizationManager.Get("ReleaseNotesHeader");
+            ProgressText.Text = LocalizationManager.Get("DownloadingUpdate");
+            InstallButton.Content = LocalizationManager.Get("InstallUpdate");
+            RemindLaterButton.Content = LocalizationManager.Get("RemindMeLater");
+
             CurrentVersionText.Text = _autoUpdateService.GetCurrentVersion().ToString();
             NewVersionText.Text = _release.TagName.TrimStart('v', 'V');
             ReleaseNotesText.Text = string.IsNullOrWhiteSpace(_release.Body) 
-                ? "No release notes available." 
+                ? LocalizationManager.Get("NoReleaseNotes") 
                 : _release.Body;
         }
 
@@ -45,7 +55,7 @@ namespace GuiGenericBuilderDesktop
                     Dispatcher.Invoke(() =>
                     {
                         ProgressBar.Value = percentage;
-                        ProgressText.Text = $"Downloading update... {percentage}%";
+                        ProgressText.Text = LocalizationManager.GetFormat("DownloadingUpdateProgress", percentage);
                     });
                 });
 
@@ -56,8 +66,8 @@ namespace GuiGenericBuilderDesktop
                     _logger.Information("Update downloaded successfully. Applying update...");
                     
                     MessageBox.Show(
-                        "Update downloaded successfully. The application will now restart to apply the update.",
-                        "Update Ready",
+                        LocalizationManager.Get("UpdateDownloadSuccess"),
+                        LocalizationManager.Get("UpdateReady"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Information);
 
@@ -68,8 +78,8 @@ namespace GuiGenericBuilderDesktop
                     _logger.Warning("Update installation failed");
                     
                     MessageBox.Show(
-                        "Failed to download the update. Please try again later or download manually from GitHub.",
-                        "Update Failed",
+                        LocalizationManager.Get("UpdateDownloadFailed"),
+                        LocalizationManager.Get("UpdateFailed"),
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
 
@@ -83,8 +93,8 @@ namespace GuiGenericBuilderDesktop
                 _logger.Error(ex, "Error during update installation");
                 
                 MessageBox.Show(
-                    $"An error occurred while installing the update: {ex.Message}",
-                    "Update Error",
+                    LocalizationManager.GetFormat("UpdateInstallError", ex.Message),
+                    LocalizationManager.Get("UpdateErrorTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
 
