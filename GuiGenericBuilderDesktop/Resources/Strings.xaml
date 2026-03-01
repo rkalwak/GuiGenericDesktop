@@ -386,5 +386,14 @@ Would you like to view the update details?</system:String>
     <system:String x:Key="UpdateCheckFailed">Failed to check for updates: {0}</system:String>
     <system:String x:Key="UpdateCheckFailedTitle">Update Check Failed</system:String>
 
+    <!-- GUI-Generic Updates -->
+    <system:String x:Key="GGUpdateAvailable">A new version of GUI-Generic is available!
+`
+Current version: {0}
+Available version: {1}
+
+Would you like to update now?</system:String>
+    <system:String x:Key="GGUpdateAvailableTitle">GUI-Generic Update Available</system:String>
+
 
 </ResourceDictionary>

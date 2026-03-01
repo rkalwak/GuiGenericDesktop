@@ -49,6 +49,7 @@ namespace GuiGenericBuilderDesktop
         private VersionService _versionService;
         private UIBuilderService _uiBuilderService;
         private AutoUpdateService _autoUpdateService;
+        private GGUpdateService _ggUpdateService;
 
         public MainWindow()
         {
@@ -86,6 +87,7 @@ namespace GuiGenericBuilderDesktop
             _versionService = new VersionService(_repositoryPath, _logger);
             _uiBuilderService = new UIBuilderService(_builderConfig, _logger);
             _autoUpdateService = new AutoUpdateService("rkalwak", "GuiGenericDesktop", appConfig, _logger);
+            _ggUpdateService = new GGUpdateService(_repositoryPath, appConfig, _logger);
             InitializeBuildFlags();
             // Add the Parameters column dynamically so it's visible in the grid
             _uiBuilderService.AddParametersColumnDynamically(FlagsDataGrid, EditParameters_Click);
@@ -108,23 +110,23 @@ namespace GuiGenericBuilderDesktop
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            // Automatically check for updates on startup (non-blocking)
+            // Automatically check for application updates on startup (non-blocking)
             try
             {
                 _logger.Information("Performing automatic update check on startup");
-                
+
                 var (updateAvailable, latestRelease) = await _autoUpdateService.CheckForUpdatesAsync();
-                
+
                 if (updateAvailable && latestRelease != null)
                 {
                     _logger.Information("Update available on startup: {Version}", latestRelease.TagName);
-                    
+
                     var result = MessageBox.Show(
                         LocalizationManager.GetFormat("NewVersionAvailable", latestRelease.TagName),
                         LocalizationManager.Get("UpdateAvailableTitle"),
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Information);
-                    
+
                     if (result == MessageBoxResult.Yes)
                     {
                         var updateWindow = new UpdateWindow(_autoUpdateService, latestRelease, _logger)
@@ -142,6 +144,41 @@ namespace GuiGenericBuilderDesktop
             catch (Exception ex)
             {
                 _logger.Warning(ex, "Failed to check for updates on startup (non-critical)");
+                // Don't show error to user on startup - it's just a background check
+            }
+
+            // Check for GUI-Generic builder updates
+            try
+            {
+                _logger.Information("Performing GUI-Generic builder update check on startup");
+
+                var (ggUpdateAvailable, remoteVersion, currentVersion) = await _ggUpdateService.CheckForGGUpdatesAsync();
+
+                if (ggUpdateAvailable && remoteVersion != null)
+                {
+                    _logger.Information("GUI-Generic builder update available: {RemoteVersion} (current: {CurrentVersion})", 
+                        remoteVersion, currentVersion);
+
+                    var result = MessageBox.Show(
+                        LocalizationManager.GetFormat("GGUpdateAvailable", currentVersion, remoteVersion),
+                        LocalizationManager.Get("GGUpdateAvailableTitle"),
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Information);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        // Trigger the update button click
+                        UpdateGG_Click(updateGGButton, new RoutedEventArgs());
+                    }
+                }
+                else
+                {
+                    _logger.Information("GUI-Generic builder is up to date (startup check)");
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, "Failed to check for GUI-Generic builder updates on startup (non-critical)");
                 // Don't show error to user on startup - it's just a background check
             }
         }

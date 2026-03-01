@@ -1,5 +1,15 @@
 ﻿# Changelog
 
+## [2026-03-01] - Version 2.0.16
+
+**GUI-Generic Version Check**
+- Added automatic check for GUI-Generic builder updates on application startup
+- Compares local builder.json version with remote version from GitHub
+- Prompts user to update when newer version is available
+- Provides seamless update experience by triggering existing update mechanism
+- Helps ensure users are building with the latest builder configuration and features
+- Configurable via `GGUpdateCheckEnabled` in appsettings.json (default: true)
+
 ## [2026-03-01] - Version 2.0.15
 ## [2026-02-15] - Version 2.0.14
 

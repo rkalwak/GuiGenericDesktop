@@ -385,5 +385,14 @@ Czy chcesz zobaczyć szczegóły aktualizacji?</system:String>
     <system:String x:Key="UpdateCheckFailed">Nie udało się sprawdzić aktualizacji: {0}</system:String>
     <system:String x:Key="UpdateCheckFailedTitle">Błąd sprawdzania aktualizacji</system:String>
 
+    <!-- GUI-Generic Updates -->
+    <system:String x:Key="GGUpdateAvailable">Dostępna jest nowa wersja GUI-Generic!
+
+Aktualna wersja: {0}
+Dostępna wersja: {1}
+
+Czy chcesz zaktualizować teraz?</system:String>
+    <system:String x:Key="GGUpdateAvailableTitle">Dostępna aktualizacja GUI-Generic</system:String>
+
 
 </ResourceDictionary>

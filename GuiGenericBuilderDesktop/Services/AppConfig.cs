@@ -21,6 +21,12 @@ namespace GuiGenericBuilderDesktop.Services
         public Version MaxVersion => Version.TryParse(AutoUpdateMaxVersion, out var v) ? v : null;
 
         /// <summary>
+        /// Whether the GUI-Generic builder update check is enabled.
+        /// When enabled, the application checks for newer builder.json versions on GitHub at startup.
+        /// </summary>
+        public bool GGUpdateCheckEnabled { get; set; }
+
+        /// <summary>
         /// Optional local path to the GUI-Generic repository.
         /// When set, the application uses this path instead of downloading the repository.
         /// </summary>
