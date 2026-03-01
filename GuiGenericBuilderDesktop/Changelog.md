@@ -1,5 +1,15 @@
 ﻿# Changelog
 
+## [2026-03-01] - Version 2.0.15
+## [2026-02-15] - Version 2.0.14
+
+**Auto-update for application.**
+- Added functionality to check for updates on GitHub releases
+- Notifies user when a new version is available with option to download and install
+- Checks for updates on application startup and via "Check for Updates" button in "Help" menu
+- Displays current version and latest version information
+- Provides changelog link for new version to inform users about new features and fixes
+
 ## [2026-02-12] - Version 2.0.13
 
 **ESP32-S2 Support**
