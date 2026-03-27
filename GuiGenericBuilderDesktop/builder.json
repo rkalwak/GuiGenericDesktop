@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "6.0.2",
   "GLOBALPARAMETERS": {
     "Parameters": [
@@ -110,13 +110,13 @@
       "Flags": {
         "SUPLA_CONFIG": {
           "name": "Konfiguracja (LED, Config)",
-          "desc": "Ustawienia urządzenia->Konfiguracja. Umożliwia skonfigurowanie LEDa statusowego i przycisku przełączającego moduł w tryb konfiguracji.",
+          "desc": "Ustawienia urządzenia-\u003eKonfiguracja. Umożliwia skonfigurowanie LEDa statusowego i przycisku przełączającego moduł w tryb konfiguracji.",
           "alertOff": "Wyłączenie tej opcji uniemożliwi konfigurację przycisku włączającego tryb konfiguracji modułu (AP: 192.168.4.1) a tym samym brak dostępu do modułu. Nie będzie można także skonfigurować LED systemowego.",
           "defOn": true,
           "translations": {
             "en": {
               "name": "Configuration (LED, Config)",
-              "desc": "Device settings->Configuration. It allows you to configure the status LED and the button to switch the module to configuration mode.",
+              "desc": "Device settings-\u003eConfiguration. It allows you to configure the status LED and the button to switch the module to configuration mode.",
               "alertOff": "Disabling this option will prevent the configuration of the button enabling the module configuration mode (AP: 192.168.4.1) and thus the lack of access to the module. The system LED will also not be configurable."
             }
           },
@@ -126,13 +126,13 @@
         },
         "SUPLA_OTA": {
           "name": "Aktualizacja przez WWW",
-          "desc": "Narzędzia->Aktualizacja. Umożliwia wgrywanie nowszego firmware przez stronę WWW modułu.",
+          "desc": "Narzędzia-\u003eAktualizacja. Umożliwia wgrywanie nowszego firmware przez stronę WWW modułu.",
           "alertOff": "Wyłączenie tej opcji uniemożliwi aktualizację firmware modułu przez przeglądarkę WWW. Konieczna będzie aktualizacja poprzez port szeregowy.",
           "defOn": true,
           "translations": {
             "en": {
               "name": "WWW update (OTA)",
-              "desc": "Tools->Update. It allows you to upload newer firmware via the module´s website.",
+              "desc": "Tools-\u003eUpdate. It allows you to upload newer firmware via the module´s website.",
               "alertOff": "Disabling this option will prevent updating the module firmware via the web browser. You will need to upgrade via serial port."
             }
           },
@@ -315,7 +315,7 @@
                     {
                       "Value": "3",
                       "Name": "Not Configured Mode",
-                      "Description": "Device enters 'not configured' mode. This is the default behavior."
+                      "Description": "Device enters \u0027not configured\u0027 mode. This is the default behavior."
                     }
                   ]
                 }
@@ -354,7 +354,7 @@
               "Translations": {
                 "en": {
                   "Name": "Config Mode Timeout (minutes)",
-                  "Description": "Specifies the duration (in minutes) for which the device remains in configuration mode when 'Config Mode → Offline' is selected."
+                  "Description": "Specifies the duration (in minutes) for which the device remains in configuration mode when \u0027Config Mode → Offline\u0027 is selected."
                 }
               }
             },
@@ -455,7 +455,7 @@
       "Flags": {
         "SUPLA_RELAY": {
           "name": "Przekaźniki",
-          "desc": "Ustawienia urządzenia->Przekaźniki. Umożliwia obsługę przekaźników.",
+          "desc": "Ustawienia urządzenia-\u003ePrzekaźniki. Umożliwia obsługę przekaźników.",
           "defOn": false,
           "depOn": [
             "SUPLA_ROLLERSHUTTER",
@@ -465,7 +465,7 @@
           "translations": {
             "en": {
               "name": "Relays",
-              "desc": "Device settings->Relays. It enables the operation of relays."
+              "desc": "Device settings-\u003eRelays. It enables the operation of relays."
             }
           },
           "parameters": [
@@ -474,7 +474,7 @@
         },
         "SUPLA_BUTTON": {
           "name": "Przyciski",
-          "desc": "Ustawienia urządzenia->Przyciski. Umożliwia obsługę przycisków wraz z innymi funkcjonalnościami.",
+          "desc": "Ustawienia urządzenia-\u003ePrzyciski. Umożliwia obsługę przycisków wraz z innymi funkcjonalnościami.",
           "defOn": false,
           "depOn": [
             "SUPLA_ROLLERSHUTTER",
@@ -494,7 +494,7 @@
           "translations": {
             "en": {
               "name": "Buttons",
-              "desc": "Device settings->Buttons. It allows the operation of buttons along with other functionalities."
+              "desc": "Device settings-\u003eButtons. It allows the operation of buttons along with other functionalities."
             }
           },
           "parameters": [
@@ -535,12 +535,12 @@
         },
         "SUPLA_ROLLERSHUTTER": {
           "name": "Rolety",
-          "desc": "Ustawienia urządzenia->Rolety. Umożliwia obsługę rolet. Wymagana włączona obsługa przekaźników i przycisków.",
+          "desc": "Ustawienia urządzenia-\u003eRolety. Umożliwia obsługę rolet. Wymagana włączona obsługa przekaźników i przycisków.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Roller shutters",
-              "desc": "Device settings->Roller shutters. It enables the operation of roller shutters. Relays and buttons enabled."
+              "desc": "Device settings-\u003eRoller shutters. It enables the operation of roller shutters. Relays and buttons enabled."
             }
           },
           "parameters": [
@@ -549,12 +549,12 @@
         },
         "SUPLA_LIMIT_SWITCH": {
           "name": "Krańcówki",
-          "desc": "Ustawienia urządzenia->Krańcówki. Umożliwia obsługę przełączników krańcowych.",
+          "desc": "Ustawienia urządzenia-\u003eKrańcówki. Umożliwia obsługę przełączników krańcowych.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Limit switches",
-              "desc": "Device settings->Limit switches. Enables the operation of limit switches."
+              "desc": "Device settings-\u003eLimit switches. Enables the operation of limit switches."
             }
           },
           "parameters": [
@@ -577,12 +577,12 @@
         },
         "SUPLA_LED": {
           "name": "LED załączenia przekaźnika",
-          "desc": "Ustawienia urządzenia->LED. Umożliwia zmianę poziomu sygnału sterującego LED sygnalizującym załączenie przekaźnika.",
+          "desc": "Ustawienia urządzenia-\u003eLED. Umożliwia zmianę poziomu sygnału sterującego LED sygnalizującym załączenie przekaźnika.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "LED for switching on the relay",
-              "desc": "Device settings->LED. It enables to change the level of the signal which controls the LED lighting which signals the relay activation."
+              "desc": "Device settings-\u003eLED. It enables to change the level of the signal which controls the LED lighting which signals the relay activation."
             }
           },
           "parameters": [
@@ -645,12 +645,12 @@
       "Flags": {
         "SUPLA_MCP23017": {
           "name": "MCP23017",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę rozszerzenia portów x16 MCP2317.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę rozszerzenia portów x16 MCP2317.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "MCP23017",
-              "desc": "Device settings->I2C. Supports MCP2317 x16 port expansion."
+              "desc": "Device settings-\u003eI2C. Supports MCP2317 x16 port expansion."
             }
           },
           "Parameters": [
@@ -659,12 +659,12 @@
         },
         "SUPLA_PCF8575": {
           "name": "PCF8575",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę rozszerzenia portów x16 PCF8575.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę rozszerzenia portów x16 PCF8575.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "PCF8575",
-              "desc": "Device settings->I2C. Supports PCF8575 x16 port expansion."
+              "desc": "Device settings-\u003eI2C. Supports PCF8575 x16 port expansion."
             }
           },
           "Parameters": [
@@ -673,12 +673,12 @@
         },
         "SUPLA_PCF8574": {
           "name": "PCF8574/A",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę rozszerzenia portów x8 PCF8574/A.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę rozszerzenia portów x8 PCF8574/A.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "PCF8574/A",
-              "desc": "Device settings->I2C. Supports PCF8574/A x8 port expansion."
+              "desc": "Device settings-\u003eI2C. Supports PCF8574/A x8 port expansion."
             }
           },
           "Parameters": [
@@ -699,12 +699,12 @@
       "Flags": {
         "SUPLA_DS18B20": {
           "name": "Sensor DS18B20",
-          "desc": "Ustawienia urządzenia->1Wire. Umożliwia obsługę sensorów DS18B20.",
+          "desc": "Ustawienia urządzenia-\u003e1Wire. Umożliwia obsługę sensorów DS18B20.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "DS18B20 sensor",
-              "desc": "Device settings->1Wire. It enables the support of DS18B20 sensors."
+              "desc": "Device settings-\u003e1Wire. It enables the support of DS18B20 sensors."
             }
           },
           "Parameters": [
@@ -713,12 +713,12 @@
         },
         "SUPLA_DHT11": {
           "name": "Sensor DHT11",
-          "desc": "Ustawienia urządzenia->1Wire. Umożliwia obsługę sensorów DHT11.",
+          "desc": "Ustawienia urządzenia-\u003e1Wire. Umożliwia obsługę sensorów DHT11.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "DHT11 sensor",
-              "desc": "Device settings->1Wire. It enables the operation of DHT11 sensors."
+              "desc": "Device settings-\u003e1Wire. It enables the operation of DHT11 sensors."
             }
           },
           "Parameters": [
@@ -727,12 +727,12 @@
         },
         "SUPLA_DHT22": {
           "name": "Sensor DHT22",
-          "desc": "Ustawienia urządzenia->1Wire. Umożliwia obsługę sensorów DHT22.",
+          "desc": "Ustawienia urządzenia-\u003e1Wire. Umożliwia obsługę sensorów DHT22.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "DHT22 sensor",
-              "desc": "Device settings->1Wire. It enables the operation of DHT22 sensors."
+              "desc": "Device settings-\u003e1Wire. It enables the operation of DHT22 sensors."
             }
           },
           "Parameters": [
@@ -741,12 +741,12 @@
         },
         "SUPLA_SI7021_SONOFF": {
           "name": "Sensor Si7021 Sonoff",
-          "desc": "Ustawienia urządzenia->1Wire. Umożliwia obsługę sensorów Si7021 na płytkach SonOff.",
+          "desc": "Ustawienia urządzenia-\u003e1Wire. Umożliwia obsługę sensorów Si7021 na płytkach SonOff.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Si7021 Sonoff sensor",
-              "desc": "Device settings->1Wire. Allows you to support Si7021 sensors on SonOff boards."
+              "desc": "Device settings-\u003e1Wire. Allows you to support Si7021 sensors on SonOff boards."
             }
           },
           "Parameters": [
@@ -767,12 +767,12 @@
       "Flags": {
         "SUPLA_BME280": {
           "name": "Sensor BME280",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę sensorów BME280.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę sensorów BME280.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "BME280 sensor",
-              "desc": "Device settings->I2C. It enables the support of BME280 sensors."
+              "desc": "Device settings-\u003eI2C. It enables the support of BME280 sensors."
             }
           },
           "Parameters": [
@@ -825,12 +825,12 @@
         },
         "SUPLA_BMP280": {
           "name": "Sensor BMP280",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę sensorów BMP280.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę sensorów BMP280.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "BMP280 sensor",
-              "desc": "Device settings->I2C. It enables the support of BMP280 sensors."
+              "desc": "Device settings-\u003eI2C. It enables the support of BMP280 sensors."
             }
           },
           "Parameters": [
@@ -883,12 +883,12 @@
         },
         "SUPLA_SHT3x": {
           "name": "Sensor SHT3x",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę sensorów serii SHT3x.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę sensorów serii SHT3x.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "SHT3x sensor",
-              "desc": "Device settings->I2C. Supports SHT3x series sensors."
+              "desc": "Device settings-\u003eI2C. Supports SHT3x series sensors."
             }
           },
           "Parameters": [
@@ -920,12 +920,12 @@
         },
         "SUPLA_SHT_AUTODETECT": {
           "name": "Sensor SHTxx",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę sensorów serii SHTxx.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę sensorów serii SHTxx.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "SHTxx sensor",
-              "desc": "Device settings->I2C. Supports SHTxx series sensors."
+              "desc": "Device settings-\u003eI2C. Supports SHTxx series sensors."
             }
           },
           "Parameters": [
@@ -957,12 +957,12 @@
         },
         "SUPLA_SI7021": {
           "name": "Sensor Si7021",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę sensorów Si7021.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę sensorów Si7021.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Si7021 sensor",
-              "desc": "Device settings->I2C. Supports Si7021 sensors."
+              "desc": "Device settings-\u003eI2C. Supports Si7021 sensors."
             }
           },
           "Parameters": [
@@ -994,12 +994,12 @@
         },
         "SUPLA_VL53L0X": {
           "name": "Sensor VL53L0X",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę sensorów VL53L0X.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę sensorów VL53L0X.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "VL53L0X sensor",
-              "desc": "Device settings->I2C. Supports VL53L0X sensors."
+              "desc": "Device settings-\u003eI2C. Supports VL53L0X sensors."
             }
           },
           "Parameters": [
@@ -1031,12 +1031,12 @@
         },
         "SUPLA_HDC1080": {
           "name": "Sensor HDC1080",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę sensorów HDC1080.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę sensorów HDC1080.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "HDC1080 sensor",
-              "desc": "Device settings->I2C. Supports HDC1080 sensors."
+              "desc": "Device settings-\u003eI2C. Supports HDC1080 sensors."
             }
           },
           "Parameters": [
@@ -1068,12 +1068,12 @@
         },
         "SUPLA_OLED": {
           "name": "Wyświetlacz OLED SSD1306, SH1106",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwoa obsługę wyświetlacza OLED SSD1306, SH1106.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwoa obsługę wyświetlacza OLED SSD1306, SH1106.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "OLED SSD1306, SH1106 display",
-              "desc": "Device settings->I2C. It enables the operation of an OLED SSD1306, SH1106 display."
+              "desc": "Device settings-\u003eI2C. It enables the operation of an OLED SSD1306, SH1106 display."
             }
           },
           "Parameters": [
@@ -1105,12 +1105,12 @@
         },
         "SUPLA_LCD_HD44780": {
           "name": "Wyświetlacz LCD HD44780",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwoa obsługę wyświetlacza LCD HD44780.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwoa obsługę wyświetlacza LCD HD44780.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "LCD HD44780 display",
-              "desc": "Device settings->I2C. It enables the operation of an LCD HD44780 display."
+              "desc": "Device settings-\u003eI2C. It enables the operation of an LCD HD44780 display."
             }
           },
           "Parameters": [
@@ -1142,12 +1142,12 @@
         },
         "SUPLA_BH1750_KPOP": {
           "name": "Sensor BH1750",
-          "desc": "Ustawienia urządzenia->I2C. Czujnik natężenia światła BH1750",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Czujnik natężenia światła BH1750",
           "defOn": false,
           "translations": {
             "en": {
               "name": "BH1750 sensor",
-              "desc": "Device settings->I2C. Light intensity sensor BH1750."
+              "desc": "Device settings-\u003eI2C. Light intensity sensor BH1750."
             }
           },
           "Parameters": [
@@ -1179,12 +1179,12 @@
         },
         "SUPLA_MS5611": {
           "name": "Sensor MS5611",
-          "desc": "Ustawienia urządzenia->I2C. Barometr MS5611",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Barometr MS5611",
           "defOn": false,
           "translations": {
             "en": {
               "name": "MS5611 sensor",
-              "desc": "Device settings->I2C. Barometer MS5611."
+              "desc": "Device settings-\u003eI2C. Barometer MS5611."
             }
           },
           "Parameters": [
@@ -1223,12 +1223,12 @@
         },
         "SUPLA_MAX44009_KPOP": {
           "name": "Sensor MAX44009",
-          "desc": "Ustawienia urządzenia->I2C. Czujnik natężenia światła MAX44009",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Czujnik natężenia światła MAX44009",
           "defOn": false,
           "translations": {
             "en": {
               "name": "MAX44009 sensor",
-              "desc": "Device settings->I2C. Light intensity sensor MAX44009."
+              "desc": "Device settings-\u003eI2C. Light intensity sensor MAX44009."
             }
           },
           "Parameters": [
@@ -1260,12 +1260,12 @@
         },
         "SUPLA_AHTX0": {
           "name": "Sensor AHT XX",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę sensorów AHT XX.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę sensorów AHT XX.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "AHT XX sensor",
-              "desc": "Device settings->I2C. It enables the support of AHT XX sensors."
+              "desc": "Device settings-\u003eI2C. It enables the support of AHT XX sensors."
             }
           },
           "Parameters": [
@@ -1297,12 +1297,12 @@
         },
         "SUPLA_SPS30_KPOP": {
           "name": "Sensor SPS30",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę sensorów SPS30.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę sensorów SPS30.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "SPS30 sensor",
-              "desc": "Device settings->I2C. It enables the support of SPS30 sensors."
+              "desc": "Device settings-\u003eI2C. It enables the support of SPS30 sensors."
             }
           },
           "Parameters": [
@@ -1334,12 +1334,12 @@
         },
         "SUPLA_INA219": {
           "name": "Licznik energii INA219",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA219.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę czujnika prądu INA219.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "INA219 current sensor",
-              "desc": "Device settings->I2C. It enables the support of INA219 current sensor."
+              "desc": "Device settings-\u003eI2C. It enables the support of INA219 current sensor."
             }
           },
           "Parameters": [
@@ -1404,12 +1404,12 @@
         },
         "SUPLA_INA226": {
           "name": "Licznik energii INA226",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA226.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę czujnika prądu INA226.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "INA226 current sensor",
-              "desc": "Device settings->I2C. It enables the support of INA226 current sensor."
+              "desc": "Device settings-\u003eI2C. It enables the support of INA226 current sensor."
             }
           },
           "Parameters": [
@@ -1518,12 +1518,12 @@
         },
         "SUPLA_INA228": {
           "name": "Licznik energii INA228",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA228.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę czujnika prądu INA228.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "INA228 current sensor",
-              "desc": "Device settings->I2C. It enables the support of INA228 current sensor."
+              "desc": "Device settings-\u003eI2C. It enables the support of INA228 current sensor."
             }
           },
           "Parameters": [
@@ -1632,12 +1632,12 @@
         },
         "SUPLA_INA236": {
           "name": "Licznik energii INA236",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA236.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę czujnika prądu INA236.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "INA236 current sensor",
-              "desc": "Device settings->I2C. It enables the support of INA236 current sensor."
+              "desc": "Device settings-\u003eI2C. It enables the support of INA236 current sensor."
             }
           },
           "Parameters": [
@@ -1746,12 +1746,12 @@
         },
         "SUPLA_INA238": {
           "name": "Licznik energii INA238",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA238.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę czujnika prądu INA238.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "INA238 current sensor",
-              "desc": "Device settings->I2C. It enables the support of INA238 current sensor."
+              "desc": "Device settings-\u003eI2C. It enables the support of INA238 current sensor."
             }
           },
           "Parameters": [
@@ -1858,15 +1858,14 @@
             }
           ]
         },
-
         "SUPLA_INA260": {
           "name": "Licznik energii INA260",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę czujnika prądu INA260.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę czujnika prądu INA260.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "INA260 current sensor",
-              "desc": "Device settings->I2C. It enables the support of INA260 current sensor."
+              "desc": "Device settings-\u003eI2C. It enables the support of INA260 current sensor."
             }
           },
           "Parameters": [
@@ -1987,12 +1986,12 @@
       "Flags": {
         "SUPLA_MAX6675": {
           "name": "Termopara MAX6675",
-          "desc": "Ustawienia urządzenia->SPI. Umożliwoa obsługę termopary MAX6675.",
+          "desc": "Ustawienia urządzenia-\u003eSPI. Umożliwoa obsługę termopary MAX6675.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Thermocouple MAX6675",
-              "desc": "Device settings->SPI. Supports MAX6675 thermocouple."
+              "desc": "Device settings-\u003eSPI. Supports MAX6675 thermocouple."
             }
           },
           "Parameters": [
@@ -2001,12 +2000,12 @@
         },
         "SUPLA_MAX31855": {
           "name": "Termopara MAX31855",
-          "desc": "Ustawienia urządzenia->SPI. Umożliwoa obsługę termopary MAX31855.",
+          "desc": "Ustawienia urządzenia-\u003eSPI. Umożliwoa obsługę termopary MAX31855.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Thermocouple MAX31855",
-              "desc": "Device settings->SPI. Supports MAX31855 thermocouple."
+              "desc": "Device settings-\u003eSPI. Supports MAX31855 thermocouple."
             }
           },
           "Parameters": [
@@ -2015,12 +2014,12 @@
         },
         "SUPLA_INA239": {
           "name": "Licznik energii INA239",
-          "desc": "Ustawienia urządzenia->SPI. Umożliwia obsługę czujnika prądu INA239.",
+          "desc": "Ustawienia urządzenia-\u003eSPI. Umożliwia obsługę czujnika prądu INA239.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "INA239 current sensor",
-              "desc": "Device settings->SPI. It enables the support of INA239 current sensor."
+              "desc": "Device settings-\u003eSPI. It enables the support of INA239 current sensor."
             }
           },
           "Parameters": [
@@ -2029,12 +2028,12 @@
         },
         "SUPLA_INA229": {
           "name": "Licznik energii INA229",
-          "desc": "Ustawienia urządzenia->SPI. Umożliwia obsługę czujnika prądu INA229.",
+          "desc": "Ustawienia urządzenia-\u003eSPI. Umożliwia obsługę czujnika prądu INA229.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "INA229 current sensor",
-              "desc": "Device settings->SPI. It enables the support of INA229 current sensor."
+              "desc": "Device settings-\u003eSPI. It enables the support of INA229 current sensor."
             }
           },
           "Parameters": [
@@ -2043,12 +2042,12 @@
         },
         "SUPLA_CC1101": {
           "name": "Moduł radiowy CC1101",
-          "desc": "Ustawienia urządzenia->SPI. Umożliwia obsługę modułu radiowego CC1101 i odczyt liczników wMBus.",
+          "desc": "Ustawienia urządzenia-\u003eSPI. Umożliwia obsługę modułu radiowego CC1101 i odczyt liczników wMBus.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "CC1101 radio module",
-              "desc": "Device settings->SPI. It enables the support of CC1101 radio module and reading wMBus meters."
+              "desc": "Device settings-\u003eSPI. It enables the support of CC1101 radio module and reading wMBus meters."
             }
           },
           "Parameters": [
@@ -2430,6 +2429,38 @@
               }
             },
             {
+              "Key": "SensorChannel1",
+              "Name": "Typ kanału czujnika CC1101 #1",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Impulse counter"
+                },
+                {
+                  "Value": "1",
+                  "Name": "General purpose measurement"
+                },
+                {
+                  "Value": "2",
+                  "Name": "General purpose meter"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Channel type for first wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Channel Type #1",
+                  "Description": "Channel type for first wMBus meter"
+                },
+                "pl": {
+                  "Name": "Type kanału czujnika CC1101 #1",
+                  "Description": "Typ kanału dla pierwszego licznika wMBus"
+                }
+              }
+            },
+            {
               "Key": "Enabled2",
               "Name": "Włącz obsługę czujnika CC1101 #2",
               "Type": "enum",
@@ -2446,15 +2477,15 @@
                   "Description": "Wyłącza obsługę czujnika CC1101 #2."
                 }
               ],
-              "Description": "Enable support for first CC1101 sensor",
+              "Description": "Enable support for second CC1101 sensor",
               "Translations": {
                 "en": {
                   "Name": "Enable CC1101 Sensor #2",
-                  "Description": "Enable support for first CC1101 sensor"
+                  "Description": "Enable support for second CC1101 sensor"
                 },
                 "pl": {
                   "Name": "Włącz czujnik CC1101 #2",
-                  "Description": "Włącz obsługę pierwszego czujnika CC1101"
+                  "Description": "Włącz obsługę drugiego czujnika CC1101"
                 }
               }
             },
@@ -2735,6 +2766,38 @@
               }
             },
             {
+              "Key": "SensorChannel2",
+              "Name": "Typ kanału czujnika CC1101 #2",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Impulse counter"
+                },
+                {
+                  "Value": "1",
+                  "Name": "General purpose measurement"
+                },
+                {
+                  "Value": "2",
+                  "Name": "General purpose meter"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Channel type for second wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Channel Type #2",
+                  "Description": "Channel type for second wMBus meter"
+                },
+                "pl": {
+                  "Name": "Type kanału czujnika CC1101 #2",
+                  "Description": "Typ kanału dla drugiego licznika wMBus"
+                }
+              }
+            },
+            {
               "Key": "Enabled3",
               "Name": "Włącz obsługę czujnika CC1101 #3",
               "Type": "enum",
@@ -2751,15 +2814,15 @@
                   "Description": "Wyłącza obsługę czujnika CC1101 #3."
                 }
               ],
-              "Description": "Enable support for first CC1101 sensor",
+              "Description": "Enable support for third CC1101 sensor",
               "Translations": {
                 "en": {
                   "Name": "Enable CC1101 Sensor #3",
-                  "Description": "Enable support for first CC1101 sensor"
+                  "Description": "Enable support for third CC1101 sensor"
                 },
                 "pl": {
                   "Name": "Włącz czujnik CC1101 #3",
-                  "Description": "Włącz obsługę pierwszego czujnika CC1101"
+                  "Description": "Włącz obsługę trzeciego czujnika CC1101"
                 }
               }
             },
@@ -3040,6 +3103,38 @@
               }
             },
             {
+              "Key": "SensorChannel3",
+              "Name": "Type kanału czujnika CC1101 #3",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Impulse counter"
+                },
+                {
+                  "Value": "1",
+                  "Name": "General purpose measurement"
+                },
+                {
+                  "Value": "2",
+                  "Name": "General purpose meter"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Channel type for third wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Channel Type #3",
+                  "Description": "Channel type for third wMBus meter"
+                },
+                "pl": {
+                  "Name": "Type kanału czujnika CC1101 #3",
+                  "Description": "Typ kanału dla trzeciego licznika wMBus"
+                }
+              }
+            },
+            {
               "Key": "Enabled4",
               "Name": "Włącz obsługę czujnika CC1101 #4",
               "Type": "enum",
@@ -3056,15 +3151,15 @@
                   "Description": "Wyłącza obsługę czujnika CC1101 #4."
                 }
               ],
-              "Description": "Enable support for first CC1101 sensor",
+              "Description": "Enable support for fourth CC1101 sensor",
               "Translations": {
                 "en": {
                   "Name": "Enable CC1101 Sensor #4",
-                  "Description": "Enable support for first CC1101 sensor"
+                  "Description": "Enable support for fourth CC1101 sensor"
                 },
                 "pl": {
                   "Name": "Włącz czujnik CC1101 #4",
-                  "Description": "Włącz obsługę pierwszego czujnika CC1101"
+                  "Description": "Włącz obsługę czwartego czujnika CC1101"
                 }
               }
             },
@@ -3343,6 +3438,2060 @@
                   "Description": "Właściwość do odczytu z czwartego licznika wMBus"
                 }
               }
+            },
+            {
+              "Key": "SensorChannel4",
+              "Name": "Typ kanału czujnika CC1101 #4",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Impulse counter"
+                },
+                {
+                  "Value": "1",
+                  "Name": "General purpose measurement"
+                },
+                {
+                  "Value": "2",
+                  "Name": "General purpose meter"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Channel type for fourth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Channel Type #4",
+                  "Description": "Channel type for fourth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Type kanału czujnika CC1101 #4",
+                  "Description": "Typ kanału dla czwartego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "Enabled5",
+              "Name": "Włącz obsługę czujnika CC1101 #5",
+              "Type": "enum",
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "1",
+                  "Name": "Tak",
+                  "Description": "Włącza obsługę czujnika CC1101 #5."
+                },
+                {
+                  "Value": "0",
+                  "Name": "Nie",
+                  "Description": "Wyłącza obsługę czujnika CC1101 #5."
+                }
+              ],
+              "Description": "Enable support for fifth CC1101 sensor",
+              "Translations": {
+                "en": {
+                  "Name": "Enable CC1101 Sensor #5",
+                  "Description": "Enable support for fifth CC1101 sensor"
+                },
+                "pl": {
+                  "Name": "Włącz czujnik CC1101 #5",
+                  "Description": "Włącz obsługę piÄ…tego czujnika CC1101"
+                }
+              }
+            },
+            {
+              "Key": "SensorType5",
+              "Name": "Typ czujnika CC1101 #5",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "amiplus"
+                },
+                {
+                  "Value": "1",
+                  "Name": "apator08"
+                },
+                {
+                  "Value": "2",
+                  "Name": "apator162"
+                },
+                {
+                  "Value": "3",
+                  "Name": "apatoreitn"
+                },
+                {
+                  "Value": "4",
+                  "Name": "bmeters"
+                },
+                {
+                  "Value": "5",
+                  "Name": "c5isf"
+                },
+                {
+                  "Value": "6",
+                  "Name": "compact5"
+                },
+                {
+                  "Value": "7",
+                  "Name": "dme07"
+                },
+                {
+                  "Value": "8",
+                  "Name": "elf"
+                },
+                {
+                  "Value": "9",
+                  "Name": "evo868"
+                },
+                {
+                  "Value": "10",
+                  "Name": "fhkvdataiii"
+                },
+                {
+                  "Value": "11",
+                  "Name": "hydrocalm3"
+                },
+                {
+                  "Value": "12",
+                  "Name": "hydrodigit"
+                },
+                {
+                  "Value": "13",
+                  "Name": "hydrus"
+                },
+                {
+                  "Value": "14",
+                  "Name": "iperl"
+                },
+                {
+                  "Value": "15",
+                  "Name": "itron"
+                },
+                {
+                  "Value": "16",
+                  "Name": "izar"
+                },
+                {
+                  "Value": "17",
+                  "Name": "mkradio3"
+                },
+                {
+                  "Value": "18",
+                  "Name": "mkradio4"
+                },
+                {
+                  "Value": "19",
+                  "Name": "qheat"
+                },
+                {
+                  "Value": "20",
+                  "Name": "qwater"
+                },
+                {
+                  "Value": "21",
+                  "Name": "sharky774"
+                },
+                {
+                  "Value": "22",
+                  "Name": "topaseskr"
+                },
+                {
+                  "Value": "23",
+                  "Name": "ultrimis"
+                },
+                {
+                  "Value": "24",
+                  "Name": "unismart"
+                },
+                {
+                  "Value": "25",
+                  "Name": "vario451"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Sensor type for fifth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Type #5",
+                  "Description": "Sensor type for fifth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Typ czujnika CC1101 #5",
+                  "Description": "Typ czujnika dla piÄ…tego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorID5",
+              "Name": "ID czujnika CC1101 #5",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Meter ID for fifth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor ID #5",
+                  "Description": "Meter ID for fifth wMBus meter"
+                },
+                "pl": {
+                  "Name": "ID czujnika CC1101 #5",
+                  "Description": "ID licznika dla piÄ…tego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorKey5",
+              "Name": "Klucz czujnika CC1101 #5",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Encryption key for fifth wMBus meter (hex)",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Key #5",
+                  "Description": "Encryption key for fifth wMBus meter (hex)"
+                },
+                "pl": {
+                  "Name": "Klucz czujnika CC1101 #5",
+                  "Description": "Klucz szyfrowania dla piÄ…tego licznika wMBus (hex)"
+                }
+              }
+            },
+            {
+              "Key": "SensorProperty5",
+              "Name": "Właściwość czujnika CC1101 #5",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "total_water_m3"
+                },
+                {
+                  "Value": "1",
+                  "Name": "total_energy_consumption_kwh"
+                },
+                {
+                  "Value": "2",
+                  "Name": "current_power_consumption_kw"
+                },
+                {
+                  "Value": "3",
+                  "Name": "total_energy_production_kwh"
+                },
+                {
+                  "Value": "4",
+                  "Name": "current_power_production_kw"
+                },
+                {
+                  "Value": "5",
+                  "Name": "voltage_at_phase_1_v"
+                },
+                {
+                  "Value": "6",
+                  "Name": "voltage_at_phase_2_v"
+                },
+                {
+                  "Value": "7",
+                  "Name": "voltage_at_phase_3_v"
+                },
+                {
+                  "Value": "8",
+                  "Name": "current_hca"
+                },
+                {
+                  "Value": "9",
+                  "Name": "previous_hca"
+                },
+                {
+                  "Value": "10",
+                  "Name": "temp_room_avg_c"
+                },
+                {
+                  "Value": "11",
+                  "Name": "total_heating_kwh"
+                },
+                {
+                  "Value": "12",
+                  "Name": "flow_temperature_c"
+                },
+                {
+                  "Value": "13",
+                  "Name": "return_temperature_c"
+                },
+                {
+                  "Value": "14",
+                  "Name": "current_heating_kwh"
+                },
+                {
+                  "Value": "15",
+                  "Name": "previous_heating_kwh"
+                },
+                {
+                  "Value": "16",
+                  "Name": "total_gas_m3"
+                },
+                {
+                  "Value": "17",
+                  "Name": "total_heating_gj"
+                },
+                {
+                  "Value": "18",
+                  "Name": "last_month_total_water_m3"
+                },
+                {
+                  "Value": "19",
+                  "Name": "current_month_total_water_l"
+                },
+                {
+                  "Value": "20",
+                  "Name": "transmit_period_s"
+                },
+                {
+                  "Value": "21",
+                  "Name": "remaining_battery_life_y"
+                },
+                {
+                  "Value": "22",
+                  "Name": "current_alarms"
+                },
+                {
+                  "Value": "23",
+                  "Name": "previous_alarms"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Property to read from fifth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Property #5",
+                  "Description": "Property to read from fifth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Właściwość czujnika CC1101 #5",
+                  "Description": "Właściwość do odczytu z piÄ…tego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorChannel5",
+              "Name": "Typ kanału czujnika CC1101 #5",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Impulse counter"
+                },
+                {
+                  "Value": "1",
+                  "Name": "General purpose measurement"
+                },
+                {
+                  "Value": "2",
+                  "Name": "General purpose meter"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Channel type for fifth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Channel Type #5",
+                  "Description": "Channel type for fifth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Type kanału czujnika CC1101 #5",
+                  "Description": "Typ kanału dla piÄ…tego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "Enabled6",
+              "Name": "Włącz obsługę czujnika CC1101 #6",
+              "Type": "enum",
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "1",
+                  "Name": "Tak",
+                  "Description": "Włącza obsługę czujnika CC1101 #6."
+                },
+                {
+                  "Value": "0",
+                  "Name": "Nie",
+                  "Description": "Wyłącza obsługę czujnika CC1101 #6."
+                }
+              ],
+              "Description": "Enable support for sixth CC1101 sensor",
+              "Translations": {
+                "en": {
+                  "Name": "Enable CC1101 Sensor #6",
+                  "Description": "Enable support for sixth CC1101 sensor"
+                },
+                "pl": {
+                  "Name": "Włącz czujnik CC1101 #6",
+                  "Description": "Włącz obsługę szĂłstego czujnika CC1101"
+                }
+              }
+            },
+            {
+              "Key": "SensorType6",
+              "Name": "Typ czujnika CC1101 #6",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "amiplus"
+                },
+                {
+                  "Value": "1",
+                  "Name": "apator08"
+                },
+                {
+                  "Value": "2",
+                  "Name": "apator162"
+                },
+                {
+                  "Value": "3",
+                  "Name": "apatoreitn"
+                },
+                {
+                  "Value": "4",
+                  "Name": "bmeters"
+                },
+                {
+                  "Value": "5",
+                  "Name": "c5isf"
+                },
+                {
+                  "Value": "6",
+                  "Name": "compact5"
+                },
+                {
+                  "Value": "7",
+                  "Name": "dme07"
+                },
+                {
+                  "Value": "8",
+                  "Name": "elf"
+                },
+                {
+                  "Value": "9",
+                  "Name": "evo868"
+                },
+                {
+                  "Value": "10",
+                  "Name": "fhkvdataiii"
+                },
+                {
+                  "Value": "11",
+                  "Name": "hydrocalm3"
+                },
+                {
+                  "Value": "12",
+                  "Name": "hydrodigit"
+                },
+                {
+                  "Value": "13",
+                  "Name": "hydrus"
+                },
+                {
+                  "Value": "14",
+                  "Name": "iperl"
+                },
+                {
+                  "Value": "15",
+                  "Name": "itron"
+                },
+                {
+                  "Value": "16",
+                  "Name": "izar"
+                },
+                {
+                  "Value": "17",
+                  "Name": "mkradio3"
+                },
+                {
+                  "Value": "18",
+                  "Name": "mkradio4"
+                },
+                {
+                  "Value": "19",
+                  "Name": "qheat"
+                },
+                {
+                  "Value": "20",
+                  "Name": "qwater"
+                },
+                {
+                  "Value": "21",
+                  "Name": "sharky774"
+                },
+                {
+                  "Value": "22",
+                  "Name": "topaseskr"
+                },
+                {
+                  "Value": "23",
+                  "Name": "ultrimis"
+                },
+                {
+                  "Value": "24",
+                  "Name": "unismart"
+                },
+                {
+                  "Value": "25",
+                  "Name": "vario451"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Sensor type for sixth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Type #6",
+                  "Description": "Sensor type for sixth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Typ czujnika CC1101 #6",
+                  "Description": "Typ czujnika dla szĂłstego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorID6",
+              "Name": "ID czujnika CC1101 #6",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Meter ID for sixth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor ID #6",
+                  "Description": "Meter ID for sixth wMBus meter"
+                },
+                "pl": {
+                  "Name": "ID czujnika CC1101 #6",
+                  "Description": "ID licznika dla szĂłstego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorKey6",
+              "Name": "Klucz czujnika CC1101 #6",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Encryption key for sixth wMBus meter (hex)",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Key #6",
+                  "Description": "Encryption key for sixth wMBus meter (hex)"
+                },
+                "pl": {
+                  "Name": "Klucz czujnika CC1101 #6",
+                  "Description": "Klucz szyfrowania dla szĂłstego licznika wMBus (hex)"
+                }
+              }
+            },
+            {
+              "Key": "SensorProperty6",
+              "Name": "Właściwość czujnika CC1101 #6",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "total_water_m3"
+                },
+                {
+                  "Value": "1",
+                  "Name": "total_energy_consumption_kwh"
+                },
+                {
+                  "Value": "2",
+                  "Name": "current_power_consumption_kw"
+                },
+                {
+                  "Value": "3",
+                  "Name": "total_energy_production_kwh"
+                },
+                {
+                  "Value": "4",
+                  "Name": "current_power_production_kw"
+                },
+                {
+                  "Value": "5",
+                  "Name": "voltage_at_phase_1_v"
+                },
+                {
+                  "Value": "6",
+                  "Name": "voltage_at_phase_2_v"
+                },
+                {
+                  "Value": "7",
+                  "Name": "voltage_at_phase_3_v"
+                },
+                {
+                  "Value": "8",
+                  "Name": "current_hca"
+                },
+                {
+                  "Value": "9",
+                  "Name": "previous_hca"
+                },
+                {
+                  "Value": "10",
+                  "Name": "temp_room_avg_c"
+                },
+                {
+                  "Value": "11",
+                  "Name": "total_heating_kwh"
+                },
+                {
+                  "Value": "12",
+                  "Name": "flow_temperature_c"
+                },
+                {
+                  "Value": "13",
+                  "Name": "return_temperature_c"
+                },
+                {
+                  "Value": "14",
+                  "Name": "current_heating_kwh"
+                },
+                {
+                  "Value": "15",
+                  "Name": "previous_heating_kwh"
+                },
+                {
+                  "Value": "16",
+                  "Name": "total_gas_m3"
+                },
+                {
+                  "Value": "17",
+                  "Name": "total_heating_gj"
+                },
+                {
+                  "Value": "18",
+                  "Name": "last_month_total_water_m3"
+                },
+                {
+                  "Value": "19",
+                  "Name": "current_month_total_water_l"
+                },
+                {
+                  "Value": "20",
+                  "Name": "transmit_period_s"
+                },
+                {
+                  "Value": "21",
+                  "Name": "remaining_battery_life_y"
+                },
+                {
+                  "Value": "22",
+                  "Name": "current_alarms"
+                },
+                {
+                  "Value": "23",
+                  "Name": "previous_alarms"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Property to read from sixth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Property #6",
+                  "Description": "Property to read from sixth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Właściwość czujnika CC1101 #6",
+                  "Description": "Właściwość do odczytu z szĂłstego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorChannel6",
+              "Name": "Type kanału czujnika CC1101 #6",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Impulse counter"
+                },
+                {
+                  "Value": "1",
+                  "Name": "General purpose measurement"
+                },
+                {
+                  "Value": "2",
+                  "Name": "General purpose meter"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Channel type for sixth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Channel Type #6",
+                  "Description": "Channel type for sixth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Type kanału czujnika CC1101 #6",
+                  "Description": "Typ kanału dla szĂłstego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "Enabled7",
+              "Name": "Włącz obsługę czujnika CC1101 #7",
+              "Type": "enum",
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "1",
+                  "Name": "Tak",
+                  "Description": "Włącza obsługę czujnika CC1101 #7."
+                },
+                {
+                  "Value": "0",
+                  "Name": "Nie",
+                  "Description": "Wyłącza obsługę czujnika CC1101 #7."
+                }
+              ],
+              "Description": "Enable support for seventh CC1101 sensor",
+              "Translations": {
+                "en": {
+                  "Name": "Enable CC1101 Sensor #7",
+                  "Description": "Enable support for seventh CC1101 sensor"
+                },
+                "pl": {
+                  "Name": "Włącz czujnik CC1101 #7",
+                  "Description": "Włącz obsługę siĂłdmego czujnika CC1101"
+                }
+              }
+            },
+            {
+              "Key": "SensorType7",
+              "Name": "Typ czujnika CC1101 #7",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "amiplus"
+                },
+                {
+                  "Value": "1",
+                  "Name": "apator08"
+                },
+                {
+                  "Value": "2",
+                  "Name": "apator162"
+                },
+                {
+                  "Value": "3",
+                  "Name": "apatoreitn"
+                },
+                {
+                  "Value": "4",
+                  "Name": "bmeters"
+                },
+                {
+                  "Value": "5",
+                  "Name": "c5isf"
+                },
+                {
+                  "Value": "6",
+                  "Name": "compact5"
+                },
+                {
+                  "Value": "7",
+                  "Name": "dme07"
+                },
+                {
+                  "Value": "8",
+                  "Name": "elf"
+                },
+                {
+                  "Value": "9",
+                  "Name": "evo868"
+                },
+                {
+                  "Value": "10",
+                  "Name": "fhkvdataiii"
+                },
+                {
+                  "Value": "11",
+                  "Name": "hydrocalm3"
+                },
+                {
+                  "Value": "12",
+                  "Name": "hydrodigit"
+                },
+                {
+                  "Value": "13",
+                  "Name": "hydrus"
+                },
+                {
+                  "Value": "14",
+                  "Name": "iperl"
+                },
+                {
+                  "Value": "15",
+                  "Name": "itron"
+                },
+                {
+                  "Value": "16",
+                  "Name": "izar"
+                },
+                {
+                  "Value": "17",
+                  "Name": "mkradio3"
+                },
+                {
+                  "Value": "18",
+                  "Name": "mkradio4"
+                },
+                {
+                  "Value": "19",
+                  "Name": "qheat"
+                },
+                {
+                  "Value": "20",
+                  "Name": "qwater"
+                },
+                {
+                  "Value": "21",
+                  "Name": "sharky774"
+                },
+                {
+                  "Value": "22",
+                  "Name": "topaseskr"
+                },
+                {
+                  "Value": "23",
+                  "Name": "ultrimis"
+                },
+                {
+                  "Value": "24",
+                  "Name": "unismart"
+                },
+                {
+                  "Value": "25",
+                  "Name": "vario451"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Sensor type for seventh wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Type #7",
+                  "Description": "Sensor type for seventh wMBus meter"
+                },
+                "pl": {
+                  "Name": "Typ czujnika CC1101 #7",
+                  "Description": "Typ czujnika dla siĂłdmego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorID7",
+              "Name": "ID czujnika CC1101 #7",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Meter ID for seventh wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor ID #7",
+                  "Description": "Meter ID for seventh wMBus meter"
+                },
+                "pl": {
+                  "Name": "ID czujnika CC1101 #7",
+                  "Description": "ID licznika dla siĂłdmego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorKey7",
+              "Name": "Klucz czujnika CC1101 #7",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Encryption key for seventh wMBus meter (hex)",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Key #7",
+                  "Description": "Encryption key for seventh wMBus meter (hex)"
+                },
+                "pl": {
+                  "Name": "Klucz czujnika CC1101 #7",
+                  "Description": "Klucz szyfrowania dla siĂłdmego licznika wMBus (hex)"
+                }
+              }
+            },
+            {
+              "Key": "SensorProperty7",
+              "Name": "Właściwość czujnika CC1101 #7",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "total_water_m3"
+                },
+                {
+                  "Value": "1",
+                  "Name": "total_energy_consumption_kwh"
+                },
+                {
+                  "Value": "2",
+                  "Name": "current_power_consumption_kw"
+                },
+                {
+                  "Value": "3",
+                  "Name": "total_energy_production_kwh"
+                },
+                {
+                  "Value": "4",
+                  "Name": "current_power_production_kw"
+                },
+                {
+                  "Value": "5",
+                  "Name": "voltage_at_phase_1_v"
+                },
+                {
+                  "Value": "6",
+                  "Name": "voltage_at_phase_2_v"
+                },
+                {
+                  "Value": "7",
+                  "Name": "voltage_at_phase_3_v"
+                },
+                {
+                  "Value": "8",
+                  "Name": "current_hca"
+                },
+                {
+                  "Value": "9",
+                  "Name": "previous_hca"
+                },
+                {
+                  "Value": "10",
+                  "Name": "temp_room_avg_c"
+                },
+                {
+                  "Value": "11",
+                  "Name": "total_heating_kwh"
+                },
+                {
+                  "Value": "12",
+                  "Name": "flow_temperature_c"
+                },
+                {
+                  "Value": "13",
+                  "Name": "return_temperature_c"
+                },
+                {
+                  "Value": "14",
+                  "Name": "current_heating_kwh"
+                },
+                {
+                  "Value": "15",
+                  "Name": "previous_heating_kwh"
+                },
+                {
+                  "Value": "16",
+                  "Name": "total_gas_m3"
+                },
+                {
+                  "Value": "17",
+                  "Name": "total_heating_gj"
+                },
+                {
+                  "Value": "18",
+                  "Name": "last_month_total_water_m3"
+                },
+                {
+                  "Value": "19",
+                  "Name": "current_month_total_water_l"
+                },
+                {
+                  "Value": "20",
+                  "Name": "transmit_period_s"
+                },
+                {
+                  "Value": "21",
+                  "Name": "remaining_battery_life_y"
+                },
+                {
+                  "Value": "22",
+                  "Name": "current_alarms"
+                },
+                {
+                  "Value": "23",
+                  "Name": "previous_alarms"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Property to read from seventh wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Property #7",
+                  "Description": "Property to read from seventh wMBus meter"
+                },
+                "pl": {
+                  "Name": "Właściwość czujnika CC1101 #7",
+                  "Description": "Właściwość do odczytu z siĂłdmego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorChannel7",
+              "Name": "Typ kanału czujnika CC1101 #7",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Impulse counter"
+                },
+                {
+                  "Value": "1",
+                  "Name": "General purpose measurement"
+                },
+                {
+                  "Value": "2",
+                  "Name": "General purpose meter"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Channel type for seventh wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Channel Type #7",
+                  "Description": "Channel type for seventh wMBus meter"
+                },
+                "pl": {
+                  "Name": "Type kanału czujnika CC1101 #7",
+                  "Description": "Typ kanału dla siĂłdmego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "Enabled8",
+              "Name": "Włącz obsługę czujnika CC1101 #8",
+              "Type": "enum",
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "1",
+                  "Name": "Tak",
+                  "Description": "Włącza obsługę czujnika CC1101 #8."
+                },
+                {
+                  "Value": "0",
+                  "Name": "Nie",
+                  "Description": "Wyłącza obsługę czujnika CC1101 #8."
+                }
+              ],
+              "Description": "Enable support for eighth CC1101 sensor",
+              "Translations": {
+                "en": {
+                  "Name": "Enable CC1101 Sensor #8",
+                  "Description": "Enable support for eighth CC1101 sensor"
+                },
+                "pl": {
+                  "Name": "Włącz czujnik CC1101 #8",
+                  "Description": "Włącz obsługę Ăłsmego czujnika CC1101"
+                }
+              }
+            },
+            {
+              "Key": "SensorType8",
+              "Name": "Typ czujnika CC1101 #8",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "amiplus"
+                },
+                {
+                  "Value": "1",
+                  "Name": "apator08"
+                },
+                {
+                  "Value": "2",
+                  "Name": "apator162"
+                },
+                {
+                  "Value": "3",
+                  "Name": "apatoreitn"
+                },
+                {
+                  "Value": "4",
+                  "Name": "bmeters"
+                },
+                {
+                  "Value": "5",
+                  "Name": "c5isf"
+                },
+                {
+                  "Value": "6",
+                  "Name": "compact5"
+                },
+                {
+                  "Value": "7",
+                  "Name": "dme07"
+                },
+                {
+                  "Value": "8",
+                  "Name": "elf"
+                },
+                {
+                  "Value": "9",
+                  "Name": "evo868"
+                },
+                {
+                  "Value": "10",
+                  "Name": "fhkvdataiii"
+                },
+                {
+                  "Value": "11",
+                  "Name": "hydrocalm3"
+                },
+                {
+                  "Value": "12",
+                  "Name": "hydrodigit"
+                },
+                {
+                  "Value": "13",
+                  "Name": "hydrus"
+                },
+                {
+                  "Value": "14",
+                  "Name": "iperl"
+                },
+                {
+                  "Value": "15",
+                  "Name": "itron"
+                },
+                {
+                  "Value": "16",
+                  "Name": "izar"
+                },
+                {
+                  "Value": "17",
+                  "Name": "mkradio3"
+                },
+                {
+                  "Value": "18",
+                  "Name": "mkradio4"
+                },
+                {
+                  "Value": "19",
+                  "Name": "qheat"
+                },
+                {
+                  "Value": "20",
+                  "Name": "qwater"
+                },
+                {
+                  "Value": "21",
+                  "Name": "sharky774"
+                },
+                {
+                  "Value": "22",
+                  "Name": "topaseskr"
+                },
+                {
+                  "Value": "23",
+                  "Name": "ultrimis"
+                },
+                {
+                  "Value": "24",
+                  "Name": "unismart"
+                },
+                {
+                  "Value": "25",
+                  "Name": "vario451"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Sensor type for eighth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Type #8",
+                  "Description": "Sensor type for eighth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Typ czujnika CC1101 #8",
+                  "Description": "Typ czujnika dla Ăłsmego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorID8",
+              "Name": "ID czujnika CC1101 #8",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Meter ID for eighth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor ID #8",
+                  "Description": "Meter ID for eighth wMBus meter"
+                },
+                "pl": {
+                  "Name": "ID czujnika CC1101 #8",
+                  "Description": "ID licznika dla Ăłsmego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorKey8",
+              "Name": "Klucz czujnika CC1101 #8",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Encryption key for eighth wMBus meter (hex)",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Key #8",
+                  "Description": "Encryption key for eighth wMBus meter (hex)"
+                },
+                "pl": {
+                  "Name": "Klucz czujnika CC1101 #8",
+                  "Description": "Klucz szyfrowania dla Ăłsmego licznika wMBus (hex)"
+                }
+              }
+            },
+            {
+              "Key": "SensorProperty8",
+              "Name": "Właściwość czujnika CC1101 #8",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "total_water_m3"
+                },
+                {
+                  "Value": "1",
+                  "Name": "total_energy_consumption_kwh"
+                },
+                {
+                  "Value": "2",
+                  "Name": "current_power_consumption_kw"
+                },
+                {
+                  "Value": "3",
+                  "Name": "total_energy_production_kwh"
+                },
+                {
+                  "Value": "4",
+                  "Name": "current_power_production_kw"
+                },
+                {
+                  "Value": "5",
+                  "Name": "voltage_at_phase_1_v"
+                },
+                {
+                  "Value": "6",
+                  "Name": "voltage_at_phase_2_v"
+                },
+                {
+                  "Value": "7",
+                  "Name": "voltage_at_phase_3_v"
+                },
+                {
+                  "Value": "8",
+                  "Name": "current_hca"
+                },
+                {
+                  "Value": "9",
+                  "Name": "previous_hca"
+                },
+                {
+                  "Value": "10",
+                  "Name": "temp_room_avg_c"
+                },
+                {
+                  "Value": "11",
+                  "Name": "total_heating_kwh"
+                },
+                {
+                  "Value": "12",
+                  "Name": "flow_temperature_c"
+                },
+                {
+                  "Value": "13",
+                  "Name": "return_temperature_c"
+                },
+                {
+                  "Value": "14",
+                  "Name": "current_heating_kwh"
+                },
+                {
+                  "Value": "15",
+                  "Name": "previous_heating_kwh"
+                },
+                {
+                  "Value": "16",
+                  "Name": "total_gas_m3"
+                },
+                {
+                  "Value": "17",
+                  "Name": "total_heating_gj"
+                },
+                {
+                  "Value": "18",
+                  "Name": "last_month_total_water_m3"
+                },
+                {
+                  "Value": "19",
+                  "Name": "current_month_total_water_l"
+                },
+                {
+                  "Value": "20",
+                  "Name": "transmit_period_s"
+                },
+                {
+                  "Value": "21",
+                  "Name": "remaining_battery_life_y"
+                },
+                {
+                  "Value": "22",
+                  "Name": "current_alarms"
+                },
+                {
+                  "Value": "23",
+                  "Name": "previous_alarms"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Property to read from eighth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Property #8",
+                  "Description": "Property to read from eighth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Właściwość czujnika CC1101 #8",
+                  "Description": "Właściwość do odczytu z Ăłsmego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorChannel8",
+              "Name": "Typ kanału czujnika CC1101 #8",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Impulse counter"
+                },
+                {
+                  "Value": "1",
+                  "Name": "General purpose measurement"
+                },
+                {
+                  "Value": "2",
+                  "Name": "General purpose meter"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Channel type for eighth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Channel Type #8",
+                  "Description": "Channel type for eighth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Type kanału czujnika CC1101 #8",
+                  "Description": "Typ kanału dla Ăłsmego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "Enabled9",
+              "Name": "Włącz obsługę czujnika CC1101 #9",
+              "Type": "enum",
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "1",
+                  "Name": "Tak",
+                  "Description": "Włącza obsługę czujnika CC1101 #9."
+                },
+                {
+                  "Value": "0",
+                  "Name": "Nie",
+                  "Description": "Wyłącza obsługę czujnika CC1101 #9."
+                }
+              ],
+              "Description": "Enable support for ninth CC1101 sensor",
+              "Translations": {
+                "en": {
+                  "Name": "Enable CC1101 Sensor #9",
+                  "Description": "Enable support for ninth CC1101 sensor"
+                },
+                "pl": {
+                  "Name": "Włącz czujnik CC1101 #9",
+                  "Description": "Włącz obsługę dziewiÄ…tego czujnika CC1101"
+                }
+              }
+            },
+            {
+              "Key": "SensorType9",
+              "Name": "Typ czujnika CC1101 #9",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "amiplus"
+                },
+                {
+                  "Value": "1",
+                  "Name": "apator08"
+                },
+                {
+                  "Value": "2",
+                  "Name": "apator162"
+                },
+                {
+                  "Value": "3",
+                  "Name": "apatoreitn"
+                },
+                {
+                  "Value": "4",
+                  "Name": "bmeters"
+                },
+                {
+                  "Value": "5",
+                  "Name": "c5isf"
+                },
+                {
+                  "Value": "6",
+                  "Name": "compact5"
+                },
+                {
+                  "Value": "7",
+                  "Name": "dme07"
+                },
+                {
+                  "Value": "8",
+                  "Name": "elf"
+                },
+                {
+                  "Value": "9",
+                  "Name": "evo868"
+                },
+                {
+                  "Value": "10",
+                  "Name": "fhkvdataiii"
+                },
+                {
+                  "Value": "11",
+                  "Name": "hydrocalm3"
+                },
+                {
+                  "Value": "12",
+                  "Name": "hydrodigit"
+                },
+                {
+                  "Value": "13",
+                  "Name": "hydrus"
+                },
+                {
+                  "Value": "14",
+                  "Name": "iperl"
+                },
+                {
+                  "Value": "15",
+                  "Name": "itron"
+                },
+                {
+                  "Value": "16",
+                  "Name": "izar"
+                },
+                {
+                  "Value": "17",
+                  "Name": "mkradio3"
+                },
+                {
+                  "Value": "18",
+                  "Name": "mkradio4"
+                },
+                {
+                  "Value": "19",
+                  "Name": "qheat"
+                },
+                {
+                  "Value": "20",
+                  "Name": "qwater"
+                },
+                {
+                  "Value": "21",
+                  "Name": "sharky774"
+                },
+                {
+                  "Value": "22",
+                  "Name": "topaseskr"
+                },
+                {
+                  "Value": "23",
+                  "Name": "ultrimis"
+                },
+                {
+                  "Value": "24",
+                  "Name": "unismart"
+                },
+                {
+                  "Value": "25",
+                  "Name": "vario451"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Sensor type for ninth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Type #9",
+                  "Description": "Sensor type for ninth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Typ czujnika CC1101 #9",
+                  "Description": "Typ czujnika dla dziewiÄ…tego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorID9",
+              "Name": "ID czujnika CC1101 #9",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Meter ID for ninth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor ID #9",
+                  "Description": "Meter ID for ninth wMBus meter"
+                },
+                "pl": {
+                  "Name": "ID czujnika CC1101 #9",
+                  "Description": "ID licznika dla dziewiÄ…tego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorKey9",
+              "Name": "Klucz czujnika CC1101 #9",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Encryption key for ninth wMBus meter (hex)",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Key #9",
+                  "Description": "Encryption key for ninth wMBus meter (hex)"
+                },
+                "pl": {
+                  "Name": "Klucz czujnika CC1101 #9",
+                  "Description": "Klucz szyfrowania dla dziewiÄ…tego licznika wMBus (hex)"
+                }
+              }
+            },
+            {
+              "Key": "SensorProperty9",
+              "Name": "Właściwość czujnika CC1101 #9",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "total_water_m3"
+                },
+                {
+                  "Value": "1",
+                  "Name": "total_energy_consumption_kwh"
+                },
+                {
+                  "Value": "2",
+                  "Name": "current_power_consumption_kw"
+                },
+                {
+                  "Value": "3",
+                  "Name": "total_energy_production_kwh"
+                },
+                {
+                  "Value": "4",
+                  "Name": "current_power_production_kw"
+                },
+                {
+                  "Value": "5",
+                  "Name": "voltage_at_phase_1_v"
+                },
+                {
+                  "Value": "6",
+                  "Name": "voltage_at_phase_2_v"
+                },
+                {
+                  "Value": "7",
+                  "Name": "voltage_at_phase_3_v"
+                },
+                {
+                  "Value": "8",
+                  "Name": "current_hca"
+                },
+                {
+                  "Value": "9",
+                  "Name": "previous_hca"
+                },
+                {
+                  "Value": "10",
+                  "Name": "temp_room_avg_c"
+                },
+                {
+                  "Value": "11",
+                  "Name": "total_heating_kwh"
+                },
+                {
+                  "Value": "12",
+                  "Name": "flow_temperature_c"
+                },
+                {
+                  "Value": "13",
+                  "Name": "return_temperature_c"
+                },
+                {
+                  "Value": "14",
+                  "Name": "current_heating_kwh"
+                },
+                {
+                  "Value": "15",
+                  "Name": "previous_heating_kwh"
+                },
+                {
+                  "Value": "16",
+                  "Name": "total_gas_m3"
+                },
+                {
+                  "Value": "17",
+                  "Name": "total_heating_gj"
+                },
+                {
+                  "Value": "18",
+                  "Name": "last_month_total_water_m3"
+                },
+                {
+                  "Value": "19",
+                  "Name": "current_month_total_water_l"
+                },
+                {
+                  "Value": "20",
+                  "Name": "transmit_period_s"
+                },
+                {
+                  "Value": "21",
+                  "Name": "remaining_battery_life_y"
+                },
+                {
+                  "Value": "22",
+                  "Name": "current_alarms"
+                },
+                {
+                  "Value": "23",
+                  "Name": "previous_alarms"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Property to read from ninth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Property #9",
+                  "Description": "Property to read from ninth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Właściwość czujnika CC1101 #9",
+                  "Description": "Właściwość do odczytu z dziewiÄ…tego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorChannel9",
+              "Name": "Typ kanału czujnika CC1101 #9",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Impulse counter"
+                },
+                {
+                  "Value": "1",
+                  "Name": "General purpose measurement"
+                },
+                {
+                  "Value": "2",
+                  "Name": "General purpose meter"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Channel type for ninth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Channel Type #9",
+                  "Description": "Channel type for ninth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Type kanału czujnika CC1101 #9",
+                  "Description": "Typ kanału dla dziewiÄ…tego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "Enabled10",
+              "Name": "Włącz obsługę czujnika CC1101 #10",
+              "Type": "enum",
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "1",
+                  "Name": "Tak",
+                  "Description": "Włącza obsługę czujnika CC1101 #10."
+                },
+                {
+                  "Value": "0",
+                  "Name": "Nie",
+                  "Description": "Wyłącza obsługę czujnika CC1101 #10."
+                }
+              ],
+              "Description": "Enable support for tenth CC1101 sensor",
+              "Translations": {
+                "en": {
+                  "Name": "Enable CC1101 Sensor #10",
+                  "Description": "Enable support for tenth CC1101 sensor"
+                },
+                "pl": {
+                  "Name": "Włącz czujnik CC1101 #10",
+                  "Description": "Włącz obsługę dziesiÄ…tego czujnika CC1101"
+                }
+              }
+            },
+            {
+              "Key": "SensorType10",
+              "Name": "Typ czujnika CC1101 #10",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "amiplus"
+                },
+                {
+                  "Value": "1",
+                  "Name": "apator08"
+                },
+                {
+                  "Value": "2",
+                  "Name": "apator162"
+                },
+                {
+                  "Value": "3",
+                  "Name": "apatoreitn"
+                },
+                {
+                  "Value": "4",
+                  "Name": "bmeters"
+                },
+                {
+                  "Value": "5",
+                  "Name": "c5isf"
+                },
+                {
+                  "Value": "6",
+                  "Name": "compact5"
+                },
+                {
+                  "Value": "7",
+                  "Name": "dme07"
+                },
+                {
+                  "Value": "8",
+                  "Name": "elf"
+                },
+                {
+                  "Value": "9",
+                  "Name": "evo868"
+                },
+                {
+                  "Value": "10",
+                  "Name": "fhkvdataiii"
+                },
+                {
+                  "Value": "11",
+                  "Name": "hydrocalm3"
+                },
+                {
+                  "Value": "12",
+                  "Name": "hydrodigit"
+                },
+                {
+                  "Value": "13",
+                  "Name": "hydrus"
+                },
+                {
+                  "Value": "14",
+                  "Name": "iperl"
+                },
+                {
+                  "Value": "15",
+                  "Name": "itron"
+                },
+                {
+                  "Value": "16",
+                  "Name": "izar"
+                },
+                {
+                  "Value": "17",
+                  "Name": "mkradio3"
+                },
+                {
+                  "Value": "18",
+                  "Name": "mkradio4"
+                },
+                {
+                  "Value": "19",
+                  "Name": "qheat"
+                },
+                {
+                  "Value": "20",
+                  "Name": "qwater"
+                },
+                {
+                  "Value": "21",
+                  "Name": "sharky774"
+                },
+                {
+                  "Value": "22",
+                  "Name": "topaseskr"
+                },
+                {
+                  "Value": "23",
+                  "Name": "ultrimis"
+                },
+                {
+                  "Value": "24",
+                  "Name": "unismart"
+                },
+                {
+                  "Value": "25",
+                  "Name": "vario451"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Sensor type for tenth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Type #10",
+                  "Description": "Sensor type for tenth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Typ czujnika CC1101 #10",
+                  "Description": "Typ czujnika dla dziesiÄ…tego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorID10",
+              "Name": "ID czujnika CC1101 #10",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Meter ID for tenth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor ID #10",
+                  "Description": "Meter ID for tenth wMBus meter"
+                },
+                "pl": {
+                  "Name": "ID czujnika CC1101 #10",
+                  "Description": "ID licznika dla dziesiÄ…tego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorKey10",
+              "Name": "Klucz czujnika CC1101 #10",
+              "Type": "string",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Description": "Encryption key for tenth wMBus meter (hex)",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Key #10",
+                  "Description": "Encryption key for tenth wMBus meter (hex)"
+                },
+                "pl": {
+                  "Name": "Klucz czujnika CC1101 #10",
+                  "Description": "Klucz szyfrowania dla dziesiÄ…tego licznika wMBus (hex)"
+                }
+              }
+            },
+            {
+              "Key": "SensorProperty10",
+              "Name": "Właściwość czujnika CC1101 #10",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "total_water_m3"
+                },
+                {
+                  "Value": "1",
+                  "Name": "total_energy_consumption_kwh"
+                },
+                {
+                  "Value": "2",
+                  "Name": "current_power_consumption_kw"
+                },
+                {
+                  "Value": "3",
+                  "Name": "total_energy_production_kwh"
+                },
+                {
+                  "Value": "4",
+                  "Name": "current_power_production_kw"
+                },
+                {
+                  "Value": "5",
+                  "Name": "voltage_at_phase_1_v"
+                },
+                {
+                  "Value": "6",
+                  "Name": "voltage_at_phase_2_v"
+                },
+                {
+                  "Value": "7",
+                  "Name": "voltage_at_phase_3_v"
+                },
+                {
+                  "Value": "8",
+                  "Name": "current_hca"
+                },
+                {
+                  "Value": "9",
+                  "Name": "previous_hca"
+                },
+                {
+                  "Value": "10",
+                  "Name": "temp_room_avg_c"
+                },
+                {
+                  "Value": "11",
+                  "Name": "total_heating_kwh"
+                },
+                {
+                  "Value": "12",
+                  "Name": "flow_temperature_c"
+                },
+                {
+                  "Value": "13",
+                  "Name": "return_temperature_c"
+                },
+                {
+                  "Value": "14",
+                  "Name": "current_heating_kwh"
+                },
+                {
+                  "Value": "15",
+                  "Name": "previous_heating_kwh"
+                },
+                {
+                  "Value": "16",
+                  "Name": "total_gas_m3"
+                },
+                {
+                  "Value": "17",
+                  "Name": "total_heating_gj"
+                },
+                {
+                  "Value": "18",
+                  "Name": "last_month_total_water_m3"
+                },
+                {
+                  "Value": "19",
+                  "Name": "current_month_total_water_l"
+                },
+                {
+                  "Value": "20",
+                  "Name": "transmit_period_s"
+                },
+                {
+                  "Value": "21",
+                  "Name": "remaining_battery_life_y"
+                },
+                {
+                  "Value": "22",
+                  "Name": "current_alarms"
+                },
+                {
+                  "Value": "23",
+                  "Name": "previous_alarms"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Property to read from tenth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Property #10",
+                  "Description": "Property to read from tenth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Właściwość czujnika CC1101 #10",
+                  "Description": "Właściwość do odczytu z dziesiÄ…tego licznika wMBus"
+                }
+              }
+            },
+            {
+              "Key": "SensorChannel10",
+              "Name": "Typ kanału czujnika CC1101 #10",
+              "Type": "enum",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Impulse counter"
+                },
+                {
+                  "Value": "1",
+                  "Name": "General purpose measurement"
+                },
+                {
+                  "Value": "2",
+                  "Name": "General purpose meter"
+                }
+              ],
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Description": "Channel type for tenth wMBus meter",
+              "Translations": {
+                "en": {
+                  "Name": "CC1101 Sensor Channel Type #10",
+                  "Description": "Channel type for tenth wMBus meter"
+                },
+                "pl": {
+                  "Name": "Type kanału czujnika CC1101 #10",
+                  "Description": "Typ kanału dla dziesiÄ…tego licznika wMBus"
+                }
+              }
             }
           ]
         }
@@ -3360,12 +5509,12 @@
       "Flags": {
         "SUPLA_ANALOG_READING_KPOP": {
           "name": "Pomiar analogowy (ADC Pin)",
-          "desc": "Ustawienia urządzenia->Analog. Umożliwia obsługę pomiaru napięcia na wejściu ADC Pin.",
+          "desc": "Ustawienia urządzenia-\u003eAnalog. Umożliwia obsługę pomiaru napięcia na wejściu ADC Pin.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Analog measurement (ADC Pin)",
-              "desc": "Device settings->Analog. Enables support for voltage measurement at ADC Pin input."
+              "desc": "Device settings-\u003eAnalog. Enables support for voltage measurement at ADC Pin input."
             }
           },
           "Parameters": [
@@ -3374,7 +5523,7 @@
         },
         "SUPLA_NTC_10K": {
           "name": "Termistor NTC 10K",
-          "desc": "Ustawienia urządzenia->Analog. Umożliwia obsługę termistora NTC 10K.",
+          "desc": "Ustawienia urządzenia-\u003eAnalog. Umożliwia obsługę termistora NTC 10K.",
           "defOn": false,
           "depRel": [
             "SUPLA_MPX_5XXX"
@@ -3382,7 +5531,7 @@
           "translations": {
             "en": {
               "name": "NTC 10K thermistor",
-              "desc": "Device settings->Analog. Supports the NTC 10K thermistor."
+              "desc": "Device settings-\u003eAnalog. Supports the NTC 10K thermistor."
             }
           },
           "Parameters": [
@@ -3391,7 +5540,7 @@
         },
         "SUPLA_MPX_5XXX": {
           "name": "Czujnik ciśnienia MPX5xxx",
-          "desc": "Ustawienia urządzenia->Analog. Umożliwia obsługę czujnika ciśnienia z serii MPX5xxx.",
+          "desc": "Ustawienia urządzenia-\u003eAnalog. Umożliwia obsługę czujnika ciśnienia z serii MPX5xxx.",
           "defOn": false,
           "depRel": [
             "SUPLA_NTC_10K"
@@ -3399,7 +5548,7 @@
           "translations": {
             "en": {
               "name": "MPX5xxx pressure sensor",
-              "desc": "Device settings->Analog. Enables operation of pressure sensor from MPX5xxx series."
+              "desc": "Device settings-\u003eAnalog. Enables operation of pressure sensor from MPX5xxx series."
             }
           },
           "Parameters": [
@@ -3415,17 +5564,17 @@
         "en": "Energy meters",
         "es": "Contadores de energía",
         "de": "Energiezähler",
-        "fr": "Compteurs d'énergie"
+        "fr": "Compteurs d\u0027énergie"
       },
       "Flags": {
         "SUPLA_HLW8012": {
           "name": "Licznik energii HLW8012, BL0937",
-          "desc": "Ustawienia urządzenia->Inne. Umożliwia obsługę licznika energii HLW8012, BL0937.",
+          "desc": "Ustawienia urządzenia-\u003eInne. Umożliwia obsługę licznika energii HLW8012, BL0937.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Energy meter HLW8012, BL0937",
-              "desc": "Device settings->Other. It enables the operation of the energy meter HLW8012, BL0937."
+              "desc": "Device settings-\u003eOther. It enables the operation of the energy meter HLW8012, BL0937."
             }
           },
           "Parameters": [
@@ -3434,12 +5583,12 @@
         },
         "SUPLA_PZEM_V_3": {
           "name": "Licznik energii PZEM V3",
-          "desc": "Ustawienia urządzenia->Inne. Umożliwia obsługę licznika energii PZEM V3.",
+          "desc": "Ustawienia urządzenia-\u003eInne. Umożliwia obsługę licznika energii PZEM V3.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Energy meter PZEM V3",
-              "desc": "Device settings->Other. It enables the operation of the energy meter PZEM V3."
+              "desc": "Device settings-\u003eOther. It enables the operation of the energy meter PZEM V3."
             }
           },
           "Parameters": [
@@ -3448,12 +5597,12 @@
         },
         "SUPLA_PZEM_ADR": {
           "name": "Licznik energii PZEM V3",
-          "desc": "Ustawienia urządzenia->Inne. Umożliwia obsługę licznika energii PZEM V3 wraz z ustawianiem adresu.",
+          "desc": "Ustawienia urządzenia-\u003eInne. Umożliwia obsługę licznika energii PZEM V3 wraz z ustawianiem adresu.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Energy meter PZEM V3",
-              "desc": "Device settings->Other. It enables the operation of the energy meter PZEM V3 with address setting."
+              "desc": "Device settings-\u003eOther. It enables the operation of the energy meter PZEM V3 with address setting."
             }
           },
           "Parameters": [
@@ -3462,12 +5611,12 @@
         },
         "SUPLA_CSE7766": {
           "name": "Licznik energii CSE7766",
-          "desc": "Ustawienia urządzenia->Inne. Umożliwia obsługę licznika energii CSE7766.",
+          "desc": "Ustawienia urządzenia-\u003eInne. Umożliwia obsługę licznika energii CSE7766.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Energy meter CSE7766",
-              "desc": "Device settings->Other. It enables the operation of the energy meter CSE7766."
+              "desc": "Device settings-\u003eOther. It enables the operation of the energy meter CSE7766."
             }
           },
           "Parameters": [
@@ -3476,12 +5625,12 @@
         },
         "SUPLA_ADE7953": {
           "name": "Licznik energii ADE7953",
-          "desc": "Ustawienia urządzenia->I2C. Umożliwia obsługę licznika energii ADE7953.",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę licznika energii ADE7953.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Energy meter ADE7953",
-              "desc": "Device settings->I2C. It enables the operation of the energy meter ADE7953."
+              "desc": "Device settings-\u003eI2C. It enables the operation of the energy meter ADE7953."
             }
           },
           "Parameters": [
@@ -3544,12 +5693,12 @@
       "Flags": {
         "SUPLA_RGBW": {
           "name": "RGBW, RGB, Dimmer",
-          "desc": "Ustawienia urządzenia->Inne. Umożliwia obsługę urządzeń RGBW, RGB i ściemniaczy.",
+          "desc": "Ustawienia urządzenia-\u003eInne. Umożliwia obsługę urządzeń RGBW, RGB i ściemniaczy.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "RGBW, RGB, Dimmer",
-              "desc": "Device settings->Other. Enables support for RGBW, RGB devices and dimmers."
+              "desc": "Device settings-\u003eOther. Enables support for RGBW, RGB devices and dimmers."
             }
           },
           "Parameters": [
@@ -3558,12 +5707,12 @@
         },
         "SUPLA_HC_SR04": {
           "name": "Czujnik odległości HC-SR04",
-          "desc": "Ustawienia urządzenia->Inne. Umożliwia obsługę czujnika odległości HC-SR04.",
+          "desc": "Ustawienia urządzenia-\u003eInne. Umożliwia obsługę czujnika odległości HC-SR04.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "HC-SR04 distance sensor",
-              "desc": "Device settings->Other. Enables operation of the HC-SR04 distance sensor."
+              "desc": "Device settings-\u003eOther. Enables operation of the HC-SR04 distance sensor."
             }
           },
           "Parameters": [
@@ -3572,12 +5721,12 @@
         },
         "SUPLA_IMPULSE_COUNTER": {
           "name": "Licznik impulsów",
-          "desc": "Ustawienia urządzenia->Inne. Umożliwia obsługę licznika impulsów.",
+          "desc": "Ustawienia urządzenia-\u003eInne. Umożliwia obsługę licznika impulsów.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "Pulse counter",
-              "desc": "Device settings->Other. It enables the operation of the pulse counter."
+              "desc": "Device settings-\u003eOther. It enables the operation of the pulse counter."
             }
           },
           "Parameters": [
@@ -3627,17 +5776,17 @@
         "en": "Air quality sensors",
         "es": "Sensores de calidad del aire",
         "de": "Luftqualitätssensoren",
-        "fr": "Capteurs de qualité de l'air"
+        "fr": "Capteurs de qualité de l\u0027air"
       },
       "Flags": {
         "SUPLA_VINDRIKTNING_IKEA_KPOP": {
           "name": "IKEA VINDRIKTNING",
-          "desc": "Ustawienia urządzenia->Inne. Czujnik cząstek stałych PM1006",
+          "desc": "Ustawienia urządzenia-\u003eInne. Czujnik cząstek stałych PM1006",
           "defOn": false,
           "translations": {
             "en": {
               "name": "IKEA VINDRIKTNING",
-              "desc": "Device settings->Other. Particulate Matter Sensor with PM1006 inside."
+              "desc": "Device settings-\u003eOther. Particulate Matter Sensor with PM1006 inside."
             }
           },
           "Parameters": [
@@ -3646,12 +5795,12 @@
         },
         "SUPLA_PMSX003_KPOP": {
           "name": "PMSx003",
-          "desc": "Ustawienia urządzenia->Inne. Czujnik cząstek stałych: PM1.0, PM2.5, PM10. Obsługiwane czujniki PMS1003, PMS3003, PMS5003, PMS5003S, PMS5003T, PMS5003ST, PMS7003, PMSA003.",
+          "desc": "Ustawienia urządzenia-\u003eInne. Czujnik cząstek stałych: PM1.0, PM2.5, PM10. Obsługiwane czujniki PMS1003, PMS3003, PMS5003, PMS5003S, PMS5003T, PMS5003ST, PMS7003, PMSA003.",
           "defOn": false,
           "translations": {
             "en": {
               "name": "PMSx003",
-              "desc": "Device settings->Other. Particulate sensor: PM1.0, PM2.5, PM10. Supported sensors PMS1003, PMS3003, PMS5003, PMS5003S, PMS5003T, PMS5003ST, PMS7003, PMSA003."
+              "desc": "Device settings-\u003eOther. Particulate sensor: PM1.0, PM2.5, PM10. Supported sensors PMS1003, PMS3003, PMS5003, PMS5003S, PMS5003T, PMS5003ST, PMS7003, PMSA003."
             }
           },
           "Parameters": [
@@ -3782,6 +5931,7 @@
             }
           },
           "Parameters": [
+
           ]
         }
       }
