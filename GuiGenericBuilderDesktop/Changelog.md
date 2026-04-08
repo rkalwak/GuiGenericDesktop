@@ -10,6 +10,12 @@
 - Helps ensure users are building with the latest builder configuration and features
 - Configurable via `GGUpdateCheckEnabled` in appsettings.json (default: true)
 
+**CC1101 Sensor Configuration Extended**
+- Added `SensorChannel` parameter to all CC1101 sensors (values 1-10)
+- Extended CC1101 sensor support from 4 to 10 sensors
+- Each sensor now has: Enabled, SensorType, SensorID, SensorKey, SensorProperty, and SensorChannel
+- Allows more flexible wMBus meter configuration with custom channel assignments
+
 ## [2026-03-01] - Version 2.0.15
 ## [2026-02-15] - Version 2.0.14
 

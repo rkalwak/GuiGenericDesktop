@@ -2412,6 +2412,26 @@
                 {
                   "Value": "23",
                   "Name": "previous_alarms"
+                },
+                {
+                  "Value": "24",
+                  "Name": "total_volume_m3"
+                },
+                {
+                  "Value": "25",
+                  "Name": "power_kw"
+                },
+                {
+                  "Value": "26",
+                  "Name": "operating_time_h"
+                },
+                {
+                  "Value": "27",
+                  "Name": "operating_time_in_error_h"
+                },
+                {
+                  "Value": "28",
+                  "Name": "volume_flow_m3h"
                 }
               ],
               "IsRequired": false,
@@ -2749,6 +2769,26 @@
                 {
                   "Value": "23",
                   "Name": "previous_alarms"
+                },
+                {
+                  "Value": "24",
+                  "Name": "total_volume_m3"
+                },
+                {
+                  "Value": "25",
+                  "Name": "power_kw"
+                },
+                {
+                  "Value": "26",
+                  "Name": "operating_time_h"
+                },
+                {
+                  "Value": "27",
+                  "Name": "operating_time_in_error_h"
+                },
+                {
+                  "Value": "28",
+                  "Name": "volume_flow_m3h"
                 }
               ],
               "IsRequired": false,
@@ -3086,6 +3126,26 @@
                 {
                   "Value": "23",
                   "Name": "previous_alarms"
+                },
+                {
+                  "Value": "24",
+                  "Name": "total_volume_m3"
+                },
+                {
+                  "Value": "25",
+                  "Name": "power_kw"
+                },
+                {
+                  "Value": "26",
+                  "Name": "operating_time_h"
+                },
+                {
+                  "Value": "27",
+                  "Name": "operating_time_in_error_h"
+                },
+                {
+                  "Value": "28",
+                  "Name": "volume_flow_m3h"
                 }
               ],
               "IsRequired": false,
@@ -3423,6 +3483,26 @@
                 {
                   "Value": "23",
                   "Name": "previous_alarms"
+                },
+                {
+                  "Value": "24",
+                  "Name": "total_volume_m3"
+                },
+                {
+                  "Value": "25",
+                  "Name": "power_kw"
+                },
+                {
+                  "Value": "26",
+                  "Name": "operating_time_h"
+                },
+                {
+                  "Value": "27",
+                  "Name": "operating_time_in_error_h"
+                },
+                {
+                  "Value": "28",
+                  "Name": "volume_flow_m3h"
                 }
               ],
               "IsRequired": false,
@@ -3760,6 +3840,26 @@
                 {
                   "Value": "23",
                   "Name": "previous_alarms"
+                },
+                {
+                  "Value": "24",
+                  "Name": "total_volume_m3"
+                },
+                {
+                  "Value": "25",
+                  "Name": "power_kw"
+                },
+                {
+                  "Value": "26",
+                  "Name": "operating_time_h"
+                },
+                {
+                  "Value": "27",
+                  "Name": "operating_time_in_error_h"
+                },
+                {
+                  "Value": "28",
+                  "Name": "volume_flow_m3h"
                 }
               ],
               "IsRequired": false,
@@ -4097,6 +4197,26 @@
                 {
                   "Value": "23",
                   "Name": "previous_alarms"
+                },
+                {
+                  "Value": "24",
+                  "Name": "total_volume_m3"
+                },
+                {
+                  "Value": "25",
+                  "Name": "power_kw"
+                },
+                {
+                  "Value": "26",
+                  "Name": "operating_time_h"
+                },
+                {
+                  "Value": "27",
+                  "Name": "operating_time_in_error_h"
+                },
+                {
+                  "Value": "28",
+                  "Name": "volume_flow_m3h"
                 }
               ],
               "IsRequired": false,
@@ -4434,6 +4554,26 @@
                 {
                   "Value": "23",
                   "Name": "previous_alarms"
+                },
+                {
+                  "Value": "24",
+                  "Name": "total_volume_m3"
+                },
+                {
+                  "Value": "25",
+                  "Name": "power_kw"
+                },
+                {
+                  "Value": "26",
+                  "Name": "operating_time_h"
+                },
+                {
+                  "Value": "27",
+                  "Name": "operating_time_in_error_h"
+                },
+                {
+                  "Value": "28",
+                  "Name": "volume_flow_m3h"
                 }
               ],
               "IsRequired": false,
@@ -4771,6 +4911,26 @@
                 {
                   "Value": "23",
                   "Name": "previous_alarms"
+                },
+                {
+                  "Value": "24",
+                  "Name": "total_volume_m3"
+                },
+                {
+                  "Value": "25",
+                  "Name": "power_kw"
+                },
+                {
+                  "Value": "26",
+                  "Name": "operating_time_h"
+                },
+                {
+                  "Value": "27",
+                  "Name": "operating_time_in_error_h"
+                },
+                {
+                  "Value": "28",
+                  "Name": "volume_flow_m3h"
                 }
               ],
               "IsRequired": false,
@@ -5108,6 +5268,26 @@
                 {
                   "Value": "23",
                   "Name": "previous_alarms"
+                },
+                {
+                  "Value": "24",
+                  "Name": "total_volume_m3"
+                },
+                {
+                  "Value": "25",
+                  "Name": "power_kw"
+                },
+                {
+                  "Value": "26",
+                  "Name": "operating_time_h"
+                },
+                {
+                  "Value": "27",
+                  "Name": "operating_time_in_error_h"
+                },
+                {
+                  "Value": "28",
+                  "Name": "volume_flow_m3h"
                 }
               ],
               "IsRequired": false,
@@ -5445,6 +5625,26 @@
                 {
                   "Value": "23",
                   "Name": "previous_alarms"
+                },
+                {
+                  "Value": "24",
+                  "Name": "total_volume_m3"
+                },
+                {
+                  "Value": "25",
+                  "Name": "power_kw"
+                },
+                {
+                  "Value": "26",
+                  "Name": "operating_time_h"
+                },
+                {
+                  "Value": "27",
+                  "Name": "operating_time_in_error_h"
+                },
+                {
+                  "Value": "28",
+                  "Name": "volume_flow_m3h"
                 }
               ],
               "IsRequired": false,
