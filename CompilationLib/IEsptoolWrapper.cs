@@ -18,5 +18,14 @@ namespace CompilationLib
         /// <param name="repositoryPath">Path to GUI-Generic repository (to find partition CSV)</param>
         /// <returns>Path to the merged file if successful, null otherwise</returns>
         Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string board, string repositoryPath = null, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Reads a specific region of the device flash memory to a file.
+        /// </summary>
+        /// <param name="comPort">COM port the device is connected to</param>
+        /// <param name="offset">Flash offset to start reading from</param>
+        /// <param name="size">Number of bytes to read</param>
+        /// <param name="outputFile">Path to save the read data</param>
+        Task<EsptoolResult> ReadFlashRegion(string comPort, long offset, long size, string outputFile, CancellationToken cancellation = default);
     }
 }

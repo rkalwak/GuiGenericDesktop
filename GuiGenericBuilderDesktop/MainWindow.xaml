@@ -8,22 +8,107 @@
         Title="Gui Generic Builder Desktop" WindowState="Maximized" Height="1200" Width="1700" Background="#00d151">
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <TabControl Background="#00d151">
+            <TabItem Header="GuiGeneric">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-        <DockPanel x:Name="devicePanel" Grid.Row="0" LastChildFill="False" Margin="4,4,4,4" Background="#00d151" Height="40">
-        </DockPanel>
+                    <DockPanel x:Name="devicePanel" Grid.Row="0" LastChildFill="False" Margin="4,4,4,4" Background="#00d151" Height="40">
+                    </DockPanel>
 
-        <DockPanel x:Name="buttonsPanel" Grid.Row="1" LastChildFill="False" Margin="4,4,4,4" Background="#00d151" Height="40">
-        </DockPanel>
+                    <DockPanel x:Name="buttonsPanel" Grid.Row="1" LastChildFill="False" Margin="4,4,4,4" Background="#00d151" Height="40">
+                    </DockPanel>
 
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#00d151" Focusable="False">
-            <StackPanel x:Name="flagsContainer" Margin="12" Background="White">
-            </StackPanel>
-        </ScrollViewer>
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" Background="#00d151" Focusable="False">
+                        <StackPanel x:Name="flagsContainer" Margin="12" Background="White">
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Bramka Zigbee">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Row 0: Device panel — COM port + detect -->
+                    <DockPanel Grid.Row="0" LastChildFill="False" Margin="4,4,4,4" Background="#00d151" Height="40">
+                        <TextBlock Text="Port COM:" FontWeight="SemiBold" Foreground="White"
+                                   VerticalAlignment="Center" Margin="4,0,4,0"/>
+                        <ComboBox x:Name="z2sComPortSelector"
+                                  Width="90" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                        <Button x:Name="z2sDetectPortButton"
+                                Content="Wykryj port"
+                                Click="Z2SDetectPort_Click"
+                                Height="28" Width="110"
+                                VerticalAlignment="Center" Margin="6,0,0,0"
+                                Background="White" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="z2sChipLabel"
+                                   Text="" Foreground="White" FontSize="12"
+                                   VerticalAlignment="Center" Margin="12,0,0,0"/>
+                    </DockPanel>
+
+                    <!-- Row 1: Buttons panel — actions -->
+                    <DockPanel Grid.Row="1" LastChildFill="False" Margin="4,4,4,4" Background="#00d151" Height="40">
+                        <Button x:Name="z2sCheckVersionButton"
+                                Content="Sprawdź wersję"
+                                Click="CheckZ2SVersion_Click"
+                                Height="28" Width="140"
+                                VerticalAlignment="Center" Margin="4,0,0,0"
+                                Background="White" FontWeight="SemiBold"/>
+                        <Button x:Name="z2sBackupButton"
+                                Content="Backup"
+                                Click="Z2SBackup_Click"
+                                Height="28" Width="110"
+                                VerticalAlignment="Center" Margin="6,0,0,0"
+                                Background="White" FontWeight="SemiBold"/>
+                        <Button x:Name="z2sUpgradeButton"
+                                Content="Aktualizuj firmware"
+                                Click="Z2SUpgrade_Click"
+                                Height="28" Width="160"
+                                VerticalAlignment="Center" Margin="6,0,0,0"
+                                Background="White" FontWeight="SemiBold"/>
+                        <Rectangle Width="1" Fill="White" Margin="12,6,12,6" VerticalAlignment="Stretch"/>
+                        <TextBlock Text="Opcje firmware:" Foreground="White" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <CheckBox x:Name="z2sWithLogsCheckBox"
+                                  Content="Logi" IsChecked="True"
+                                  Foreground="White" FontWeight="SemiBold"
+                                  VerticalAlignment="Center" Margin="0,0,14,0"
+                                  ToolTip="Firmware z włączonymi logami na porcie szeregowym"/>
+                        <CheckBox x:Name="z2sFullVersionCheckBox"
+                                  Content="Pełna wersja" IsChecked="False"
+                                  Foreground="White" FontWeight="SemiBold"
+                                  VerticalAlignment="Center"
+                                  ToolTip="Wgra pełny obraz firmware (skasuje SPIFFS). Odznaczone = tylko aktualizacja aplikacji (update_only)"/>
+                    </DockPanel>
+
+                    <!-- Row 2: Content area -->
+                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                  Background="#00d151" Focusable="False">
+                        <StackPanel Margin="12" Background="White">
+                            <TextBlock Text="Bramka Zigbee — Z2S Library" FontSize="16" FontWeight="Bold"
+                                       Margin="0,8,0,4"/>
+                            <TextBlock Text="Sprawdź, wykonaj backup lub zaktualizuj firmware Z2S na podłączonym urządzeniu."
+                                       TextWrapping="Wrap" Margin="0,0,0,12" Foreground="#444"/>
+                            <Border x:Name="z2sStatusBorder" Background="#F5F5F5" CornerRadius="4"
+                                    BorderBrush="#DDD" BorderThickness="1" Padding="14" MinHeight="80"
+                                    Margin="0,0,0,0">
+                                <TextBlock x:Name="z2sStatusText"
+                                           Text="Wybierz port COM i naciśnij przycisk aby rozpocząć."
+                                           TextWrapping="Wrap" FontSize="13"/>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
 
         <DataGrid x:Name="FlagsDataGrid"
                   Visibility="Collapsed"

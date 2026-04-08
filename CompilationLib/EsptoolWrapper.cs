@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Text;
 using System.Runtime.InteropServices;
 
@@ -124,6 +124,13 @@ namespace CompilationLib
         /// </summary>
         public async Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, CancellationToken cancellation = default)
             => await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 read-flash 0x000000 ALL {EscapeArgument(backupFile)}",
+                               cancellation);
+
+        /// <summary>
+        /// Reads a specific region of the device flash memory to a file.
+        /// </summary>
+        public async Task<EsptoolResult> ReadFlashRegion(string comPort, long offset, long size, string outputFile, CancellationToken cancellation = default)
+            => await RunEsptoolAsync($"--port {EscapeArgument(comPort)} --baud 921600 read-flash 0x{offset:X} 0x{size:X} {EscapeArgument(outputFile)}",
                                cancellation);
 
         /// <summary>

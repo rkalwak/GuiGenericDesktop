@@ -35,6 +35,9 @@ namespace CompilationLib.Tests
             public async Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, System.Threading.CancellationToken cancellation = default)
             => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Read flash success", StdErr = "", Command = "esptool read-flash" });
 
+            public async Task<EsptoolResult> ReadFlashRegion(string comPort, long offset, long size, string outputFile, System.Threading.CancellationToken cancellation = default)
+            => await Task.FromResult(new EsptoolResult { Success = false, ExitCode = 1, StdOut = "", StdErr = "Not implemented in fake", Command = "esptool read-flash" });
+
             public async Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, System.Threading.CancellationToken cancellation = default)
             => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Write flash success", StdErr = "", Command = "esptool write-flash" });
         }

@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -50,6 +50,11 @@ namespace GuiGenericBuilderDesktop
         private UIBuilderService _uiBuilderService;
         private AutoUpdateService _autoUpdateService;
         private GGUpdateService _ggUpdateService;
+        private Z2SUpdateService _z2sUpdateService;
+
+        // Z2S tab state
+        private string _z2sChip = string.Empty;
+        private CancellationTokenSource _z2sCancellation;
 
         public MainWindow()
         {
@@ -88,6 +93,15 @@ namespace GuiGenericBuilderDesktop
             _uiBuilderService = new UIBuilderService(_builderConfig, _logger);
             _autoUpdateService = new AutoUpdateService("rkalwak", "GuiGenericDesktop", appConfig, _logger);
             _ggUpdateService = new GGUpdateService(_repositoryPath, appConfig, _logger);
+            _z2sUpdateService = new Z2SUpdateService(_esptoolWrapper, _logger);
+
+            // Populate Z2S COM port selector
+            z2sComPortSelector.Items.Add(new ComboBoxItem { Content = "None", Tag = "None", IsSelected = true });
+            for (int i = 1; i <= 100; i++)
+            {
+                z2sComPortSelector.Items.Add(new ComboBoxItem { Content = $"COM{i}", Tag = $"COM{i}" });
+            }
+
             InitializeBuildFlags();
             // Add the Parameters column dynamically so it's visible in the grid
             _uiBuilderService.AddParametersColumnDynamically(FlagsDataGrid, EditParameters_Click);
@@ -741,6 +755,239 @@ namespace GuiGenericBuilderDesktop
                     LocalizationManager.Get("NoSelectionTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
+            }
+        }
+
+        private async void Z2SDetectPort_Click(object sender, RoutedEventArgs e)
+        {
+            z2sDetectPortButton.IsEnabled = false;
+            z2sStatusText.Text = "Wykrywanie urządzenia…";
+
+            try
+            {
+                var (port, deviceInfo) = await _deviceManagementService.DetectDeviceAsync();
+
+                if (!string.IsNullOrWhiteSpace(port))
+                {
+                    var match = _deviceManagementService.FindComboBoxItemByTag(z2sComPortSelector, port);
+                    if (match != null)
+                        z2sComPortSelector.SelectedItem = match;
+
+                    _z2sChip = deviceInfo?.ChipType?.ToLowerInvariant() ?? string.Empty;
+                    z2sChipLabel.Text = string.IsNullOrEmpty(_z2sChip) ? string.Empty : $"Chip: {_z2sChip.ToUpperInvariant()}";
+
+                    z2sStatusText.Text = $"Wykryto port: {port}" +
+                        (string.IsNullOrEmpty(_z2sChip) ? string.Empty : $", chip: {_z2sChip.ToUpperInvariant()}") +
+                        ".\nNaciśnij przycisk aby sprawdzić wersję.";
+                }
+                else
+                {
+                    _z2sChip = string.Empty;
+                    z2sChipLabel.Text = string.Empty;
+                    z2sStatusText.Text = "Nie wykryto urządzenia. Sprawdź połączenie USB i spróbuj ponownie.";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Z2SDetectPort_Click failed");
+                z2sStatusText.Text = $"Błąd wykrywania: {ex.Message}";
+            }
+            finally
+            {
+                z2sDetectPortButton.IsEnabled = true;
+            }
+        }
+
+        private async void CheckZ2SVersion_Click(object sender, RoutedEventArgs e)
+        {
+            var z2sPort = (z2sComPortSelector.SelectedItem as ComboBoxItem)?.Tag as string;
+            if (string.IsNullOrEmpty(z2sPort) || z2sPort == "None")
+            {
+                z2sStatusText.Text = "Błąd: Wybierz port COM przed sprawdzeniem.";
+                return;
+            }
+
+            z2sCheckVersionButton.IsEnabled = false;
+            z2sStatusText.Text = $"Łączenie z urządzeniem na {z2sPort}…";
+
+            try
+            {
+                var result = await _z2sUpdateService.CheckVersionAsync(z2sPort);
+
+                if (result.DeviceVersion == null && result.Error != null)
+                {
+                    z2sStatusText.Text = $"Nie udało się odczytać wersji z urządzenia.\n{result.Error}";
+                }
+                else if (result.DeviceVersion == null)
+                {
+                    z2sStatusText.Text = "Nie znaleziono pliku version.dat w SPIFFS.\nSprawdź czy urządzenie jest podłączone i ma firmware Z2S.";
+                }
+                else if (result.IsUpdateAvailable)
+                {
+                    z2sStatusText.Text = $"✔ Dostępna aktualizacja!\n\nWersja na urządzeniu:  {result.DeviceVersion}\nNajnowsza wersja:       {result.LatestVersion ?? "nieznana"}\n\nhttps://github.com/lsroka76/Z2S_Library";
+                }
+                else
+                {
+                    z2sStatusText.Text = $"✔ Firmware jest aktualny.\n\nWersja na urządzeniu:  {result.DeviceVersion}\nNajnowsza wersja:       {result.LatestVersion ?? "nieznana"}";
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                z2sStatusText.Text = "Operacja anulowana.";
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "CheckZ2SVersion_Click failed");
+                z2sStatusText.Text = $"Błąd: {ex.Message}";
+            }
+            finally
+            {
+                z2sCheckVersionButton.IsEnabled = true;
+            }
+        }
+
+        private void Z2SSetButtonsEnabled(bool enabled)
+        {
+            z2sCheckVersionButton.IsEnabled = enabled;
+            z2sBackupButton.IsEnabled = enabled;
+            z2sUpgradeButton.IsEnabled = enabled;
+            z2sDetectPortButton.IsEnabled = enabled;
+        }
+
+        private async void Z2SBackup_Click(object sender, RoutedEventArgs e)
+        {
+            var z2sPort = (z2sComPortSelector.SelectedItem as ComboBoxItem)?.Tag as string;
+            if (string.IsNullOrEmpty(z2sPort) || z2sPort == "None")
+            {
+                z2sStatusText.Text = "Błąd: Wybierz port COM przed wykonaniem backupu.";
+                return;
+            }
+
+            if (string.IsNullOrEmpty(_z2sChip))
+            {
+                z2sStatusText.Text = "Błąd: Najpierw wykryj urządzenie przyciskiem 'Wykryj port'.";
+                return;
+            }
+
+            Z2SSetButtonsEnabled(false);
+            _z2sCancellation = new CancellationTokenSource();
+
+            var backupDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backups", "z2s");
+
+            try
+            {
+                z2sStatusText.Text = $"Tworzenie backupu na porcie {z2sPort}…\n(może potrwać kilka minut)";
+
+                var result = await _z2sUpdateService.BackupAsync(z2sPort, _z2sChip, backupDir, _z2sCancellation.Token);
+
+                if (result.Success)
+                {
+                    _logger.Information("Z2S backup succeeded: {File}", result.BackupFilePath);
+                    z2sStatusText.Text = $"✔ Backup zakończony pomyślnie.\n\nPlik: {result.BackupFilePath}";
+                    z2sStatusBorder.Background = System.Windows.Media.Brushes.LightGreen;
+                    await Task.Delay(4000);
+                    z2sStatusBorder.Background = System.Windows.Media.Brushes.Transparent;
+                }
+                else
+                {
+                    z2sStatusText.Text = $"✘ Backup nieudany.\n{result.Error}";
+                    z2sStatusBorder.Background = System.Windows.Media.Brushes.MistyRose;
+                    await Task.Delay(4000);
+                    z2sStatusBorder.Background = System.Windows.Media.Brushes.Transparent;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                z2sStatusText.Text = "Backup anulowany.";
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Z2SBackup_Click failed");
+                z2sStatusText.Text = $"Błąd backupu: {ex.Message}";
+            }
+            finally
+            {
+                _z2sCancellation?.Dispose();
+                _z2sCancellation = null;
+                Z2SSetButtonsEnabled(true);
+            }
+        }
+
+        private async void Z2SUpgrade_Click(object sender, RoutedEventArgs e)
+        {
+            var z2sPort = (z2sComPortSelector.SelectedItem as ComboBoxItem)?.Tag as string;
+            if (string.IsNullOrEmpty(z2sPort) || z2sPort == "None")
+            {
+                z2sStatusText.Text = "Błąd: Wybierz port COM przed aktualizacją.";
+                return;
+            }
+
+            if (string.IsNullOrEmpty(_z2sChip))
+            {
+                z2sStatusText.Text = "Błąd: Najpierw wykryj urządzenie przyciskiem 'Wykryj port'.";
+                return;
+            }
+
+            bool withLogs = z2sWithLogsCheckBox.IsChecked ?? true;
+            bool fullVersion = z2sFullVersionCheckBox.IsChecked ?? false;
+            string firmwareFileName = Z2SUpdateService.GetFirmwareFileName(withLogs, fullVersion);
+
+            var confirm = MessageBox.Show(
+                $"Czy na pewno zaktualizować firmware Z2S na urządzeniu podłączonym do {z2sPort}?\n\n" +
+                $"Plik: {firmwareFileName}\n\n" +
+                "Zalecane jest najpierw wykonanie backupu.",
+                "Potwierdzenie aktualizacji",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (confirm != MessageBoxResult.Yes)
+                return;
+
+            Z2SSetButtonsEnabled(false);
+            _z2sCancellation = new CancellationTokenSource();
+
+            try
+            {
+                z2sStatusText.Text = "Przygotowywanie aktualizacji…";
+
+                var result = await _z2sUpdateService.DownloadAndFlashLatestAsync(
+                    z2sPort,
+                    _z2sChip,
+                    withLogs,
+                    fullVersion,
+                    msg => Dispatcher.InvokeAsync(() => z2sStatusText.Text = msg),
+                    _z2sCancellation.Token);
+
+                if (result.Success)
+                {
+                    _logger.Information("Z2S upgrade succeeded, version {Version}", result.FlashedVersion);
+                    z2sStatusText.Text = $"✔ Aktualizacja zakończona pomyślnie!\n\nWgrana wersja: {result.FlashedVersion}";
+                    z2sStatusBorder.Background = System.Windows.Media.Brushes.LightGreen;
+                    await Task.Delay(4000);
+                    z2sStatusBorder.Background = System.Windows.Media.Brushes.Transparent;
+                }
+                else
+                {
+                    z2sStatusText.Text = $"✘ Aktualizacja nieudana.\n{result.Error}";
+                    z2sStatusBorder.Background = System.Windows.Media.Brushes.MistyRose;
+                    await Task.Delay(4000);
+                    z2sStatusBorder.Background = System.Windows.Media.Brushes.Transparent;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                z2sStatusText.Text = "Aktualizacja anulowana.";
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Z2SUpgrade_Click failed");
+                z2sStatusText.Text = $"Błąd aktualizacji: {ex.Message}";
+            }
+            finally
+            {
+                _z2sCancellation?.Dispose();
+                _z2sCancellation = null;
+                Z2SSetButtonsEnabled(true);
             }
         }
 
