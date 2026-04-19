@@ -74,7 +74,7 @@ namespace GuiGenericBuilderDesktop
                 if (param.IsRequired && string.IsNullOrWhiteSpace(param.Value))
                 {
                     var paramName = param.GetLocalizedName();
-                    errors.Add($"• {paramName} (required)");
+                    errors.Add($"ï¿½ {paramName} (required)");
                 }
                 
                 // For enum type, validate that the value exists in EnumValues (only if value is provided)
@@ -86,7 +86,7 @@ namespace GuiGenericBuilderDesktop
                     if (!param.EnumValues.Any(ev => ev.Value == param.Value))
                     {
                         var paramName = param.GetLocalizedName();
-                        errors.Add($"• {paramName} (invalid value)");
+                        errors.Add($"ï¿½ {paramName} (invalid value)");
                     }
                 }
             }

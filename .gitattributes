@@ -1,0 +1,25 @@
+# Enforce LF line endings for all text files in this repository.
+# core.autocrlf=false — git stores exactly what is committed.
+* text=auto eol=lf
+
+# Explicitly mark known text types
+*.cs    text eol=lf
+*.xaml  text eol=lf
+*.json  text eol=lf
+*.csproj text eol=lf
+*.sln   text eol=lf
+*.md    text eol=lf
+*.yml   text eol=lf
+*.yaml  text eol=lf
+*.txt   text eol=lf
+*.gitignore text eol=lf
+*.gitattributes text eol=lf
+
+# Binary — never touch
+*.bin   binary
+*.png   binary
+*.jpg   binary
+*.ico   binary
+*.zip   binary
+*.exe   binary
+*.dll   binary

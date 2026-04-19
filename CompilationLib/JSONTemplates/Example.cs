@@ -300,7 +300,7 @@ namespace SuplaTemplateBoard.Examples
             Console.WriteLine($"Automatically detected {selectedFlags.Count} required build flags:");
             foreach (var flag in selectedFlags.OrderBy(f => f))
             {
-                Console.WriteLine($"  • {flag}");
+                Console.WriteLine($"  ï¿½ {flag}");
             }
 
             // Show summary

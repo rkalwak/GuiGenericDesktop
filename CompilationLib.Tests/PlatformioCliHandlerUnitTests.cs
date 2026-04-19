@@ -30,7 +30,7 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_MS5611",
                         Parameters=new List<Parameter>
                         {
-                            new Parameter{ Key = "Altitude", Name = "Wysokoœæ n.p.m." , Value= "253.3" , Type="number"}
+                            new Parameter{ Key = "Altitude", Name = "Wysokoï¿½ï¿½ n.p.m." , Value= "253.3" , Type="number"}
                         }
                     }
                 };
@@ -167,7 +167,7 @@ namespace CompilationLib.Tests
                         Key = "SUPLA_MS5611",
                         Parameters = new List<Parameter>
                         {
-                            new Parameter { Key = "Altitude", Name = "Wysokoœæ n.p.m.", Value = "150", Type = "number" }
+                            new Parameter { Key = "Altitude", Name = "Wysokoï¿½ï¿½ n.p.m.", Value = "150", Type = "number" }
                         }
                     }
                 };

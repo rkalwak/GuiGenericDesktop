@@ -1,13 +1,13 @@
 # To do
 
-- GPIOS in general  to trzeba siê bêdzie wzi¹æ za pozosta³e GPIO (opis). Teraz np. kompilujê na C3 i w opcjach wyporu GPIO (np. dla przekaŸnika) mam, ¿e GPIO-1 to TX, a domyœlnie dla tego uk³adu jest TX na GPIO21. 
-Rozwi¹zania s¹ dwa: albo do wszystkich uk³adów dajemy GPIO bez opisów (TX, RX) albo szukamy rozpiski pinout i wstawiamy (C3 - RX20, TX21, C6 - RX17, TX16, S3- TX43, RX44, dla samego ESP32 - jest OK 1(TX) i 3(RX)).
+- GPIOS in general  to trzeba siï¿½ bï¿½dzie wziï¿½ï¿½ za pozostaï¿½e GPIO (opis). Teraz np. kompilujï¿½ na C3 i w opcjach wyporu GPIO (np. dla przekaï¿½nika) mam, ï¿½e GPIO-1 to TX, a domyï¿½lnie dla tego ukï¿½adu jest TX na GPIO21. 
+Rozwiï¿½zania sï¿½ dwa: albo do wszystkich ukï¿½adï¿½w dajemy GPIO bez opisï¿½w (TX, RX) albo szukamy rozpiski pinout i wstawiamy (C3 - RX20, TX21, C6 - RX17, TX16, S3- TX43, RX44, dla samego ESP32 - jest OK 1(TX) i 3(RX)).
 - PZEM adresy jako parametry pod flaga SUPLA_PZEM_ADR
 - default settings from cloud
 - HC_SR04 https://github.com/SUPLA/supla-device/pull/122
 - sound when compilation is done
-- Niestety ca³kowicie wirtualny termostat (oparty na linkach bezpoœrednich) nie dzia³a. To znaczy dzia³a odczyt temperatury, ale jeœli dodamy linki bezpoœrednie do przekaŸnika (w³¹cznika) to modu³ odmawia wspó³pracy. 
-Zawiesza siê, nie loguje do cloud i trzeba go przeflashowaæ na nowo, bo nawet w tryb config wejœæ nie chce. Krystian nie da³ z tym rady, ale mia³em nadziejê, ¿e siê "cudownie" naprawi³o. Niestety nie ;-)
+- Niestety caï¿½kowicie wirtualny termostat (oparty na linkach bezpoï¿½rednich) nie dziaï¿½a. To znaczy dziaï¿½a odczyt temperatury, ale jeï¿½li dodamy linki bezpoï¿½rednie do przekaï¿½nika (wï¿½ï¿½cznika) to moduï¿½ odmawia wspï¿½pracy. 
+Zawiesza siï¿½, nie loguje do cloud i trzeba go przeflashowaï¿½ na nowo, bo nawet w tryb config wejï¿½ï¿½ nie chce. Krystian nie daï¿½ z tym rady, ale miaï¿½em nadziejï¿½, ï¿½e siï¿½ "cudownie" naprawiï¿½o. Niestety nie ;-)
 - json settings
 - building Zigbee Gateway?
 - Modbus control?

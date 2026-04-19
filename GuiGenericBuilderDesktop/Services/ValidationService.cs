@@ -119,7 +119,7 @@ namespace GuiGenericBuilderDesktop.Services
                             // Build error message
                             var errorMessage = "All I2C devices must use the same SCL and SDA pins.\n\n" +
                                              "Conflicting configurations detected:\n\n" +
-                                             string.Join("\n", i2cDevices.Select(d => $"• {d}")) +
+                                             string.Join("\n", i2cDevices.Select(d => $"ï¿½ {d}")) +
                                              "\n\nPlease ensure all I2C devices have matching SCL and SDA values.";
 
                             _logger.Warning("I2C parameter mismatch detected: {Devices}", string.Join(", ", i2cDevices));
