@@ -276,6 +276,22 @@ namespace GuiGenericBuilderDesktop.Services
         }
 
         /// <summary>
+        /// Returns up to <paramref name="count"/> most recent stable releases from GitHub.
+        /// </summary>
+        public async Task<IReadOnlyList<Release>> GetReleasesAsync(int count = 10)
+        {
+            _logger.Information("Fetching up to {Count} Z2S_Library releases from GitHub", count);
+            var allReleases = await _githubClient.Repository.Release.GetAll(GitHubOwner, GitHubRepo);
+            var result = allReleases
+                .Where(r => !r.Prerelease && !r.Draft)
+                .OrderByDescending(r => r.CreatedAt)
+                .Take(count)
+                .ToList();
+            _logger.Information("Fetched {Count} releases", result.Count);
+            return result;
+        }
+
+        /// <summary>
         /// Extracts a plain version number from various tag formats:
         /// "v1.5.1", "1.5.1", "Z2S-1.5.1-07/04/26"
         /// </summary>
@@ -386,11 +402,53 @@ namespace GuiGenericBuilderDesktop.Services
                 return new Z2SFlashResult { Success = false, Error = $"Błąd GitHub: {ex.Message}" };
             }
 
-            // 2. Download to temp file
+            return await DownloadAndFlashCoreAsync(comPort, chip, withLogs, fullVersion, latestVersion, downloadUrl, progress, cancellationToken);
+        }
+
+        /// <summary>
+        /// Downloads and flashes a specific GitHub release to the device.
+        /// </summary>
+        public async Task<Z2SFlashResult> DownloadAndFlashAsync(
+            string comPort,
+            string chip,
+            bool withLogs,
+            bool fullVersion,
+            Release release,
+            Action<string> progress,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.Information("Starting Z2S flash of release {Tag} on port {Port}, chip {Chip}", release.TagName, comPort, chip);
+
+            string downloadUrl;
+            var targetFileName = GetFirmwareFileName(withLogs, fullVersion);
+            _logger.Information("Looking for asset: {FileName}", targetFileName);
+
+            var asset = release.Assets
+                .FirstOrDefault(a => a.Name.Equals(targetFileName, StringComparison.OrdinalIgnoreCase));
+
+            if (asset == null)
+                return new Z2SFlashResult { Success = false, Error = $"Nie znaleziono pliku '{targetFileName}' w wydaniu {release.TagName}." };
+
+            downloadUrl = asset.BrowserDownloadUrl;
+            _logger.Information("Z2S asset to download: {Name} ({Url})", asset.Name, downloadUrl);
+
+            return await DownloadAndFlashCoreAsync(comPort, chip, withLogs, fullVersion, release.TagName, downloadUrl, progress, cancellationToken);
+        }
+
+        private async Task<Z2SFlashResult> DownloadAndFlashCoreAsync(
+            string comPort,
+            string chip,
+            bool withLogs,
+            bool fullVersion,
+            string version,
+            string downloadUrl,
+            Action<string> progress,
+            CancellationToken cancellationToken)
+        {
             var tempFile = Path.Combine(Path.GetTempPath(), $"z2s_fw_{Guid.NewGuid():N}.bin");
             try
             {
-                progress?.Invoke($"Pobieranie firmware {latestVersion}…");
+                progress?.Invoke($"Pobieranie firmware {version}…");
                 using var http = new HttpClient();
                 http.Timeout = TimeSpan.FromMinutes(5);
                 var bytes = await http.GetByteArrayAsync(downloadUrl, cancellationToken);
@@ -404,16 +462,16 @@ namespace GuiGenericBuilderDesktop.Services
                 return new Z2SFlashResult { Success = false, Error = $"Błąd pobierania: {ex.Message}" };
             }
 
-            // 3. Flash
+            // Flash
             try
             {
-                progress?.Invoke($"Wgrywanie firmware {latestVersion} na urządzenie…");
+                progress?.Invoke($"Wgrywanie firmware {version} na urządzenie…");
                 var flashResult = await _esptoolWrapper.WriteFlush(comPort, chip, tempFile, cancellationToken);
 
                 if (flashResult.Success)
                 {
-                    _logger.Information("Z2S firmware flashed successfully, version {Version}", latestVersion);
-                    return new Z2SFlashResult { Success = true, FlashedVersion = latestVersion };
+                    _logger.Information("Z2S firmware flashed successfully, version {Version}", version);
+                    return new Z2SFlashResult { Success = true, FlashedVersion = version };
                 }
 
                 _logger.Warning("Z2S flash failed: {Error}", flashResult.StdErr);

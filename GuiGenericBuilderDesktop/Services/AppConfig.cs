@@ -31,5 +31,12 @@ namespace GuiGenericBuilderDesktop.Services
         /// When set, the application uses this path instead of downloading the repository.
         /// </summary>
         public string GGLocal { get; set; }
+
+        /// <summary>
+        /// How many of the most recent Z2S Gateway firmware releases to show in the version picker.
+        /// Can also be overridden via the Z2S_VERSION_HISTORY_COUNT environment variable.
+        /// Defaults to 10.
+        /// </summary>
+        public int Z2SVersionHistoryCount { get; set; } = 10;
     }
 }

@@ -54,6 +54,8 @@ namespace GuiGenericBuilderDesktop
 
         // Z2S tab state
         private string _z2sChip = string.Empty;
+        private string _z2sDeviceVersion = null;
+        private int _z2sVersionHistoryCount = 10;
         private CancellationTokenSource _z2sCancellation;
 
         public MainWindow()
@@ -70,10 +72,11 @@ namespace GuiGenericBuilderDesktop
             var configDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "configurations");
             _configManager = new BuildConfigurationManager(configDir, _esptoolWrapper);
 
-            // Load application configuration from appsettings.json
+            // Load application configuration from appsettings.json and environment variables
             var appConfig = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: true)
+                .AddEnvironmentVariables()
                 .Build()
                 .Get<AppConfig>() ?? new AppConfig();
 
@@ -94,6 +97,7 @@ namespace GuiGenericBuilderDesktop
             _autoUpdateService = new AutoUpdateService("rkalwak", "GuiGenericDesktop", appConfig, _logger);
             _ggUpdateService = new GGUpdateService(_repositoryPath, appConfig, _logger);
             _z2sUpdateService = new Z2SUpdateService(_esptoolWrapper, _logger);
+            _z2sVersionHistoryCount = appConfig.Z2SVersionHistoryCount > 0 ? appConfig.Z2SVersionHistoryCount : 10;
 
             // Populate Z2S COM port selector
             z2sComPortSelector.Items.Add(new ComboBoxItem { Content = "None", Tag = "None", IsSelected = true });
@@ -814,6 +818,8 @@ namespace GuiGenericBuilderDesktop
             {
                 var result = await _z2sUpdateService.CheckVersionAsync(z2sPort);
 
+                _z2sDeviceVersion = result.DeviceVersion;
+
                 if (result.DeviceVersion == null && result.Error != null)
                 {
                     z2sStatusText.Text = $"Nie udało się odczytać wersji z urządzenia.\n{result.Error}";
@@ -854,6 +860,18 @@ namespace GuiGenericBuilderDesktop
             z2sDetectPortButton.IsEnabled = enabled;
         }
 
+        private void Z2SBrowseBackupDir_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFolderDialog
+            {
+                Title = "Wybierz folder docelowy dla backupu Z2S",
+                InitialDirectory = z2sBackupDirTextBox.Text
+            };
+
+            if (dialog.ShowDialog() == true)
+                z2sBackupDirTextBox.Text = dialog.FolderName;
+        }
+
         private async void Z2SBackup_Click(object sender, RoutedEventArgs e)
         {
             var z2sPort = (z2sComPortSelector.SelectedItem as ComboBoxItem)?.Tag as string;
@@ -872,7 +890,9 @@ namespace GuiGenericBuilderDesktop
             Z2SSetButtonsEnabled(false);
             _z2sCancellation = new CancellationTokenSource();
 
-            var backupDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backups", "z2s");
+            var backupDir = string.IsNullOrWhiteSpace(z2sBackupDirTextBox?.Text)
+                ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backups", "z2s")
+                : z2sBackupDirTextBox.Text;
 
             try
             {
@@ -930,10 +950,21 @@ namespace GuiGenericBuilderDesktop
 
             bool withLogs = z2sWithLogsCheckBox.IsChecked ?? true;
             bool fullVersion = z2sFullVersionCheckBox.IsChecked ?? false;
+
+            // Show version picker — let the user choose from the last N releases
+            var picker = new Z2SVersionPickerWindow(_z2sUpdateService, _z2sDeviceVersion, _logger, _z2sVersionHistoryCount)
+            {
+                Owner = this
+            };
+
+            if (picker.ShowDialog() != true || picker.SelectedRelease == null)
+                return;
+
+            var selectedRelease = picker.SelectedRelease;
             string firmwareFileName = Z2SUpdateService.GetFirmwareFileName(withLogs, fullVersion);
 
             var confirm = MessageBox.Show(
-                $"Czy na pewno zaktualizować firmware Z2S na urządzeniu podłączonym do {z2sPort}?\n\n" +
+                $"Czy na pewno wgrać firmware Z2S {selectedRelease.TagName} na urządzeniu podłączonym do {z2sPort}?\n\n" +
                 $"Plik: {firmwareFileName}\n\n" +
                 "Zalecane jest najpierw wykonanie backupu.",
                 "Potwierdzenie aktualizacji",
@@ -950,11 +981,12 @@ namespace GuiGenericBuilderDesktop
             {
                 z2sStatusText.Text = "Przygotowywanie aktualizacji…";
 
-                var result = await _z2sUpdateService.DownloadAndFlashLatestAsync(
+                var result = await _z2sUpdateService.DownloadAndFlashAsync(
                     z2sPort,
                     _z2sChip,
                     withLogs,
                     fullVersion,
+                    selectedRelease,
                     msg => Dispatcher.InvokeAsync(() => z2sStatusText.Text = msg),
                     _z2sCancellation.Token);
 

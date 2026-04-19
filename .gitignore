@@ -1,4 +1,4 @@
-﻿*/bin
+*/bin
 */obj
 .vs/GuiGenericV2/CopilotIndices
 .vs/GuiGenericBuilderDesktop/copilot-chat
@@ -7,3 +7,4 @@ GuiGenericBuilderDesktop/GuiGenericBuilder.pfx
 GuiGenericBuilderDesktop/GuiGenericBuilder.snk
 GuiGenericBuilderDesktop/sign.ps1
 docs
+GuiGenericBuilderDesktop/Scripts

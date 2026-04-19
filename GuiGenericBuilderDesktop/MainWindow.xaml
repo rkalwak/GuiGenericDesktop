@@ -34,6 +34,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
@@ -89,8 +90,27 @@
                                   ToolTip="Wgra pełny obraz firmware (skasuje SPIFFS). Odznaczone = tylko aktualizacja aplikacji (update_only)"/>
                     </DockPanel>
 
-                    <!-- Row 2: Content area -->
-                    <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                    <!-- Row 2: Backup directory picker -->
+                    <DockPanel Grid.Row="2" LastChildFill="True" Margin="4,2,4,2" Background="#00d151" Height="34">
+                        <TextBlock Text="Katalog backupu:" FontWeight="SemiBold" Foreground="White"
+                                   VerticalAlignment="Center" Margin="4,0,6,0"/>
+                        <Button x:Name="z2sBrowseBackupDirButton"
+                                Content="Przeglądaj"
+                                Click="Z2SBrowseBackupDir_Click"
+                                Height="24" Width="90"
+                                DockPanel.Dock="Right"
+                                VerticalAlignment="Center" Margin="6,0,4,0"
+                                Background="White" FontWeight="SemiBold"/>
+                        <TextBox x:Name="z2sBackupDirTextBox"
+                                 VerticalAlignment="Center" Height="24"
+                                 VerticalContentAlignment="Center"
+                                 FontSize="11" Padding="4,0,4,0"
+                                 IsReadOnly="True" Background="#F0FFF0"
+                                 ToolTip="Katalog, w którym zostanie zapisany plik backupu"/>
+                    </DockPanel>
+
+                    <!-- Row 3: Content area -->
+                    <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
                                   Background="#00d151" Focusable="False">
                         <StackPanel Margin="12" Background="White">
                             <TextBlock Text="Bramka Zigbee — Z2S Library" FontSize="16" FontWeight="Bold"
