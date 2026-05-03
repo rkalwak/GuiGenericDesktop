@@ -76,7 +76,6 @@ namespace GuiGenericBuilderDesktop
             var appConfig = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: true)
-                .AddEnvironmentVariables()
                 .Build()
                 .Get<AppConfig>() ?? new AppConfig();
 
@@ -96,7 +95,7 @@ namespace GuiGenericBuilderDesktop
             _uiBuilderService = new UIBuilderService(_builderConfig, _logger);
             _autoUpdateService = new AutoUpdateService("rkalwak", "GuiGenericDesktop", appConfig, _logger);
             _ggUpdateService = new GGUpdateService(_repositoryPath, appConfig, _logger);
-            _z2sUpdateService = new Z2SUpdateService(_esptoolWrapper, _logger);
+            _z2sUpdateService = new Z2SUpdateService(_esptoolWrapper, appConfig, _logger);
             _z2sVersionHistoryCount = appConfig.Z2SVersionHistoryCount > 0 ? appConfig.Z2SVersionHistoryCount : 10;
 
             // Populate Z2S COM port selector
@@ -950,6 +949,7 @@ namespace GuiGenericBuilderDesktop
 
             bool withLogs = z2sWithLogsCheckBox.IsChecked ?? true;
             bool fullVersion = z2sFullVersionCheckBox.IsChecked ?? false;
+            bool clearDevice = z2sClearDeviceCheckBox.IsChecked ?? false;
 
             // Show version picker — let the user choose from the last N releases
             var picker = new Z2SVersionPickerWindow(_z2sUpdateService, _z2sDeviceVersion, _logger, _z2sVersionHistoryCount)
@@ -965,8 +965,8 @@ namespace GuiGenericBuilderDesktop
 
             var confirm = MessageBox.Show(
                 $"Czy na pewno wgrać firmware Z2S {selectedRelease.TagName} na urządzeniu podłączonym do {z2sPort}?\n\n" +
-                $"Plik: {firmwareFileName}\n\n" +
-                "Zalecane jest najpierw wykonanie backupu.",
+                $"Plik: {firmwareFileName}" +
+                (clearDevice ? "\n\n⚠ Cała pamięć flash zostanie wyczyszczona przed wgraniem firmware!" : "\n\nZalecane jest najpierw wykonanie backupu."),
                 "Potwierdzenie aktualizacji",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
@@ -986,6 +986,7 @@ namespace GuiGenericBuilderDesktop
                     _z2sChip,
                     withLogs,
                     fullVersion,
+                    clearDevice,
                     selectedRelease,
                     msg => Dispatcher.InvokeAsync(() => z2sStatusText.Text = msg),
                     _z2sCancellation.Token);

@@ -27,5 +27,10 @@ namespace CompilationLib
         /// <param name="size">Number of bytes to read</param>
         /// <param name="outputFile">Path to save the read data</param>
         Task<EsptoolResult> ReadFlashRegion(string comPort, long offset, long size, string outputFile, CancellationToken cancellation = default);
+
+        /// <summary>
+        /// Erases the entire flash memory of the device.
+        /// </summary>
+        Task<EsptoolResult> EraseFlash(string comPort, string chip, CancellationToken cancellation = default);
     }
 }

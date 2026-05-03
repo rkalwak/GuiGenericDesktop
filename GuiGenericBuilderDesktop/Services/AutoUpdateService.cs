@@ -34,6 +34,8 @@ namespace GuiGenericBuilderDesktop.Services
 
             // Initialize GitHub client
             _githubClient = new GitHubClient(new ProductHeaderValue("GuiGenericBuilderDesktop"));
+            if (!string.IsNullOrWhiteSpace(config.GitHubPat))
+                _githubClient.Credentials = new Credentials(config.GitHubPat);
 
             // Get current version from assembly
             _currentVersion = Assembly.GetExecutingAssembly().GetName().Version;

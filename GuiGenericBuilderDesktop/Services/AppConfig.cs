@@ -38,5 +38,22 @@ namespace GuiGenericBuilderDesktop.Services
         /// Defaults to 10.
         /// </summary>
         public int Z2SVersionHistoryCount { get; set; } = 10;
+
+        /// <summary>
+        /// GitHub repository owner for the Zigbee (Z2S) firmware.
+        /// </summary>
+        public string ZigbeeGitHubOwner { get; set; } = "rkalwak";
+
+        /// <summary>
+        /// GitHub repository name for the Zigbee (Z2S) firmware.
+        /// </summary>
+        public string ZigbeeGitHubRepo { get; set; } = "Z2S_Library";
+
+        /// <summary>
+        /// GitHub Personal Access Token used to authenticate API requests.
+        /// Set via the GITHUB_PAT environment variable or appsettings.json.
+        /// When provided, authenticated requests have a higher rate limit.
+        /// </summary>
+        public string GitHubPat { get; set; }
     }
 }

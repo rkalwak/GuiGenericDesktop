@@ -39,8 +39,12 @@ namespace GuiGenericBuilderDesktop.Services
         private readonly IEsptoolWrapper _esptoolWrapper;
         private readonly GitHubClient _githubClient;
 
-        private const string GitHubOwner = "lsroka76";
-        private const string GitHubRepo = "Z2S_Library";
+        private readonly string _zigbeeGitHubOwner;
+        private readonly string _zigbeeGitHubRepo;
+        private readonly GitHubReleasesClient _releasesClient;
+
+        private IReadOnlyList<GitHubRelease> _cachedReleases;
+        private int _cachedReleaseCount;
 
         // Standard SPIFFS offsets as fallbacks when partition table cannot be read
         private const long DefaultSpiffsOffset = 0x290000;
@@ -60,11 +64,16 @@ namespace GuiGenericBuilderDesktop.Services
             return $"Z2S_Gateway.8MB.OTA.{logsPart}.{versionPart}.bin";
         }
 
-        public Z2SUpdateService(IEsptoolWrapper esptoolWrapper, ILogger logger)
+        public Z2SUpdateService(IEsptoolWrapper esptoolWrapper, AppConfig config, ILogger logger)
         {
             _esptoolWrapper = esptoolWrapper;
             _logger = logger;
+            _zigbeeGitHubOwner = config.ZigbeeGitHubOwner;
+            _zigbeeGitHubRepo = config.ZigbeeGitHubRepo;
             _githubClient = new GitHubClient(new ProductHeaderValue("GuiGenericBuilderDesktop"));
+            if (!string.IsNullOrWhiteSpace(config.GitHubPat))
+                _githubClient.Credentials = new Credentials(config.GitHubPat);
+            _releasesClient = new GitHubReleasesClient(config.GitHubPat, logger);
             _logger.Information("Z2SUpdateService initialized");
         }
 
@@ -221,74 +230,61 @@ namespace GuiGenericBuilderDesktop.Services
         }
 
         /// <summary>
-        /// Scans raw SPIFFS/LittleFS bytes for the "Z2S-" prefix of version.dat content.
-        /// Returns the version segment (e.g. "1.5.1") from "Z2S-1.5.1-07/04/26".
+        /// Scans raw SPIFFS/LittleFS bytes for the specified version marker prefix of version.dat content.
+        /// Delegates to <see cref="SpiffsVersionParser.FindVersion"/>.
         /// </summary>
-        private string FindVersionInBytes(byte[] data)
+        private string FindVersionInBytes(byte[] data, string versionMarker = "SV-")
         {
-            var pattern = Encoding.ASCII.GetBytes("Z2S-");
-
-            for (int i = 0; i <= data.Length - pattern.Length; i++)
-            {
-                bool match = true;
-                for (int j = 0; j < pattern.Length; j++)
-                {
-                    if (data[i + j] != pattern[j]) { match = false; break; }
-                }
-                if (!match) continue;
-
-                // Read ahead for the full line (max 50 chars, stop at control chars or null)
-                int end = i + pattern.Length;
-                while (end < data.Length && end < i + 50
-                       && data[end] >= 0x20 && data[end] < 0x7F)
-                    end++;
-
-                var versionLine = Encoding.ASCII.GetString(data, i, end - i);
-                _logger.Information("Found Z2S version string: {Line}", versionLine);
-
-                // "Z2S-1.5.1-07/04/26" → split('-') → [0]="Z2S" [1]="1.5.1" [2]="07/04/26"
-                var parts = versionLine.Split('-');
-                if (parts.Length >= 2 && !string.IsNullOrWhiteSpace(parts[1]))
-                    return parts[1].Trim();
-            }
-
-            return null;
+            var version = SpiffsVersionParser.FindVersion(data, versionMarker);
+            if (version != null)
+                _logger.Information("Found Z2S version string: {Version}", version);
+            else
+                _logger.Warning("version.dat pattern not found in SPIFFS region");
+            return version;
         }
 
         private async Task<string> GetLatestGitHubVersionAsync()
         {
             _logger.Information("Fetching latest Z2S_Library release from GitHub");
 
-            var releases = await _githubClient.Repository.Release.GetAll(GitHubOwner, GitHubRepo);
-            var latest = releases
-                .Where(r => !r.Prerelease && !r.Draft)
-                .OrderByDescending(r => r.CreatedAt)
-                .FirstOrDefault();
-
-            if (latest == null)
+            try
             {
-                _logger.Warning("No releases found for {Owner}/{Repo}", GitHubOwner, GitHubRepo);
+                var latest = await _githubClient.Repository.Release.GetLatest(_zigbeeGitHubOwner, _zigbeeGitHubRepo);
+                _logger.Information("Latest Z2S_Library release tag: {Tag}", latest.TagName);
+                return latest.TagName;
+            }
+            catch (NotFoundException)
+            {
+                _logger.Warning("No releases found for {Owner}/{Repo}", _zigbeeGitHubOwner, _zigbeeGitHubRepo);
                 return null;
             }
-
-            _logger.Information("Latest Z2S_Library release tag: {Tag}", latest.TagName);
-            return latest.TagName;
         }
 
         /// <summary>
         /// Returns up to <paramref name="count"/> most recent stable releases from GitHub.
+        /// Results are cached in memory — call <see cref="InvalidateReleasesCache"/> to force a refresh.
         /// </summary>
-        public async Task<IReadOnlyList<Release>> GetReleasesAsync(int count = 10)
+        public async Task<IReadOnlyList<GitHubRelease>> GetReleasesAsync(int count = 15, CancellationToken cancellationToken = default)
         {
-            _logger.Information("Fetching up to {Count} Z2S_Library releases from GitHub", count);
-            var allReleases = await _githubClient.Repository.Release.GetAll(GitHubOwner, GitHubRepo);
-            var result = allReleases
-                .Where(r => !r.Prerelease && !r.Draft)
-                .OrderByDescending(r => r.CreatedAt)
-                .Take(count)
-                .ToList();
-            _logger.Information("Fetched {Count} releases", result.Count);
-            return result;
+            if (_cachedReleases != null && _cachedReleaseCount == count)
+            {
+                _logger.Information("Returning {Count} cached releases", _cachedReleases.Count);
+                return _cachedReleases;
+            }
+
+            _cachedReleases = await _releasesClient.GetLatestStableReleasesAsync(_zigbeeGitHubOwner, _zigbeeGitHubRepo, count, cancellationToken);
+            _cachedReleaseCount = count;
+            return _cachedReleases;
+        }
+
+        /// <summary>
+        /// Clears the in-memory releases cache so the next call to <see cref="GetReleasesAsync"/> fetches fresh data.
+        /// </summary>
+        public void InvalidateReleasesCache()
+        {
+            _cachedReleases = null;
+            _cachedReleaseCount = 0;
+            _logger.Information("Releases cache invalidated");
         }
 
         /// <summary>
@@ -315,6 +311,7 @@ namespace GuiGenericBuilderDesktop.Services
 
         /// <summary>
         /// Creates a full-flash backup of the connected device to the specified directory.
+        /// The filename includes the firmware version read from the device.
         /// </summary>
         public async Task<Z2SBackupResult> BackupAsync(string comPort, string chip, string backupDirectory, CancellationToken cancellationToken = default)
         {
@@ -326,7 +323,22 @@ namespace GuiGenericBuilderDesktop.Services
                     Directory.CreateDirectory(backupDirectory);
 
                 var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-                var backupFile = Path.Combine(backupDirectory, $"Z2S_Backup_{timestamp}.bin");
+                string deviceVersion = null;
+
+                try
+                {
+                    deviceVersion = await ReadDeviceVersionAsync(comPort, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warning(ex, "Could not read device version for backup filename, using timestamp only");
+                }
+
+                var filenameSuffix = string.IsNullOrEmpty(deviceVersion)
+                    ? timestamp
+                    : $"{deviceVersion}_{timestamp}";
+
+                var backupFile = Path.Combine(backupDirectory, $"Z2S_Backup_{filenameSuffix}.bin");
 
                 var result = await _esptoolWrapper.ReadFlush(comPort, chip, backupFile, cancellationToken);
 
@@ -360,6 +372,7 @@ namespace GuiGenericBuilderDesktop.Services
             string chip,
             bool withLogs,
             bool fullVersion,
+            bool clearDevice,
             Action<string> progress,
             CancellationToken cancellationToken = default)
         {
@@ -372,11 +385,8 @@ namespace GuiGenericBuilderDesktop.Services
             try
             {
                 progress?.Invoke("Pobieranie informacji o najnowszej wersji z GitHub…");
-                var releases = await _githubClient.Repository.Release.GetAll(GitHubOwner, GitHubRepo);
-                var latest = releases
-                    .Where(r => !r.Prerelease && !r.Draft)
-                    .OrderByDescending(r => r.CreatedAt)
-                    .FirstOrDefault();
+                var releases = await _releasesClient.GetLatestStableReleasesAsync(_zigbeeGitHubOwner, _zigbeeGitHubRepo, 1, cancellationToken);
+                var latest = releases.FirstOrDefault();
 
                 if (latest == null)
                     return new Z2SFlashResult { Success = false, Error = "Nie znaleziono wydania w repozytorium GitHub." };
@@ -402,18 +412,15 @@ namespace GuiGenericBuilderDesktop.Services
                 return new Z2SFlashResult { Success = false, Error = $"Błąd GitHub: {ex.Message}" };
             }
 
-            return await DownloadAndFlashCoreAsync(comPort, chip, withLogs, fullVersion, latestVersion, downloadUrl, progress, cancellationToken);
+            return await DownloadAndFlashCoreAsync(comPort, chip, withLogs, fullVersion, clearDevice, latestVersion, downloadUrl, progress, cancellationToken);
         }
-
-        /// <summary>
-        /// Downloads and flashes a specific GitHub release to the device.
-        /// </summary>
         public async Task<Z2SFlashResult> DownloadAndFlashAsync(
             string comPort,
             string chip,
             bool withLogs,
             bool fullVersion,
-            Release release,
+            bool clearDevice,
+            GitHubRelease release,
             Action<string> progress,
             CancellationToken cancellationToken = default)
         {
@@ -432,7 +439,7 @@ namespace GuiGenericBuilderDesktop.Services
             downloadUrl = asset.BrowserDownloadUrl;
             _logger.Information("Z2S asset to download: {Name} ({Url})", asset.Name, downloadUrl);
 
-            return await DownloadAndFlashCoreAsync(comPort, chip, withLogs, fullVersion, release.TagName, downloadUrl, progress, cancellationToken);
+            return await DownloadAndFlashCoreAsync(comPort, chip, withLogs, fullVersion, clearDevice, release.TagName, downloadUrl, progress, cancellationToken);
         }
 
         private async Task<Z2SFlashResult> DownloadAndFlashCoreAsync(
@@ -440,6 +447,7 @@ namespace GuiGenericBuilderDesktop.Services
             string chip,
             bool withLogs,
             bool fullVersion,
+            bool clearDevice,
             string version,
             string downloadUrl,
             Action<string> progress,
@@ -460,6 +468,29 @@ namespace GuiGenericBuilderDesktop.Services
             {
                 _logger.Error(ex, "Failed to download Z2S firmware");
                 return new Z2SFlashResult { Success = false, Error = $"Błąd pobierania: {ex.Message}" };
+            }
+
+            // Erase flash before writing if requested
+            if (clearDevice)
+            {
+                try
+                {
+                    progress?.Invoke("Czyszczenie pamięci urządzenia…");
+                    _logger.Information("Erasing flash on port {Port}, chip {Chip}", comPort, chip);
+                    var eraseResult = await _esptoolWrapper.EraseFlash(comPort, chip, cancellationToken);
+                    if (!eraseResult.Success)
+                    {
+                        _logger.Warning("Erase flash failed: {Error}", eraseResult.StdErr);
+                        return new Z2SFlashResult { Success = false, Error = $"Błąd czyszczenia pamięci: {eraseResult.StdErr}" };
+                    }
+                    _logger.Information("Flash erased successfully");
+                }
+                catch (OperationCanceledException) { throw; }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Z2S erase flash exception");
+                    return new Z2SFlashResult { Success = false, Error = $"Błąd czyszczenia pamięci: {ex.Message}" };
+                }
             }
 
             // Flash

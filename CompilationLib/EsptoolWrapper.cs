@@ -134,6 +134,13 @@ namespace CompilationLib
                                cancellation);
 
         /// <summary>
+        /// Erases the entire flash memory of the device.
+        /// </summary>
+        public async Task<EsptoolResult> EraseFlash(string comPort, string chip, CancellationToken cancellation = default)
+            => await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 erase-flash",
+                               cancellation);
+
+        /// <summary>
         /// Merges partition.bin, bootloader.bin and firmware.bin into a single complete firmware file using esptool merge_bin.
         /// The merged file can be flashed directly to address 0x0000 for a complete firmware installation.
         /// Addresses are parsed from the partition CSV file to ensure accuracy.

@@ -1,6 +1,5 @@
 using System.Windows;
 using System.Windows.Controls;
-using Octokit;
 using Serilog;
 using GuiGenericBuilderDesktop.Services;
 
@@ -13,13 +12,13 @@ namespace GuiGenericBuilderDesktop
         private readonly int _versionHistoryCount;
         private readonly ILogger _logger;
 
-        private IReadOnlyList<Release> _releases;
-        private Release _latestRelease;
+        private IReadOnlyList<GitHubRelease> _releases;
+        private GitHubRelease _latestRelease;
 
         /// <summary>
         /// The release selected by the user. Null if the window was cancelled.
         /// </summary>
-        public Release SelectedRelease { get; private set; }
+        public GitHubRelease SelectedRelease { get; private set; }
 
         /// <summary>
         /// True when the selected release is older than the latest available release.
@@ -86,7 +85,7 @@ namespace GuiGenericBuilderDesktop
 
         private void ReleaseListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            var selected = ReleaseListBox.SelectedItem as Release;
+            var selected = ReleaseListBox.SelectedItem as GitHubRelease;
             if (selected == null)
             {
                 FlashButton.IsEnabled = false;
@@ -106,7 +105,7 @@ namespace GuiGenericBuilderDesktop
 
         private void FlashButton_Click(object sender, RoutedEventArgs e)
         {
-            var selected = ReleaseListBox.SelectedItem as Release;
+            var selected = ReleaseListBox.SelectedItem as GitHubRelease;
             if (selected == null) return;
 
             if (IsDowngrade)
