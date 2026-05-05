@@ -16,6 +16,9 @@
 - Do not introduce strings in any other language.
 - Comments in code may be in English only.
 
+## Testing Guidelines
+- Never make tests dependent on environment variables. Put test data (like COM port, chip name) directly in the test class as constants.
+
 ## Line Ending Verification (PowerShell)
 ```powershell
 $b = [System.IO.File]::ReadAllBytes($path)
@@ -25,4 +28,3 @@ for ($i = 0; $i -lt $b.Length - 1; $i++) {
     elseif ($b[$i] -eq 10 -and ($i -eq 0 -or $b[$i-1] -ne 13)) { $lf++ }
 }
 # Expected: crlf=0, lf>0, first byte != 239 (no BOM)
-```

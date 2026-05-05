@@ -36,7 +36,7 @@ namespace GuiGenericBuilderDesktop
             if (!string.IsNullOrWhiteSpace(deviceVersion))
                 CurrentVersionText.Text = $"Aktualna wersja na urządzeniu: {deviceVersion}";
 
-            Loaded += async (_, _) => await LoadReleasesAsync();
+            LoadingText.Text = "Kliknij 'Pobierz listę', aby załadować dostępne wersje firmware.";
         }
 
         private async Task LoadReleasesAsync()
@@ -44,7 +44,10 @@ namespace GuiGenericBuilderDesktop
             try
             {
                 LoadingText.Visibility = Visibility.Visible;
+                LoadingText.Text = "Pobieranie listy wersji z GitHub…";
                 FlashButton.IsEnabled = false;
+                LoadReleasesButton.IsEnabled = false;
+                RefreshReleasesButton.IsEnabled = false;
 
                 _releases = await _updateService.GetReleasesAsync(_versionHistoryCount);
 
@@ -68,6 +71,22 @@ namespace GuiGenericBuilderDesktop
                 _logger.Error(ex, "Failed to fetch Z2S releases for picker");
                 LoadingText.Text = $"Błąd pobierania listy wersji: {ex.Message}";
             }
+            finally
+            {
+                LoadReleasesButton.IsEnabled = true;
+                RefreshReleasesButton.IsEnabled = true;
+            }
+        }
+
+        private async void LoadReleasesButton_Click(object sender, RoutedEventArgs e)
+        {
+            await LoadReleasesAsync();
+        }
+
+        private async void RefreshReleasesButton_Click(object sender, RoutedEventArgs e)
+        {
+            _updateService.InvalidateReleasesCache();
+            await LoadReleasesAsync();
         }
 
         private void MarkLatestItem(object sender, RoutedEventArgs e)

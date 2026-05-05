@@ -141,6 +141,13 @@ namespace CompilationLib
                                cancellation);
 
         /// <summary>
+        /// Writes a binary file to the device flash at a specific byte offset.
+        /// </summary>
+        public async Task<EsptoolResult> WriteFlashAtOffset(string comPort, string chip, long offset, string binFile, CancellationToken cancellation = default)
+            => await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 write-flash 0x{offset:X} {EscapeArgument(binFile)}",
+                               cancellation);
+
+        /// <summary>
         /// Merges partition.bin, bootloader.bin and firmware.bin into a single complete firmware file using esptool merge_bin.
         /// The merged file can be flashed directly to address 0x0000 for a complete firmware installation.
         /// Addresses are parsed from the partition CSV file to ensure accuracy.

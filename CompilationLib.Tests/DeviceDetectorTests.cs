@@ -43,6 +43,9 @@ namespace CompilationLib.Tests
 
             public async Task<EsptoolResult> EraseFlash(string comPort, string chip, System.Threading.CancellationToken cancellation = default)
             => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Erase flash success", StdErr = "", Command = "esptool erase-flash" });
+
+            public async Task<EsptoolResult> WriteFlashAtOffset(string comPort, string chip, long offset, string binFile, System.Threading.CancellationToken cancellation = default)
+            => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Write flash success", StdErr = "", Command = "esptool write-flash" });
         }
 
         [Fact]

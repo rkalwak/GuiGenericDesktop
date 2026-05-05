@@ -46,6 +46,9 @@ namespace GuiGenericBuilderDesktop.Services
         private IReadOnlyList<GitHubRelease> _cachedReleases;
         private int _cachedReleaseCount;
 
+        private static readonly string ReleaseCacheFile =
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "z2s_releases_cache.json");
+
         // Standard SPIFFS offsets as fallbacks when partition table cannot be read
         private const long DefaultSpiffsOffset = 0x290000;
         private const long DefaultSpiffsSize = 0x170000;
@@ -262,29 +265,72 @@ namespace GuiGenericBuilderDesktop.Services
 
         /// <summary>
         /// Returns up to <paramref name="count"/> most recent stable releases from GitHub.
-        /// Results are cached in memory — call <see cref="InvalidateReleasesCache"/> to force a refresh.
+        /// Results are cached in memory and on disk — call <see cref="InvalidateReleasesCache"/> to force a refresh.
         /// </summary>
         public async Task<IReadOnlyList<GitHubRelease>> GetReleasesAsync(int count = 15, CancellationToken cancellationToken = default)
         {
             if (_cachedReleases != null && _cachedReleaseCount == count)
             {
-                _logger.Information("Returning {Count} cached releases", _cachedReleases.Count);
+                _logger.Information("Returning {Count} cached releases (memory)", _cachedReleases.Count);
                 return _cachedReleases;
+            }
+
+            // Try loading from file cache
+            if (File.Exists(ReleaseCacheFile))
+            {
+                try
+                {
+                    var json = await File.ReadAllTextAsync(ReleaseCacheFile, cancellationToken);
+                    var cached = System.Text.Json.JsonSerializer.Deserialize<List<GitHubRelease>>(json);
+                    if (cached != null && cached.Count > 0)
+                    {
+                        _logger.Information("Loaded {Count} releases from file cache {File}", cached.Count, ReleaseCacheFile);
+                        _cachedReleases = cached.Take(count).ToList();
+                        _cachedReleaseCount = count;
+                        return _cachedReleases;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warning(ex, "Failed to read releases file cache, fetching from GitHub");
+                }
             }
 
             _cachedReleases = await _releasesClient.GetLatestStableReleasesAsync(_zigbeeGitHubOwner, _zigbeeGitHubRepo, count, cancellationToken);
             _cachedReleaseCount = count;
+
+            // Persist to file cache
+            try
+            {
+                var json = System.Text.Json.JsonSerializer.Serialize(_cachedReleases);
+                await File.WriteAllTextAsync(ReleaseCacheFile, json, cancellationToken);
+                _logger.Information("Releases cached to file {File}", ReleaseCacheFile);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, "Failed to write releases file cache");
+            }
+
             return _cachedReleases;
         }
 
         /// <summary>
-        /// Clears the in-memory releases cache so the next call to <see cref="GetReleasesAsync"/> fetches fresh data.
+        /// Clears the in-memory and on-disk releases cache so the next call to <see cref="GetReleasesAsync"/> fetches fresh data.
         /// </summary>
         public void InvalidateReleasesCache()
         {
             _cachedReleases = null;
             _cachedReleaseCount = 0;
-            _logger.Information("Releases cache invalidated");
+            try
+            {
+                if (File.Exists(ReleaseCacheFile))
+                    File.Delete(ReleaseCacheFile);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, "Failed to delete releases file cache");
+            }
+            _logger.Information("Releases cache invalidated (memory + file)");
         }
 
         /// <summary>
@@ -519,5 +565,41 @@ namespace GuiGenericBuilderDesktop.Services
                 try { if (File.Exists(tempFile)) File.Delete(tempFile); } catch { }
             }
         }
+            /// <summary>
+            /// Restores the device flash from a previously created backup file.
+            /// </summary>
+            public async Task<Z2SFlashResult> RestoreFromBackupAsync(
+                string comPort,
+                string chip,
+                string backupFilePath,
+                Action<string> progress,
+                CancellationToken cancellationToken = default)
+            {
+                _logger.Information("Starting Z2S restore from backup {File} on port {Port}, chip {Chip}", backupFilePath, comPort, chip);
+
+                if (!File.Exists(backupFilePath))
+                    return new Z2SFlashResult { Success = false, Error = $"Plik backupu nie istnieje: {backupFilePath}" };
+
+                try
+                {
+                    progress?.Invoke($"Przywracanie z backupu: {Path.GetFileName(backupFilePath)}…");
+                    var result = await _esptoolWrapper.WriteFlush(comPort, chip, backupFilePath, cancellationToken);
+
+                    if (result.Success)
+                    {
+                        _logger.Information("Z2S restore succeeded from {File}", backupFilePath);
+                        return new Z2SFlashResult { Success = true, FlashedVersion = "przywrócony backup" };
+                    }
+
+                    _logger.Warning("Z2S restore failed: {Error}", result.StdErr);
+                    return new Z2SFlashResult { Success = false, Error = result.StdErr };
+                }
+                catch (OperationCanceledException) { throw; }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Z2S restore exception");
+                    return new Z2SFlashResult { Success = false, Error = ex.Message };
+                }
+            }
+        }
     }
-}

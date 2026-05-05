@@ -855,6 +855,7 @@ namespace GuiGenericBuilderDesktop
         {
             z2sCheckVersionButton.IsEnabled = enabled;
             z2sBackupButton.IsEnabled = enabled;
+            z2sRestoreButton.IsEnabled = enabled;
             z2sUpgradeButton.IsEnabled = enabled;
             z2sDetectPortButton.IsEnabled = enabled;
         }
@@ -950,6 +951,7 @@ namespace GuiGenericBuilderDesktop
             bool withLogs = z2sWithLogsCheckBox.IsChecked ?? true;
             bool fullVersion = z2sFullVersionCheckBox.IsChecked ?? false;
             bool clearDevice = z2sClearDeviceCheckBox.IsChecked ?? false;
+            bool backupBeforeFlash = z2sBackupBeforeFlashCheckBox.IsChecked ?? true;
 
             // Show version picker — let the user choose from the last N releases
             var picker = new Z2SVersionPickerWindow(_z2sUpdateService, _z2sDeviceVersion, _logger, _z2sVersionHistoryCount)
@@ -963,10 +965,19 @@ namespace GuiGenericBuilderDesktop
             var selectedRelease = picker.SelectedRelease;
             string firmwareFileName = Z2SUpdateService.GetFirmwareFileName(withLogs, fullVersion);
 
+            var confirmMessage = $"Czy na pewno wgrać firmware Z2S {selectedRelease.TagName} na urządzeniu podłączonym do {z2sPort}?\n\nPlik: {firmwareFileName}";
+
+            if (!picker.IsDowngrade && _z2sDeviceVersion != null && selectedRelease.TagName != _z2sDeviceVersion)
+                confirmMessage += "\n\n\u26a0 Uwaga: wgrywanie nowszej wersji mo\u017ce spowodowa\u0107 problemy z uruchomieniem urz\u0105dzenia. W razie problem\u00f3w u\u017cyj opcji 'Przywr\u00f3\u0107 z backupu'.";
+
+            if (clearDevice)
+                confirmMessage += "\n\n⚠ Cała pamięć flash zostanie wyczyszczona przed wgraniem firmware!";
+
+            if (backupBeforeFlash)
+                confirmMessage += "\n\n✔ Backup zostanie wykonany automatycznie przed wgraniem firmware.";
+
             var confirm = MessageBox.Show(
-                $"Czy na pewno wgrać firmware Z2S {selectedRelease.TagName} na urządzeniu podłączonym do {z2sPort}?\n\n" +
-                $"Plik: {firmwareFileName}" +
-                (clearDevice ? "\n\n⚠ Cała pamięć flash zostanie wyczyszczona przed wgraniem firmware!" : "\n\nZalecane jest najpierw wykonanie backupu."),
+                confirmMessage,
                 "Potwierdzenie aktualizacji",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
@@ -979,6 +990,36 @@ namespace GuiGenericBuilderDesktop
 
             try
             {
+                // Auto-backup before flashing if requested
+                if (backupBeforeFlash)
+                {
+                    var backupDir = string.IsNullOrWhiteSpace(z2sBackupDirTextBox?.Text)
+                        ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backups", "z2s")
+                        : z2sBackupDirTextBox.Text;
+
+                    z2sStatusText.Text = $"Tworzenie backupu przed aktualizacją na porcie {z2sPort}…\n(może potrwać kilka minut)";
+                    var backupResult = await _z2sUpdateService.BackupAsync(z2sPort, _z2sChip, backupDir, _z2sCancellation.Token);
+
+                    if (!backupResult.Success)
+                    {
+                        var continueAnyway = MessageBox.Show(
+                            $"Backup nie powiódł się: {backupResult.Error}\n\nCzy chcesz kontynuować aktualizację mimo niepowodzenia backupu?",
+                            "Błąd backupu",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Warning);
+
+                        if (continueAnyway != MessageBoxResult.Yes)
+                        {
+                            z2sStatusText.Text = "Aktualizacja anulowana — backup nie powiódł się.";
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        z2sStatusText.Text = $"✔ Backup zakończony: {backupResult.BackupFilePath}\nRozpoczynanie aktualizacji…";
+                    }
+                }
+
                 z2sStatusText.Text = "Przygotowywanie aktualizacji…";
 
                 var result = await _z2sUpdateService.DownloadAndFlashAsync(
@@ -1015,6 +1056,91 @@ namespace GuiGenericBuilderDesktop
             {
                 _logger.Error(ex, "Z2SUpgrade_Click failed");
                 z2sStatusText.Text = $"Błąd aktualizacji: {ex.Message}";
+            }
+            finally
+            {
+                _z2sCancellation?.Dispose();
+                _z2sCancellation = null;
+                Z2SSetButtonsEnabled(true);
+            }
+        }
+
+        private async void Z2SRestore_Click(object sender, RoutedEventArgs e)
+        {
+            var z2sPort = (z2sComPortSelector.SelectedItem as ComboBoxItem)?.Tag as string;
+            if (string.IsNullOrEmpty(z2sPort) || z2sPort == "None")
+            {
+                z2sStatusText.Text = "Błąd: Wybierz port COM przed przywracaniem backupu.";
+                return;
+            }
+
+            if (string.IsNullOrEmpty(_z2sChip))
+            {
+                z2sStatusText.Text = "Błąd: Najpierw wykryj urządzenie przyciskiem 'Wykryj port'.";
+                return;
+            }
+
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "Wybierz plik backupu Z2S do przywrócenia",
+                Filter = "Pliki binarne (*.bin)|*.bin|Wszystkie pliki (*.*)|*.*",
+                InitialDirectory = string.IsNullOrWhiteSpace(z2sBackupDirTextBox?.Text)
+                    ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backups", "z2s")
+                    : z2sBackupDirTextBox.Text
+            };
+
+            if (dialog.ShowDialog() != true)
+                return;
+
+            var backupFile = dialog.FileName;
+
+            var confirm = MessageBox.Show(
+                $"Czy na pewno chcesz przywrócić backup na urządzeniu podłączonym do {z2sPort}?\n\nPlik: {backupFile}\n\n⚠ Obecna zawartość flash zostanie nadpisana!",
+                "Potwierdzenie przywracania backupu",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (confirm != MessageBoxResult.Yes)
+                return;
+
+            Z2SSetButtonsEnabled(false);
+            _z2sCancellation = new CancellationTokenSource();
+
+            try
+            {
+                z2sStatusText.Text = $"Przywracanie backupu z pliku:\n{backupFile}\n(może potrwać kilka minut)";
+
+                var result = await _z2sUpdateService.RestoreFromBackupAsync(
+                    z2sPort,
+                    _z2sChip,
+                    backupFile,
+                    msg => Dispatcher.InvokeAsync(() => z2sStatusText.Text = msg),
+                    _z2sCancellation.Token);
+
+                if (result.Success)
+                {
+                    _logger.Information("Z2S restore succeeded from {File}", backupFile);
+                    z2sStatusText.Text = $"✔ Przywracanie zakończone pomyślnie!\n\nPlik: {backupFile}";
+                    z2sStatusBorder.Background = System.Windows.Media.Brushes.LightGreen;
+                    await Task.Delay(4000);
+                    z2sStatusBorder.Background = System.Windows.Media.Brushes.Transparent;
+                }
+                else
+                {
+                    z2sStatusText.Text = $"✘ Przywracanie nieudane.\n{result.Error}";
+                    z2sStatusBorder.Background = System.Windows.Media.Brushes.MistyRose;
+                    await Task.Delay(4000);
+                    z2sStatusBorder.Background = System.Windows.Media.Brushes.Transparent;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                z2sStatusText.Text = "Przywracanie anulowane.";
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Z2SRestore_Click failed");
+                z2sStatusText.Text = $"Błąd przywracania: {ex.Message}";
             }
             finally
             {

@@ -32,5 +32,11 @@ namespace CompilationLib
         /// Erases the entire flash memory of the device.
         /// </summary>
         Task<EsptoolResult> EraseFlash(string comPort, string chip, CancellationToken cancellation = default);
+
+        /// <summary>
+        /// Writes a binary file to the device flash at a specific byte offset.
+        /// Used for OTA-only firmware images that must land in the app0 partition.
+        /// </summary>
+        Task<EsptoolResult> WriteFlashAtOffset(string comPort, string chip, long offset, string binFile, CancellationToken cancellation = default);
     }
 }

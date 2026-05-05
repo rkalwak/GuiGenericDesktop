@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Wybierz wersję firmware Z2S Gateway"
-        Height="520" Width="600"
+        Height="570" Width="650"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#F5F5F5">
@@ -21,6 +21,61 @@
             <TextBlock FontSize="22" FontWeight="Bold" Text="🔧" VerticalAlignment="Center"/>
             <TextBlock FontSize="18" FontWeight="Bold" Margin="8,0,0,0" VerticalAlignment="Center"
                        Text="Wybierz wersję do wgrania"/>
+            <Button x:Name="LoadReleasesButton" Content="Pobierz listę"
+                    Width="110" Height="28" Margin="20,0,6,0"
+                    VerticalAlignment="Center"
+                    Background="#4CAF50" Foreground="White" FontWeight="SemiBold"
+                    Click="LoadReleasesButton_Click" Cursor="Hand">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="4" BorderThickness="0">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#CCCCCC"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#388E3C"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button x:Name="RefreshReleasesButton" Content="Odśwież (GitHub)"
+                    Width="130" Height="28" Margin="0,0,0,0"
+                    VerticalAlignment="Center"
+                    Background="#FF9800" Foreground="White" FontWeight="SemiBold"
+                    Click="RefreshReleasesButton_Click" Cursor="Hand"
+                    ToolTip="Wyczyść pamięć podręczną i pobierz świeżą listę z GitHub">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="Button">
+                                    <Border Background="{TemplateBinding Background}" CornerRadius="4" BorderThickness="0">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Background" Value="#CCCCCC"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#E65100"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
         </StackPanel>
 
         <!-- Current device version info -->

@@ -12,6 +12,18 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
+  <ItemGroup>
+    <!-- manifest and download script are always copied; *.bin files are gitignored but copied when present -->
+    <Content Include="TestFixtures\Z2SFirmware\manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFixtures\Z2SFirmware\Download-Firmware.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestFixtures\Z2SFirmware\*.bin" Condition="Exists('TestFixtures\Z2SFirmware\')">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="FluentAssertions" Version="8.8.0" />
