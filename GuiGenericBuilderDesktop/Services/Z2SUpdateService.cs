@@ -359,7 +359,7 @@ namespace GuiGenericBuilderDesktop.Services
         /// Creates a full-flash backup of the connected device to the specified directory.
         /// The filename includes the firmware version read from the device.
         /// </summary>
-        public async Task<Z2SBackupResult> BackupAsync(string comPort, string chip, string backupDirectory, CancellationToken cancellationToken = default)
+        public async Task<Z2SBackupResult> BackupAsync(string comPort, string chip, string backupDirectory, string flashSize = null, CancellationToken cancellationToken = default)
         {
             _logger.Information("Starting Z2S backup on port {Port}, chip {Chip}", comPort, chip);
 
@@ -386,7 +386,7 @@ namespace GuiGenericBuilderDesktop.Services
 
                 var backupFile = Path.Combine(backupDirectory, $"Z2S_Backup_{filenameSuffix}.bin");
 
-                var result = await _esptoolWrapper.ReadFlush(comPort, chip, backupFile, cancellationToken);
+                var result = await _esptoolWrapper.ReadFlush(comPort, chip, backupFile, flashSize, cancellationToken);
 
                 if (result.Success && File.Exists(backupFile))
                 {

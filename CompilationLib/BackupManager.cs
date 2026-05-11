@@ -54,7 +54,7 @@ namespace CompilationLib
                 Console.WriteLine($"Backup may take several minutes depending on flash size...");
 
                 // Read flash using esptool
-                var result = await _esptoolWrapper.ReadFlush(comPort, chipType, backupFilePath, cancellationToken);
+                var result = await _esptoolWrapper.ReadFlush(comPort, chipType, backupFilePath, cancellation: cancellationToken);
 
                 if (result.Success)
                 {

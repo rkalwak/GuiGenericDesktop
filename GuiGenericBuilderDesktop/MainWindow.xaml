@@ -50,6 +50,11 @@
                                 Height="28" Width="110"
                                 VerticalAlignment="Center" Margin="6,0,0,0"
                                 Background="White" FontWeight="SemiBold"/>
+                        <TextBlock Text="Flash:" FontWeight="SemiBold" Foreground="White"
+                                   VerticalAlignment="Center" Margin="12,0,4,0"/>
+                        <ComboBox x:Name="z2sFlashSizeSelector"
+                                  Width="70" VerticalAlignment="Center" Margin="0,0,0,0"
+                                  ToolTip="Rozmiar pamięci flash urządzenia. Wykrywany automatycznie po kliknięciu 'Wykryj port'."/>
                         <TextBlock x:Name="z2sChipLabel"
                                    Text="" Foreground="White" FontSize="12"
                                    VerticalAlignment="Center" Margin="12,0,0,0"/>
@@ -135,11 +140,16 @@
                             <TextBlock Text="Sprawdź, wykonaj backup lub zaktualizuj firmware Z2S na podłączonym urządzeniu."
                                        TextWrapping="Wrap" Margin="0,0,0,12" Foreground="#444"/>
                             <Border x:Name="z2sStatusBorder" Background="#F5F5F5" CornerRadius="4"
-                                    BorderBrush="#DDD" BorderThickness="1" Padding="14" MinHeight="80"
+                                    BorderBrush="#DDD" BorderThickness="1" Padding="4" MinHeight="80"
                                     Margin="0,0,0,0">
-                                <TextBlock x:Name="z2sStatusText"
-                                           Text="Wybierz port COM i naciśnij przycisk aby rozpocząć."
-                                           TextWrapping="Wrap" FontSize="13"/>
+                                <TextBox x:Name="z2sStatusText"
+                                         Text="Wybierz port COM i naciśnij przycisk aby rozpocząć."
+                                         TextWrapping="Wrap" FontSize="13"
+                                         IsReadOnly="True" BorderThickness="0" Background="Transparent"
+                                         VerticalScrollBarVisibility="Auto"
+                                         Padding="10,10,10,10"
+                                         IsTabStop="False"
+                                         FocusVisualStyle="{x:Null}"/>
                             </Border>
                         </StackPanel>
                     </ScrollViewer>

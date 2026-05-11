@@ -32,7 +32,7 @@ namespace CompilationLib.Tests
             public async Task<EsptoolResult> ReadFlashId(string comPort, System.Threading.CancellationToken cancellation = default)
             => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = _flashStdOut, StdErr = _flashStdErr, Command = "esptool --flash-id" });
 
-            public async Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, System.Threading.CancellationToken cancellation = default)
+            public async Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, string flashSize = null, System.Threading.CancellationToken cancellation = default)
             => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Read flash success", StdErr = "", Command = "esptool read-flash" });
 
             public async Task<EsptoolResult> ReadFlashRegion(string comPort, long offset, long size, string outputFile, System.Threading.CancellationToken cancellation = default)

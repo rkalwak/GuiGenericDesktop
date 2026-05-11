@@ -54,6 +54,7 @@ namespace GuiGenericBuilderDesktop
 
         // Z2S tab state
         private string _z2sChip = string.Empty;
+        private string _z2sFlashSize = string.Empty;
         private string _z2sDeviceVersion = null;
         private int _z2sVersionHistoryCount = 10;
         private CancellationTokenSource _z2sCancellation;
@@ -104,6 +105,16 @@ namespace GuiGenericBuilderDesktop
             {
                 z2sComPortSelector.Items.Add(new ComboBoxItem { Content = $"COM{i}", Tag = $"COM{i}" });
             }
+
+            // Populate Z2S flash size selector
+            z2sFlashSizeSelector.Items.Add(new ComboBoxItem { Content = "Auto", Tag = string.Empty, IsSelected = true });
+            foreach (var fs in new[] { "2MB", "4MB", "8MB", "16MB", "32MB" })
+                z2sFlashSizeSelector.Items.Add(new ComboBoxItem { Content = fs, Tag = fs });
+            z2sFlashSizeSelector.SelectionChanged += (s, e) =>
+            {
+                if (z2sFlashSizeSelector.SelectedItem is ComboBoxItem ci)
+                    _z2sFlashSize = (ci.Tag as string) ?? string.Empty;
+            };
 
             InitializeBuildFlags();
             // Add the Parameters column dynamically so it's visible in the grid
@@ -779,14 +790,25 @@ namespace GuiGenericBuilderDesktop
                     _z2sChip = deviceInfo?.ChipType?.ToLowerInvariant() ?? string.Empty;
                     z2sChipLabel.Text = string.IsNullOrEmpty(_z2sChip) ? string.Empty : $"Chip: {_z2sChip.ToUpperInvariant()}";
 
+                    // Auto-select detected flash size in the dropdown
+                    var detectedFlash = deviceInfo?.FlashSize ?? string.Empty;
+                    _z2sFlashSize = detectedFlash;
+                    var flashMatch = z2sFlashSizeSelector.Items
+                        .OfType<ComboBoxItem>()
+                        .FirstOrDefault(ci => string.Equals(ci.Tag as string, detectedFlash, StringComparison.OrdinalIgnoreCase));
+                    z2sFlashSizeSelector.SelectedItem = flashMatch ?? z2sFlashSizeSelector.Items[0];
+
                     z2sStatusText.Text = $"Wykryto port: {port}" +
                         (string.IsNullOrEmpty(_z2sChip) ? string.Empty : $", chip: {_z2sChip.ToUpperInvariant()}") +
+                        (string.IsNullOrEmpty(detectedFlash) ? string.Empty : $", flash: {detectedFlash}") +
                         ".\nNaciśnij przycisk aby sprawdzić wersję.";
                 }
                 else
                 {
                     _z2sChip = string.Empty;
+                    _z2sFlashSize = string.Empty;
                     z2sChipLabel.Text = string.Empty;
+                    z2sFlashSizeSelector.SelectedIndex = 0;
                     z2sStatusText.Text = "Nie wykryto urządzenia. Sprawdź połączenie USB i spróbuj ponownie.";
                 }
             }
@@ -890,15 +912,18 @@ namespace GuiGenericBuilderDesktop
             Z2SSetButtonsEnabled(false);
             _z2sCancellation = new CancellationTokenSource();
 
-            var backupDir = string.IsNullOrWhiteSpace(z2sBackupDirTextBox?.Text)
-                ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backups", "z2s")
-                : z2sBackupDirTextBox.Text;
+            var backupDir = z2sBackupDirTextBox?.Text?.Trim();
+            if (string.IsNullOrWhiteSpace(backupDir))
+            {
+                z2sStatusText.Text = "Błąd: Wybierz katalog docelowy backupu przed wykonaniem operacji.";
+                return;
+            }
 
             try
             {
                 z2sStatusText.Text = $"Tworzenie backupu na porcie {z2sPort}…\n(może potrwać kilka minut)";
 
-                var result = await _z2sUpdateService.BackupAsync(z2sPort, _z2sChip, backupDir, _z2sCancellation.Token);
+                var result = await _z2sUpdateService.BackupAsync(z2sPort, _z2sChip, backupDir, _z2sFlashSize, _z2sCancellation.Token);
 
                 if (result.Success)
                 {
@@ -993,12 +1018,15 @@ namespace GuiGenericBuilderDesktop
                 // Auto-backup before flashing if requested
                 if (backupBeforeFlash)
                 {
-                    var backupDir = string.IsNullOrWhiteSpace(z2sBackupDirTextBox?.Text)
-                        ? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "backups", "z2s")
-                        : z2sBackupDirTextBox.Text;
+                    var backupDir = z2sBackupDirTextBox?.Text?.Trim();
+                    if (string.IsNullOrWhiteSpace(backupDir))
+                    {
+                        z2sStatusText.Text = "Błąd: Wybierz katalog docelowy backupu przed wykonaniem operacji.";
+                        return;
+                    }
 
                     z2sStatusText.Text = $"Tworzenie backupu przed aktualizacją na porcie {z2sPort}…\n(może potrwać kilka minut)";
-                    var backupResult = await _z2sUpdateService.BackupAsync(z2sPort, _z2sChip, backupDir, _z2sCancellation.Token);
+                    var backupResult = await _z2sUpdateService.BackupAsync(z2sPort, _z2sChip, backupDir, _z2sFlashSize, _z2sCancellation.Token);
 
                     if (!backupResult.Success)
                     {
@@ -1671,9 +1699,8 @@ namespace GuiGenericBuilderDesktop
                             var fs = deviceInfo?.FlashSize ?? string.Empty;
                             if (!string.IsNullOrWhiteSpace(fs) && flashSizeSelector != null)
                             {
-                                var normalized = fs.Trim().ToUpperInvariant();
                                 var fmatch = flashSizeSelector.Items.OfType<ComboBoxItem>()
-                                    .FirstOrDefault(ci => normalized.Contains((ci.Tag as string) ?? (ci.Content as string)));
+                                    .FirstOrDefault(ci => string.Equals(ci.Tag as string, fs.Trim(), StringComparison.OrdinalIgnoreCase));
                                 if (fmatch != null)
                                 {
                                     flashSizeSelector.SelectedItem = fmatch;

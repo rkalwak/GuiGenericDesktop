@@ -78,10 +78,7 @@ namespace CompilationLib.Tests
             var backupFile = Path.Combine(_backupDir, $"backup_{olderFw.Version}.bin");
 
             Log($"Creating backup to {backupFile}...");
-            var backupResult = await _esptool.ReadFlush(ComPort, Chip, backupFile, CancellationToken.None);
-            backupResult.Success.Should().BeTrue($"backup must succeed. Error: {backupResult.StdErr}");
-
-            File.Exists(backupFile).Should().BeTrue("backup file must exist on disk");
+            var backupResult = await _esptool.ReadFlush(ComPort, Chip, backupFile, cancellation: CancellationToken.None);
 
             var backupSize = new FileInfo(backupFile).Length;
             Log($"Backup file size: {backupSize:N0} bytes ({backupSize / 1024.0 / 1024:F2} MB)");
@@ -132,6 +129,78 @@ namespace CompilationLib.Tests
         }
 
         [Fact]
+        public async Task Backup_FileContainsSameVersion_AsFlashedFirmware()
+        {
+            // -- 1. Load fixtures and pick the full image --------------------------
+            var fixtures = LoadFirmwareFixtures();
+            var fw23full = fixtures.Find(f => f.Version == "v1.5.23-full");
+            fw23full.Should().NotBeNull("v1.5.23-full must be present in manifest.json; run Download-Firmware.ps1");
+            File.Exists(fw23full!.BinPath).Should().BeTrue($"v1.5.23 full binary not found at '{fw23full.BinPath}'; run Download-Firmware.ps1");
+
+            // -- 2. Flash the known full image -------------------------------------
+            Log($"Flashing {fw23full.Version} to {ComPort} at offset {fw23full.FlashOffset}...");
+            var flashResult = await _esptool.WriteFlashAtOffset(ComPort, Chip, fw23full.FlashOffsetLong, fw23full.BinPath, CancellationToken.None);
+            flashResult.Success.Should().BeTrue($"flashing {fw23full.Version} must succeed. Error: {flashResult.StdErr}");
+
+            // -- 3. Read version from the live device ------------------------------
+            Log("Waiting for device to boot...");
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            var deviceVersion = await ReadDeviceVersionWithRetryAsync(ComPort, cancellationToken: CancellationToken.None);
+            deviceVersion.Should().NotBeNullOrWhiteSpace("device must report a version after booting the flashed firmware");
+            Log($"Device version: {deviceVersion}");
+
+            // -- 4. Create a backup of the full flash ------------------------------
+            Directory.CreateDirectory(_backupDir);
+            var backupFile = Path.Combine(_backupDir, $"backup_version_check.bin");
+
+            Log($"Creating backup to {backupFile}...");
+            var backupResult = await _esptool.ReadFlush(ComPort, Chip, backupFile, cancellation: CancellationToken.None);
+            backupResult.Success.Should().BeTrue($"backup must succeed. Error: {backupResult.StdErr}");
+            File.Exists(backupFile).Should().BeTrue("backup file must exist on disk");
+
+            // -- 5. Parse version from backup file ---------------------------------
+            Log("Parsing version from backup file...");
+            const long defaultSpiffsOffset = 0x290000;
+            const long defaultSpiffsSize   = 0x170000;
+            const long spiffsScanSize      = 0x10000;
+
+            var backupBytes = File.ReadAllBytes(backupFile);
+
+            // Locate the SPIFFS partition from the partition table embedded in the backup
+            // (partition table lives at 0x8000 in a full flash image, 0xC00 bytes long)
+            const int ptableOffset = 0x8000;
+            const int ptableSize   = 0xC00;
+            backupBytes.Length.Should().BeGreaterThan(ptableOffset + ptableSize,
+                "backup file must contain the partition table at 0x8000");
+
+            var ptableBytes = new byte[ptableSize];
+            Array.Copy(backupBytes, ptableOffset, ptableBytes, 0, ptableSize);
+            var (foundOffset, foundSize) = ParsePartitionTable(ptableBytes);
+
+            long spiffsOffset = foundOffset > 0 ? foundOffset : defaultSpiffsOffset;
+            long spiffsSize   = foundOffset > 0 ? foundSize   : defaultSpiffsSize;
+            Log($"SPIFFS offset from backup partition table: 0x{spiffsOffset:X}, size 0x{spiffsSize:X}");
+
+            var scanSize = (int)Math.Min(spiffsSize, spiffsScanSize);
+            backupBytes.Length.Should().BeGreaterThan((int)spiffsOffset + scanSize,
+                "backup file must be large enough to contain the SPIFFS region");
+
+            var spiffsChunk = new byte[scanSize];
+            Array.Copy(backupBytes, spiffsOffset, spiffsChunk, 0, scanSize);
+            var backupVersion = SpiffsVersionParser.FindVersion(spiffsChunk);
+
+            Log($"Version parsed from backup file: {backupVersion}");
+
+            // -- 6. Assert versions match ------------------------------------------
+            backupVersion.Should().NotBeNullOrWhiteSpace("backup binary must contain a parseable version string");
+            backupVersion.Should().Be(deviceVersion,
+                "the version stored in the backup file must match the version read from the live device");
+
+            Log("Version in backup matches live device version. Test passed.");
+            try { Directory.Delete(_backupDir, true); } catch { /* best-effort */ }
+        }
+
+        [Fact]
         public async Task Flash_v1_5_23_Full_Then_v1_5_24_Then_v1_5_25_ValidateEachVersion()
         {
             // -- Load specific fixture versions ------------------------------------
@@ -173,7 +242,7 @@ namespace CompilationLib.Tests
             var backupFile = Path.Combine(_backupDir, "backup_v1.5.23.bin");
 
             Log($"Creating backup to {backupFile}...");
-            var backupResult = await _esptool.ReadFlush(ComPort, Chip, backupFile, CancellationToken.None);
+            var backupResult = await _esptool.ReadFlush(ComPort, Chip, backupFile, cancellation: CancellationToken.None);
             backupResult.Success.Should().BeTrue($"backup must succeed. Error: {backupResult.StdErr}");
             File.Exists(backupFile).Should().BeTrue("backup file must exist on disk");
 

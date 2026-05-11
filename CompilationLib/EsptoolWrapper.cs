@@ -120,11 +120,40 @@ namespace CompilationLib
                                 cancellation);
 
         /// <summary>
-        /// Runs esptool --chip esp32c6 --port {comPort} read-flash 0x000000 ALL {backupFile}
+        /// Runs esptool --chip {chip} --port {comPort} read-flash 0x000000 {flashSizeHex|ALL} {backupFile}
         /// </summary>
-        public async Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, CancellationToken cancellation = default)
-            => await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 read-flash 0x000000 ALL {EscapeArgument(backupFile)}",
+        public async Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, string flashSize = null, CancellationToken cancellation = default)
+        {
+            var sizeArg = FlashSizeToHex(flashSize);
+            return await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 read-flash 0x000000 {sizeArg} {EscapeArgument(backupFile)}",
                                cancellation);
+        }
+
+        /// <summary>
+        /// Converts a flash size string like "4MB", "8MB", "16MB" to a hex byte count for esptool.
+        /// Returns "ALL" if the size is null, empty, or unrecognised.
+        /// </summary>
+        private static string FlashSizeToHex(string flashSize)
+        {
+            if (string.IsNullOrWhiteSpace(flashSize))
+                return "ALL";
+
+            // Strip whitespace and normalise to uppercase
+            var s = flashSize.Trim().ToUpperInvariant();
+
+            // Already a hex or decimal number — pass through unchanged
+            if (s.StartsWith("0X") || s == "ALL")
+                return s;
+
+            // Parse "NMB" or "NKB" patterns
+            if (s.EndsWith("MB") && long.TryParse(s[..^2], out var mb))
+                return $"0x{mb * 1024 * 1024:X}";
+
+            if (s.EndsWith("KB") && long.TryParse(s[..^2], out var kb))
+                return $"0x{kb * 1024:X}";
+
+            return "ALL";
+        }
 
         /// <summary>
         /// Reads a specific region of the device flash memory to a file.
