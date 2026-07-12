@@ -903,6 +903,31 @@
                   "Name": "SDA Pin"
                 }
               }
+            },
+            {
+              "Key": "Address",
+              "Name": "Adres I2C",
+              "Type": "enum",
+              "IsRequired": true,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "OFF"
+                },
+                {
+                  "Value": "1",
+                  "Name": "0x76"
+                },
+                {
+                  "Value": "2",
+                  "Name": "0x77"
+                },
+                {
+                  "Value": "3",
+                  "Name": "0x76 and 0x77"
+                }
+              ]
             }
           ]
         },
@@ -940,6 +965,31 @@
                   "Name": "SDA Pin"
                 }
               }
+            },
+            {
+              "Key": "Address",
+              "Name": "Adres I2C",
+              "Type": "enum",
+              "IsRequired": true,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "OFF"
+                },
+                {
+                  "Value": "1",
+                  "Name": "0x44"
+                },
+                {
+                  "Value": "2",
+                  "Name": "0x45"
+                },
+                {
+                  "Value": "3",
+                  "Name": "0x44 and 0x45"
+                }
+              ]
             }
           ]
         },
@@ -1014,6 +1064,23 @@
                   "Name": "SDA Pin"
                 }
               }
+            },
+            {
+              "Key": "Address",
+              "Name": "Adres I2C",
+              "Type": "enum",
+              "IsRequired": true,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "OFF"
+                },
+                {
+                  "Value": "1",
+                  "Name": "0x40"
+                }
+              ]
             }
           ]
         },
@@ -1088,6 +1155,23 @@
                   "Name": "SDA Pin"
                 }
               }
+            },
+            {
+              "Key": "Address",
+              "Name": "Adres I2C",
+              "Type": "enum",
+              "IsRequired": true,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "OFF"
+                },
+                {
+                  "Value": "1",
+                  "Name": "0x40"
+                }
+              ]
             }
           ]
         },
@@ -1199,7 +1283,7 @@
                   "Name": "SDA Pin"
                 }
               }
-            }
+            }        
           ]
         },
         "SUPLA_MS5611": {
@@ -1243,6 +1327,23 @@
                   "Name": "SDA Pin"
                 }
               }
+            },
+            {
+              "Key": "Address",
+              "Name": "Adres I2C",
+              "Type": "enum",
+              "IsRequired": true,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "OFF"
+                },
+                {
+                  "Value": "1",
+                  "Name": "0x77"
+                }
+              ]
             }
           ]
         },
@@ -1317,6 +1418,27 @@
                   "Name": "SDA Pin"
                 }
               }
+            },
+            {
+              "Key": "Address",
+              "Name": "Adres I2C",
+              "Type": "enum",
+              "IsRequired": true,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "OFF"
+                },
+                {
+                  "Value": "1",
+                  "Name": "0x38"
+                },
+                {
+                  "Value": "2",
+                  "Name": "0x39"
+                }
+              ]
             }
           ]
         },
