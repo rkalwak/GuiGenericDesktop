@@ -1,5 +1,18 @@
 ﻿# Changelog
 
+## [2026-07-12] - Version 2.0.17
+
+**Zigbee Firmware Update**
+- Added dedicated Zigbee tab in the main window for Z2S firmware management
+- Added Z2S version picker window to browse and select available firmware releases from GitHub
+- Integrated firmware download and flash process using esptool
+- Added `Z2SUpdateService` to handle firmware fetching, OTA image size validation, and flashing
+- Added `SpiffsVersionParser` to detect currently installed Z2S firmware version from device
+- Added `GitHubReleasesClient` to list and download Z2S firmware releases
+- Added integration tests for the full Z2S flash upgrade flow
+- Added firmware image size validation tests (`Z2SFirmwareImageSizeTests`)
+- Configurable via `appsettings.json` (Z2S GitHub repo URL, esptool path, etc.)
+
 ## [2026-03-01] - Version 2.0.16
 
 **GUI-Generic Version Check**
