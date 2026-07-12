@@ -820,6 +820,31 @@
                   "Name": "SDA Pin"
                 }
               }
+            },
+            {
+              "Key": "Address",
+              "Name": "Adres I2C",
+              "Type": "enum",
+              "IsRequired": true,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "OFF"
+                },
+                {
+                  "Value": "1",
+                  "Name": "0x76"
+                },
+                {
+                  "Value": "2",
+                  "Name": "0x77"
+                },
+                {
+                  "Value": "3",
+                  "Name": "0x76 and 0x77"
+                }
+              ]
             }
           ]
         },
