@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Wybierz wersję firmware Z2S Gateway"
-        Height="570" Width="650"
+        Height="650" Width="850"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         Background="#F5F5F5">
@@ -21,7 +21,7 @@
             <TextBlock FontSize="22" FontWeight="Bold" Text="🔧" VerticalAlignment="Center"/>
             <TextBlock FontSize="18" FontWeight="Bold" Margin="8,0,0,0" VerticalAlignment="Center"
                        Text="Wybierz wersję do wgrania"/>
-            <Button x:Name="LoadReleasesButton" Content="Pobierz listę"
+            <Button x:Name="LoadReleasesButton" Content="Odśwież listę"
                     Width="110" Height="28" Margin="20,0,6,0"
                     VerticalAlignment="Center"
                     Background="#4CAF50" Foreground="White" FontWeight="SemiBold"

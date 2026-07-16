@@ -116,16 +116,22 @@ namespace CompilationLib
         /// Runs esptool --chip esp32c6 --port {comPort} write-flash 0x000000 0x4000000 {binFile}
         /// </summary>
         public async Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, CancellationToken cancellation = default)
-            => await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 write-flash 0x000000 {EscapeArgument(binFile)}",
+            => await WriteFlush(comPort, chip, binFile, UsbDeviceRecognition.DefaultFlashBaud, cancellation);
+
+        public async Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, int baudRate, CancellationToken cancellation = default)
+            => await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud {baudRate} write-flash 0x000000 {EscapeArgument(binFile)}",
                                 cancellation);
 
         /// <summary>
         /// Runs esptool --chip {chip} --port {comPort} read-flash 0x000000 {flashSizeHex|ALL} {backupFile}
         /// </summary>
         public async Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, string flashSize = null, CancellationToken cancellation = default)
+            => await ReadFlush(comPort, chip, backupFile, flashSize, UsbDeviceRecognition.DefaultFlashBaud, cancellation);
+
+        public async Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, string flashSize, int baudRate, CancellationToken cancellation = default)
         {
             var sizeArg = FlashSizeToHex(flashSize);
-            return await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 read-flash 0x000000 {sizeArg} {EscapeArgument(backupFile)}",
+            return await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud {baudRate} read-flash 0x000000 {sizeArg} {EscapeArgument(backupFile)}",
                                cancellation);
         }
 
@@ -159,21 +165,30 @@ namespace CompilationLib
         /// Reads a specific region of the device flash memory to a file.
         /// </summary>
         public async Task<EsptoolResult> ReadFlashRegion(string comPort, long offset, long size, string outputFile, CancellationToken cancellation = default)
-            => await RunEsptoolAsync($"--port {EscapeArgument(comPort)} --baud 921600 read-flash 0x{offset:X} 0x{size:X} {EscapeArgument(outputFile)}",
+            => await ReadFlashRegion(comPort, offset, size, outputFile, UsbDeviceRecognition.DefaultFlashBaud, cancellation);
+
+        public async Task<EsptoolResult> ReadFlashRegion(string comPort, long offset, long size, string outputFile, int baudRate, CancellationToken cancellation = default)
+            => await RunEsptoolAsync($"--port {EscapeArgument(comPort)} --baud {baudRate} read-flash 0x{offset:X} 0x{size:X} {EscapeArgument(outputFile)}",
                                cancellation);
 
         /// <summary>
         /// Erases the entire flash memory of the device.
         /// </summary>
         public async Task<EsptoolResult> EraseFlash(string comPort, string chip, CancellationToken cancellation = default)
-            => await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 erase-flash",
+            => await EraseFlash(comPort, chip, UsbDeviceRecognition.DefaultFlashBaud, cancellation);
+
+        public async Task<EsptoolResult> EraseFlash(string comPort, string chip, int baudRate, CancellationToken cancellation = default)
+            => await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud {baudRate} erase-flash",
                                cancellation);
 
         /// <summary>
         /// Writes a binary file to the device flash at a specific byte offset.
         /// </summary>
         public async Task<EsptoolResult> WriteFlashAtOffset(string comPort, string chip, long offset, string binFile, CancellationToken cancellation = default)
-            => await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud 921600 write-flash 0x{offset:X} {EscapeArgument(binFile)}",
+            => await WriteFlashAtOffset(comPort, chip, offset, binFile, UsbDeviceRecognition.DefaultFlashBaud, cancellation);
+
+        public async Task<EsptoolResult> WriteFlashAtOffset(string comPort, string chip, long offset, string binFile, int baudRate, CancellationToken cancellation = default)
+            => await RunEsptoolAsync($"--chip {chip} --port {EscapeArgument(comPort)} --baud {baudRate} write-flash 0x{offset:X} {EscapeArgument(binFile)}",
                                cancellation);
 
         /// <summary>

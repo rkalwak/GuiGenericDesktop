@@ -2133,7 +2133,7 @@
       "Flags": {
         "SUPLA_MAX6675": {
           "name": "Termopara MAX6675",
-          "desc": "Ustawienia urządzenia-\u003eSPI. Umożliwoa obsługę termopary MAX6675.",
+          "desc": "Ustawienia urządzenia-\u003eSPI. Umożliwia obsługę termopary MAX6675.",
           "defOn": false,
           "translations": {
             "en": {
@@ -2147,7 +2147,7 @@
         },
         "SUPLA_MAX31855": {
           "name": "Termopara MAX31855",
-          "desc": "Ustawienia urządzenia-\u003eSPI. Umożliwoa obsługę termopary MAX31855.",
+          "desc": "Ustawienia urządzenia-\u003eSPI. Umożliwia obsługę termopary MAX31855.",
           "defOn": false,
           "translations": {
             "en": {

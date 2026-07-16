@@ -21,31 +21,44 @@ namespace CompilationLib.Tests
                 _flashStdErr = flashStdErr;
             }
 
-            public async Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string board, string repositoryPath = null, CancellationToken cancellationToken = default)
-            {
-                return await Task.FromResult(string.Empty);
-            }
+            public Task<string> MergeFirmwareFiles(string buildOutputDirectory, string outputFilePath, string platform, string flashSize, string board, string repositoryPath = null, CancellationToken cancellationToken = default)
+                => Task.FromResult(string.Empty);
 
-            public async Task<EsptoolResult> ReadChipId(string comPort, System.Threading.CancellationToken cancellation = default)
-            =>  await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = _chipStdOut, StdErr = _chipStdErr, Command = "esptool --chip-id" });
+            public Task<EsptoolResult> ReadChipId(string comPort, CancellationToken cancellation = default)
+                => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = _chipStdOut, StdErr = _chipStdErr, Command = "esptool --chip-id" });
 
-            public async Task<EsptoolResult> ReadFlashId(string comPort, System.Threading.CancellationToken cancellation = default)
-            => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = _flashStdOut, StdErr = _flashStdErr, Command = "esptool --flash-id" });
+            public Task<EsptoolResult> ReadFlashId(string comPort, CancellationToken cancellation = default)
+                => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = _flashStdOut, StdErr = _flashStdErr, Command = "esptool --flash-id" });
 
-            public async Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, string flashSize = null, System.Threading.CancellationToken cancellation = default)
-            => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Read flash success", StdErr = "", Command = "esptool read-flash" });
+            public Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, string flashSize = null, CancellationToken cancellation = default)
+                => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Read flash success", StdErr = "", Command = "esptool read-flash" });
 
-            public async Task<EsptoolResult> ReadFlashRegion(string comPort, long offset, long size, string outputFile, System.Threading.CancellationToken cancellation = default)
-            => await Task.FromResult(new EsptoolResult { Success = false, ExitCode = 1, StdOut = "", StdErr = "Not implemented in fake", Command = "esptool read-flash" });
+            public Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, string flashSize, int baudRate, CancellationToken cancellation = default)
+                => ReadFlush(comPort, chip, backupFile, flashSize, cancellation);
 
-            public async Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, System.Threading.CancellationToken cancellation = default)
-            => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Write flash success", StdErr = "", Command = "esptool write-flash" });
+            public Task<EsptoolResult> ReadFlashRegion(string comPort, long offset, long size, string outputFile, CancellationToken cancellation = default)
+                => Task.FromResult(new EsptoolResult { Success = false, ExitCode = 1, StdOut = "", StdErr = "Not implemented in fake", Command = "esptool read-flash" });
 
-            public async Task<EsptoolResult> EraseFlash(string comPort, string chip, System.Threading.CancellationToken cancellation = default)
-            => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Erase flash success", StdErr = "", Command = "esptool erase-flash" });
+            public Task<EsptoolResult> ReadFlashRegion(string comPort, long offset, long size, string outputFile, int baudRate, CancellationToken cancellation = default)
+                => ReadFlashRegion(comPort, offset, size, outputFile, cancellation);
 
-            public async Task<EsptoolResult> WriteFlashAtOffset(string comPort, string chip, long offset, string binFile, System.Threading.CancellationToken cancellation = default)
-            => await Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Write flash success", StdErr = "", Command = "esptool write-flash" });
+            public Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, CancellationToken cancellation = default)
+                => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Write flash success", StdErr = "", Command = "esptool write-flash" });
+
+            public Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, int baudRate, CancellationToken cancellation = default)
+                => WriteFlush(comPort, chip, binFile, cancellation);
+
+            public Task<EsptoolResult> EraseFlash(string comPort, string chip, CancellationToken cancellation = default)
+                => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Erase flash success", StdErr = "", Command = "esptool erase-flash" });
+
+            public Task<EsptoolResult> EraseFlash(string comPort, string chip, int baudRate, CancellationToken cancellation = default)
+                => EraseFlash(comPort, chip, cancellation);
+
+            public Task<EsptoolResult> WriteFlashAtOffset(string comPort, string chip, long offset, string binFile, CancellationToken cancellation = default)
+                => Task.FromResult(new EsptoolResult { Success = true, ExitCode = 0, StdOut = "Write flash success", StdErr = "", Command = "esptool write-flash" });
+
+            public Task<EsptoolResult> WriteFlashAtOffset(string comPort, string chip, long offset, string binFile, int baudRate, CancellationToken cancellation = default)
+                => WriteFlashAtOffset(comPort, chip, offset, binFile, cancellation);
         }
 
         [Fact]

@@ -5,7 +5,9 @@ namespace CompilationLib
         Task<EsptoolResult> ReadChipId(string comPort, CancellationToken cancellation = default);
         Task<EsptoolResult> ReadFlashId(string comPort, CancellationToken cancellation = default);
         Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, string flashSize = null, CancellationToken cancellation = default);
+        Task<EsptoolResult> ReadFlush(string comPort, string chip, string backupFile, string flashSize, int baudRate, CancellationToken cancellation = default);
         Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, CancellationToken cancellation = default);
+        Task<EsptoolResult> WriteFlush(string comPort, string chip, string binFile, int baudRate, CancellationToken cancellation = default);
         
         /// <summary>
         /// Merges partition.bin, bootloader.bin and firmware.bin into a single complete firmware file
@@ -27,16 +29,19 @@ namespace CompilationLib
         /// <param name="size">Number of bytes to read</param>
         /// <param name="outputFile">Path to save the read data</param>
         Task<EsptoolResult> ReadFlashRegion(string comPort, long offset, long size, string outputFile, CancellationToken cancellation = default);
+        Task<EsptoolResult> ReadFlashRegion(string comPort, long offset, long size, string outputFile, int baudRate, CancellationToken cancellation = default);
 
         /// <summary>
         /// Erases the entire flash memory of the device.
         /// </summary>
         Task<EsptoolResult> EraseFlash(string comPort, string chip, CancellationToken cancellation = default);
+        Task<EsptoolResult> EraseFlash(string comPort, string chip, int baudRate, CancellationToken cancellation = default);
 
         /// <summary>
         /// Writes a binary file to the device flash at a specific byte offset.
         /// Used for OTA-only firmware images that must land in the app0 partition.
         /// </summary>
         Task<EsptoolResult> WriteFlashAtOffset(string comPort, string chip, long offset, string binFile, CancellationToken cancellation = default);
+        Task<EsptoolResult> WriteFlashAtOffset(string comPort, string chip, long offset, string binFile, int baudRate, CancellationToken cancellation = default);
     }
 }

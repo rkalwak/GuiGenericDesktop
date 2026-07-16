@@ -36,7 +36,8 @@ namespace GuiGenericBuilderDesktop
             if (!string.IsNullOrWhiteSpace(deviceVersion))
                 CurrentVersionText.Text = $"Aktualna wersja na urządzeniu: {deviceVersion}";
 
-            LoadingText.Text = "Kliknij 'Pobierz listę', aby załadować dostępne wersje firmware.";
+            LoadingText.Text = "Ładowanie zapisanej listy wersji firmware…";
+            Loaded += async (_, __) => await LoadReleasesAsync();
         }
 
         private async Task LoadReleasesAsync()

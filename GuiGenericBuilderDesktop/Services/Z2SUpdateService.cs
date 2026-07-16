@@ -46,6 +46,8 @@ namespace GuiGenericBuilderDesktop.Services
         private IReadOnlyList<GitHubRelease> _cachedReleases;
         private int _cachedReleaseCount;
 
+        private const int PreferredFlashBaudRate = UsbDeviceRecognition.MaxSupportedBaudrate;
+
         private static readonly string ReleaseCacheFile =
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "z2s_releases_cache.json");
 
@@ -136,19 +138,21 @@ namespace GuiGenericBuilderDesktop.Services
             };
         }
 
-        private async Task<string> ReadDeviceVersionAsync(string comPort, CancellationToken cancellationToken)
+        private async Task<string> ReadDeviceVersionAsync(string comPort, CancellationToken cancellationToken, Action<string> progress = null)
         {
             var tempDir = Path.Combine(Path.GetTempPath(), "z2s_" + Guid.NewGuid().ToString("N")[..8]);
             Directory.CreateDirectory(tempDir);
 
             try
             {
+                progress?.Invoke("Odczyt informacji o urządzeniu…");
+
                 // Read partition table to find the SPIFFS/LittleFS partition offset
                 long spiffsOffset = DefaultSpiffsOffset;
                 long spiffsSize = DefaultSpiffsSize;
 
                 var ptableFile = Path.Combine(tempDir, "ptable.bin");
-                var ptableResult = await _esptoolWrapper.ReadFlashRegion(comPort, 0x8000, 0xC00, ptableFile, cancellationToken);
+                var ptableResult = await _esptoolWrapper.ReadFlashRegion(comPort, 0x8000, 0xC00, ptableFile, PreferredFlashBaudRate, cancellationToken);
 
                 if (ptableResult.Success && File.Exists(ptableFile))
                 {
@@ -170,10 +174,12 @@ namespace GuiGenericBuilderDesktop.Services
                         ptableResult.StdErr, spiffsOffset);
                 }
 
+                progress?.Invoke("Odczyt fragmentu flash potrzebnego do backupu…");
+
                 // Read the first SpiffsScanSize bytes of the SPIFFS partition
                 var scanSize = Math.Min(spiffsSize, SpiffsScanSize);
                 var spiffsFile = Path.Combine(tempDir, "spiffs_chunk.bin");
-                var spiffsResult = await _esptoolWrapper.ReadFlashRegion(comPort, spiffsOffset, scanSize, spiffsFile, cancellationToken);
+                var spiffsResult = await _esptoolWrapper.ReadFlashRegion(comPort, spiffsOffset, scanSize, spiffsFile, PreferredFlashBaudRate, cancellationToken);
 
                 if (!spiffsResult.Success || !File.Exists(spiffsFile))
                 {
@@ -355,16 +361,40 @@ namespace GuiGenericBuilderDesktop.Services
             return trimmed;
         }
 
+        private static string SanitizeFileNameComponent(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                return string.Empty;
+
+            var invalidChars = Path.GetInvalidFileNameChars();
+            var sanitized = new StringBuilder(value.Length);
+
+            foreach (var ch in value)
+            {
+                sanitized.Append(Array.IndexOf(invalidChars, ch) >= 0 || ch == '/' || ch == '\\' ? '-' : ch);
+            }
+
+            return sanitized.ToString().Trim().Trim('.', ' ');
+        }
+
+        private static long GetFirmwareFlashOffset(bool fullVersion)
+        {
+            // OTA/update-only assets are app images and must land in the app0 partition.
+            // Full-version assets are complete flash images and are written from 0x0.
+            return fullVersion ? 0x0 : 0x10000;
+        }
+
         /// <summary>
         /// Creates a full-flash backup of the connected device to the specified directory.
         /// The filename includes the firmware version read from the device.
         /// </summary>
-        public async Task<Z2SBackupResult> BackupAsync(string comPort, string chip, string backupDirectory, string flashSize = null, CancellationToken cancellationToken = default)
+        public async Task<Z2SBackupResult> BackupAsync(string comPort, string chip, string backupDirectory, string flashSize = null, CancellationToken cancellationToken = default, Action<string> progress = null)
         {
             _logger.Information("Starting Z2S backup on port {Port}, chip {Chip}", comPort, chip);
 
             try
             {
+                progress?.Invoke("Przygotowywanie katalogu backupu…");
                 if (!Directory.Exists(backupDirectory))
                     Directory.CreateDirectory(backupDirectory);
 
@@ -373,7 +403,7 @@ namespace GuiGenericBuilderDesktop.Services
 
                 try
                 {
-                    deviceVersion = await ReadDeviceVersionAsync(comPort, cancellationToken);
+                    deviceVersion = await ReadDeviceVersionAsync(comPort, cancellationToken, progress);
                 }
                 catch (Exception ex)
                 {
@@ -382,11 +412,12 @@ namespace GuiGenericBuilderDesktop.Services
 
                 var filenameSuffix = string.IsNullOrEmpty(deviceVersion)
                     ? timestamp
-                    : $"{deviceVersion}_{timestamp}";
+                    : $"{SanitizeFileNameComponent(deviceVersion)}_{timestamp}";
 
                 var backupFile = Path.Combine(backupDirectory, $"Z2S_Backup_{filenameSuffix}.bin");
 
-                var result = await _esptoolWrapper.ReadFlush(comPort, chip, backupFile, flashSize, cancellationToken);
+                progress?.Invoke("Tworzenie pełnego backupu flash…");
+                var result = await _esptoolWrapper.ReadFlush(comPort, chip, backupFile, flashSize, PreferredFlashBaudRate, cancellationToken);
 
                 if (result.Success && File.Exists(backupFile))
                 {
@@ -523,7 +554,7 @@ namespace GuiGenericBuilderDesktop.Services
                 {
                     progress?.Invoke("Czyszczenie pamięci urządzenia…");
                     _logger.Information("Erasing flash on port {Port}, chip {Chip}", comPort, chip);
-                    var eraseResult = await _esptoolWrapper.EraseFlash(comPort, chip, cancellationToken);
+                    var eraseResult = await _esptoolWrapper.EraseFlash(comPort, chip, PreferredFlashBaudRate, cancellationToken);
                     if (!eraseResult.Success)
                     {
                         _logger.Warning("Erase flash failed: {Error}", eraseResult.StdErr);
@@ -542,8 +573,9 @@ namespace GuiGenericBuilderDesktop.Services
             // Flash
             try
             {
-                progress?.Invoke($"Wgrywanie firmware {version} na urządzenie…");
-                var flashResult = await _esptoolWrapper.WriteFlush(comPort, chip, tempFile, cancellationToken);
+                var flashOffset = GetFirmwareFlashOffset(fullVersion);
+                progress?.Invoke($"Wgrywanie firmware {version} na adres 0x{flashOffset:X}…");
+                var flashResult = await _esptoolWrapper.WriteFlashAtOffset(comPort, chip, flashOffset, tempFile, PreferredFlashBaudRate, cancellationToken);
 
                 if (flashResult.Success)
                 {
@@ -583,7 +615,7 @@ namespace GuiGenericBuilderDesktop.Services
                 try
                 {
                     progress?.Invoke($"Przywracanie z backupu: {Path.GetFileName(backupFilePath)}…");
-                    var result = await _esptoolWrapper.WriteFlush(comPort, chip, backupFilePath, cancellationToken);
+                    var result = await _esptoolWrapper.WriteFlush(comPort, chip, backupFilePath, PreferredFlashBaudRate, cancellationToken);
 
                     if (result.Success)
                     {

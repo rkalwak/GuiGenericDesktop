@@ -59,6 +59,49 @@ namespace GuiGenericBuilderDesktop
         private int _z2sVersionHistoryCount = 10;
         private CancellationTokenSource _z2sCancellation;
 
+        private async Task<CompilationResultsWindow> ShowZ2SOperationLogWindowAsync(string title)
+        {
+            CompilationResultsWindow window = null;
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                window = new CompilationResultsWindow
+                {
+                    Owner = this
+                };
+                window.Show();
+                window.SetLiveModeTitle(title);
+            });
+
+            return window;
+        }
+
+        private void AttachZ2SLogStreaming(CompilationResultsWindow window, out EventHandler<string> outputHandler, out EventHandler<string> errorHandler)
+        {
+            outputHandler = null;
+            errorHandler = null;
+
+            if (_esptoolWrapper is EsptoolWrapper esptool)
+            {
+                outputHandler = (_, line) => window?.AppendLog(line);
+                errorHandler = (_, line) => window?.AppendLog(line);
+                esptool.OutputLine += outputHandler;
+                esptool.ErrorLine += errorHandler;
+            }
+        }
+
+        private void DetachZ2SLogStreaming(EventHandler<string> outputHandler, EventHandler<string> errorHandler)
+        {
+            if (_esptoolWrapper is EsptoolWrapper esptool)
+            {
+                if (outputHandler != null)
+                    esptool.OutputLine -= outputHandler;
+
+                if (errorHandler != null)
+                    esptool.ErrorLine -= errorHandler;
+            }
+        }
+
         public MainWindow()
         {
             _esptoolWrapper = new EsptoolWrapper();
@@ -909,9 +952,6 @@ namespace GuiGenericBuilderDesktop
                 return;
             }
 
-            Z2SSetButtonsEnabled(false);
-            _z2sCancellation = new CancellationTokenSource();
-
             var backupDir = z2sBackupDirTextBox?.Text?.Trim();
             if (string.IsNullOrWhiteSpace(backupDir))
             {
@@ -919,17 +959,43 @@ namespace GuiGenericBuilderDesktop
                 return;
             }
 
+            CompilationResultsWindow backupLogWindow = null;
+            EventHandler<string> backupOutputHandler = null;
+            EventHandler<string> backupErrorHandler = null;
+            bool backupLogWindowFinalized = false;
+
+            Z2SSetButtonsEnabled(false);
+            _z2sCancellation = new CancellationTokenSource();
+
             try
             {
+                backupLogWindow = await ShowZ2SOperationLogWindowAsync("Z2S backup w toku");
+                AttachZ2SLogStreaming(backupLogWindow, out backupOutputHandler, out backupErrorHandler);
+                backupLogWindow.AppendLog($"Backup started on port {z2sPort}.");
+
+                z2sOperationProgressBar.Visibility = Visibility.Visible;
                 z2sStatusText.Text = $"Tworzenie backupu na porcie {z2sPort}…\n(może potrwać kilka minut)";
 
-                var result = await _z2sUpdateService.BackupAsync(z2sPort, _z2sChip, backupDir, _z2sFlashSize, _z2sCancellation.Token);
+                var result = await _z2sUpdateService.BackupAsync(
+                    z2sPort,
+                    _z2sChip,
+                    backupDir,
+                    _z2sFlashSize,
+                    _z2sCancellation.Token,
+                    msg => Dispatcher.Invoke(() =>
+                    {
+                        z2sStatusText.Text = msg;
+                        backupLogWindow?.AppendLog(msg);
+                    }));
 
                 if (result.Success)
                 {
                     _logger.Information("Z2S backup succeeded: {File}", result.BackupFilePath);
                     z2sStatusText.Text = $"✔ Backup zakończony pomyślnie.\n\nPlik: {result.BackupFilePath}";
                     z2sStatusBorder.Background = System.Windows.Media.Brushes.LightGreen;
+                    backupLogWindow?.AppendLog($"Backup saved to {result.BackupFilePath}");
+                    backupLogWindow?.FinalizeCompilation(true, customTitle: "Z2S backup zakończony");
+                    backupLogWindowFinalized = true;
                     await Task.Delay(4000);
                     z2sStatusBorder.Background = System.Windows.Media.Brushes.Transparent;
                 }
@@ -937,6 +1003,9 @@ namespace GuiGenericBuilderDesktop
                 {
                     z2sStatusText.Text = $"✘ Backup nieudany.\n{result.Error}";
                     z2sStatusBorder.Background = System.Windows.Media.Brushes.MistyRose;
+                    backupLogWindow?.AppendLog($"Backup failed: {result.Error}");
+                    backupLogWindow?.FinalizeCompilation(false, customTitle: "Z2S backup nieudany");
+                    backupLogWindowFinalized = true;
                     await Task.Delay(4000);
                     z2sStatusBorder.Background = System.Windows.Media.Brushes.Transparent;
                 }
@@ -944,16 +1013,30 @@ namespace GuiGenericBuilderDesktop
             catch (OperationCanceledException)
             {
                 z2sStatusText.Text = "Backup anulowany.";
+                backupLogWindow?.AppendLog("Backup cancelled.");
+                backupLogWindow?.FinalizeCompilation(false, customTitle: "Z2S backup anulowany");
+                backupLogWindowFinalized = true;
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Z2SBackup_Click failed");
                 z2sStatusText.Text = $"Błąd backupu: {ex.Message}";
+                backupLogWindow?.AppendLog($"Backup error: {ex.Message}");
+                backupLogWindow?.FinalizeCompilation(false, customTitle: "Z2S backup błąd");
+                backupLogWindowFinalized = true;
             }
             finally
             {
+                if (backupLogWindow != null)
+                {
+                    DetachZ2SLogStreaming(backupOutputHandler, backupErrorHandler);
+                    if (!backupLogWindowFinalized)
+                        backupLogWindow.FinalizeCompilation(false, customTitle: "Z2S backup zakończony");
+                }
+
                 _z2sCancellation?.Dispose();
                 _z2sCancellation = null;
+                z2sOperationProgressBar.Visibility = Visibility.Collapsed;
                 Z2SSetButtonsEnabled(true);
             }
         }
@@ -977,6 +1060,13 @@ namespace GuiGenericBuilderDesktop
             bool fullVersion = z2sFullVersionCheckBox.IsChecked ?? false;
             bool clearDevice = z2sClearDeviceCheckBox.IsChecked ?? false;
             bool backupBeforeFlash = z2sBackupBeforeFlashCheckBox.IsChecked ?? true;
+            var backupDir = z2sBackupDirTextBox?.Text?.Trim();
+
+            if (backupBeforeFlash && string.IsNullOrWhiteSpace(backupDir))
+            {
+                z2sStatusText.Text = "Błąd: włączony backup przed aktualizacją wymaga ustawienia katalogu backupu.";
+                return;
+            }
 
             // Show version picker — let the user choose from the last N releases
             var picker = new Z2SVersionPickerWindow(_z2sUpdateService, _z2sDeviceVersion, _logger, _z2sVersionHistoryCount)
@@ -1010,26 +1100,41 @@ namespace GuiGenericBuilderDesktop
             if (confirm != MessageBoxResult.Yes)
                 return;
 
+            CompilationResultsWindow upgradeLogWindow = null;
+            EventHandler<string> upgradeOutputHandler = null;
+            EventHandler<string> upgradeErrorHandler = null;
+            bool upgradeLogWindowFinalized = false;
+
             Z2SSetButtonsEnabled(false);
             _z2sCancellation = new CancellationTokenSource();
 
             try
             {
+                upgradeLogWindow = await ShowZ2SOperationLogWindowAsync("Z2S aktualizacja w toku");
+                AttachZ2SLogStreaming(upgradeLogWindow, out upgradeOutputHandler, out upgradeErrorHandler);
+                upgradeLogWindow.AppendLog($"Flash started on port {z2sPort}.");
+
                 // Auto-backup before flashing if requested
                 if (backupBeforeFlash)
                 {
-                    var backupDir = z2sBackupDirTextBox?.Text?.Trim();
-                    if (string.IsNullOrWhiteSpace(backupDir))
-                    {
-                        z2sStatusText.Text = "Błąd: Wybierz katalog docelowy backupu przed wykonaniem operacji.";
-                        return;
-                    }
-
+                    z2sOperationProgressBar.Visibility = Visibility.Visible;
                     z2sStatusText.Text = $"Tworzenie backupu przed aktualizacją na porcie {z2sPort}…\n(może potrwać kilka minut)";
-                    var backupResult = await _z2sUpdateService.BackupAsync(z2sPort, _z2sChip, backupDir, _z2sFlashSize, _z2sCancellation.Token);
+                    upgradeLogWindow.AppendLog("Starting pre-flash backup...");
+                    var backupResult = await _z2sUpdateService.BackupAsync(
+                        z2sPort,
+                        _z2sChip,
+                        backupDir,
+                        _z2sFlashSize,
+                        _z2sCancellation.Token,
+                        msg => Dispatcher.Invoke(() =>
+                        {
+                            z2sStatusText.Text = msg;
+                            upgradeLogWindow?.AppendLog(msg);
+                        }));
 
                     if (!backupResult.Success)
                     {
+                        upgradeLogWindow.AppendLog($"Pre-flash backup failed: {backupResult.Error}");
                         var continueAnyway = MessageBox.Show(
                             $"Backup nie powiódł się: {backupResult.Error}\n\nCzy chcesz kontynuować aktualizację mimo niepowodzenia backupu?",
                             "Błąd backupu",
@@ -1039,16 +1144,20 @@ namespace GuiGenericBuilderDesktop
                         if (continueAnyway != MessageBoxResult.Yes)
                         {
                             z2sStatusText.Text = "Aktualizacja anulowana — backup nie powiódł się.";
+                            upgradeLogWindow.FinalizeCompilation(false, customTitle: "Z2S aktualizacja anulowana");
+                            upgradeLogWindowFinalized = true;
                             return;
                         }
                     }
                     else
                     {
                         z2sStatusText.Text = $"✔ Backup zakończony: {backupResult.BackupFilePath}\nRozpoczynanie aktualizacji…";
+                        upgradeLogWindow.AppendLog($"Pre-flash backup saved to {backupResult.BackupFilePath}");
                     }
                 }
 
                 z2sStatusText.Text = "Przygotowywanie aktualizacji…";
+                upgradeLogWindow.AppendLog("Preparing firmware download...");
 
                 var result = await _z2sUpdateService.DownloadAndFlashAsync(
                     z2sPort,
@@ -1057,7 +1166,11 @@ namespace GuiGenericBuilderDesktop
                     fullVersion,
                     clearDevice,
                     selectedRelease,
-                    msg => Dispatcher.InvokeAsync(() => z2sStatusText.Text = msg),
+                    msg => Dispatcher.Invoke(() =>
+                    {
+                        z2sStatusText.Text = msg;
+                        upgradeLogWindow?.AppendLog(msg);
+                    }),
                     _z2sCancellation.Token);
 
                 if (result.Success)
@@ -1065,6 +1178,9 @@ namespace GuiGenericBuilderDesktop
                     _logger.Information("Z2S upgrade succeeded, version {Version}", result.FlashedVersion);
                     z2sStatusText.Text = $"✔ Aktualizacja zakończona pomyślnie!\n\nWgrana wersja: {result.FlashedVersion}";
                     z2sStatusBorder.Background = System.Windows.Media.Brushes.LightGreen;
+                    upgradeLogWindow?.AppendLog($"Upgrade completed successfully: {result.FlashedVersion}");
+                    upgradeLogWindow?.FinalizeCompilation(true, customTitle: "Z2S aktualizacja zakończona");
+                    upgradeLogWindowFinalized = true;
                     await Task.Delay(4000);
                     z2sStatusBorder.Background = System.Windows.Media.Brushes.Transparent;
                 }
@@ -1072,6 +1188,9 @@ namespace GuiGenericBuilderDesktop
                 {
                     z2sStatusText.Text = $"✘ Aktualizacja nieudana.\n{result.Error}";
                     z2sStatusBorder.Background = System.Windows.Media.Brushes.MistyRose;
+                    upgradeLogWindow?.AppendLog($"Upgrade failed: {result.Error}");
+                    upgradeLogWindow?.FinalizeCompilation(false, customTitle: "Z2S aktualizacja nieudana");
+                    upgradeLogWindowFinalized = true;
                     await Task.Delay(4000);
                     z2sStatusBorder.Background = System.Windows.Media.Brushes.Transparent;
                 }
@@ -1079,16 +1198,30 @@ namespace GuiGenericBuilderDesktop
             catch (OperationCanceledException)
             {
                 z2sStatusText.Text = "Aktualizacja anulowana.";
+                upgradeLogWindow?.AppendLog("Upgrade cancelled.");
+                upgradeLogWindow?.FinalizeCompilation(false, customTitle: "Z2S aktualizacja anulowana");
+                upgradeLogWindowFinalized = true;
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Z2SUpgrade_Click failed");
                 z2sStatusText.Text = $"Błąd aktualizacji: {ex.Message}";
+                upgradeLogWindow?.AppendLog($"Upgrade error: {ex.Message}");
+                upgradeLogWindow?.FinalizeCompilation(false, customTitle: "Z2S aktualizacja błąd");
+                upgradeLogWindowFinalized = true;
             }
             finally
             {
+                if (upgradeLogWindow != null)
+                {
+                    DetachZ2SLogStreaming(upgradeOutputHandler, upgradeErrorHandler);
+                    if (!upgradeLogWindowFinalized)
+                        upgradeLogWindow.FinalizeCompilation(false, customTitle: "Z2S aktualizacja zakończona");
+                }
+
                 _z2sCancellation?.Dispose();
                 _z2sCancellation = null;
+                z2sOperationProgressBar.Visibility = Visibility.Collapsed;
                 Z2SSetButtonsEnabled(true);
             }
         }
@@ -1131,18 +1264,31 @@ namespace GuiGenericBuilderDesktop
             if (confirm != MessageBoxResult.Yes)
                 return;
 
+            CompilationResultsWindow restoreLogWindow = null;
+            EventHandler<string> restoreOutputHandler = null;
+            EventHandler<string> restoreErrorHandler = null;
+            bool restoreLogWindowFinalized = false;
+
             Z2SSetButtonsEnabled(false);
             _z2sCancellation = new CancellationTokenSource();
 
             try
             {
+                restoreLogWindow = await ShowZ2SOperationLogWindowAsync("Z2S przywracanie w toku");
+                AttachZ2SLogStreaming(restoreLogWindow, out restoreOutputHandler, out restoreErrorHandler);
+                restoreLogWindow.AppendLog($"Restore started from {backupFile}.");
+
                 z2sStatusText.Text = $"Przywracanie backupu z pliku:\n{backupFile}\n(może potrwać kilka minut)";
 
                 var result = await _z2sUpdateService.RestoreFromBackupAsync(
                     z2sPort,
                     _z2sChip,
                     backupFile,
-                    msg => Dispatcher.InvokeAsync(() => z2sStatusText.Text = msg),
+                    msg => Dispatcher.Invoke(() =>
+                    {
+                        z2sStatusText.Text = msg;
+                        restoreLogWindow?.AppendLog(msg);
+                    }),
                     _z2sCancellation.Token);
 
                 if (result.Success)
@@ -1150,6 +1296,9 @@ namespace GuiGenericBuilderDesktop
                     _logger.Information("Z2S restore succeeded from {File}", backupFile);
                     z2sStatusText.Text = $"✔ Przywracanie zakończone pomyślnie!\n\nPlik: {backupFile}";
                     z2sStatusBorder.Background = System.Windows.Media.Brushes.LightGreen;
+                    restoreLogWindow?.AppendLog($"Restore completed successfully from {backupFile}");
+                    restoreLogWindow?.FinalizeCompilation(true, customTitle: "Z2S przywracanie zakończone");
+                    restoreLogWindowFinalized = true;
                     await Task.Delay(4000);
                     z2sStatusBorder.Background = System.Windows.Media.Brushes.Transparent;
                 }
@@ -1157,6 +1306,9 @@ namespace GuiGenericBuilderDesktop
                 {
                     z2sStatusText.Text = $"✘ Przywracanie nieudane.\n{result.Error}";
                     z2sStatusBorder.Background = System.Windows.Media.Brushes.MistyRose;
+                    restoreLogWindow?.AppendLog($"Restore failed: {result.Error}");
+                    restoreLogWindow?.FinalizeCompilation(false, customTitle: "Z2S przywracanie nieudane");
+                    restoreLogWindowFinalized = true;
                     await Task.Delay(4000);
                     z2sStatusBorder.Background = System.Windows.Media.Brushes.Transparent;
                 }
@@ -1164,16 +1316,30 @@ namespace GuiGenericBuilderDesktop
             catch (OperationCanceledException)
             {
                 z2sStatusText.Text = "Przywracanie anulowane.";
+                restoreLogWindow?.AppendLog("Restore cancelled.");
+                restoreLogWindow?.FinalizeCompilation(false, customTitle: "Z2S przywracanie anulowane");
+                restoreLogWindowFinalized = true;
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Z2SRestore_Click failed");
                 z2sStatusText.Text = $"Błąd przywracania: {ex.Message}";
+                restoreLogWindow?.AppendLog($"Restore error: {ex.Message}");
+                restoreLogWindow?.FinalizeCompilation(false, customTitle: "Z2S przywracanie błąd");
+                restoreLogWindowFinalized = true;
             }
             finally
             {
+                if (restoreLogWindow != null)
+                {
+                    DetachZ2SLogStreaming(restoreOutputHandler, restoreErrorHandler);
+                    if (!restoreLogWindowFinalized)
+                        restoreLogWindow.FinalizeCompilation(false, customTitle: "Z2S przywracanie zakończone");
+                }
+
                 _z2sCancellation?.Dispose();
                 _z2sCancellation = null;
+                z2sOperationProgressBar.Visibility = Visibility.Collapsed;
                 Z2SSetButtonsEnabled(true);
             }
         }

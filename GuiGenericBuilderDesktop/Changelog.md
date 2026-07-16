@@ -1,6 +1,6 @@
 ﻿# Changelog
 
-## [2026-07-12] - Version 2.0.17
+## [2026-07-16] - Version 2.0.17
 
 **Zigbee Firmware Update**
 - Added dedicated Zigbee tab in the main window for Z2S firmware management

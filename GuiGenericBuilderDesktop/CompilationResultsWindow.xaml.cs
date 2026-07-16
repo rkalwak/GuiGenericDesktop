@@ -102,6 +102,18 @@ namespace GuiGenericBuilderDesktop
             StartTimer();
         }
 
+        public void SetLiveModeTitle(string title)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+                return;
+
+            Dispatcher.Invoke(() =>
+            {
+                Title = title;
+                TitleText.Text = title;
+            });
+        }
+
         public void StartTimer()
         {
             _compilationStopwatch = Stopwatch.StartNew();
@@ -180,7 +192,7 @@ namespace GuiGenericBuilderDesktop
         }
 
 
-        public void FinalizeCompilation(bool success, string encodedConfig = null, string backupPath = null, string firmwarePath = null)
+        public void FinalizeCompilation(bool success, string encodedConfig = null, string backupPath = null, string firmwarePath = null, string customTitle = null)
         {
             Dispatcher.Invoke(() =>
             {
@@ -202,8 +214,8 @@ namespace GuiGenericBuilderDesktop
 
                 if (_isSuccess)
                 {
-                    Title = LocalizationManager.Get("CompilationSuccessTitle");
-                    TitleText.Text = LocalizationManager.Get("CompilationSuccessTitle");
+                    Title = customTitle ?? LocalizationManager.Get("CompilationSuccessTitle");
+                    TitleText.Text = customTitle ?? LocalizationManager.Get("CompilationSuccessTitle");
 
                     if (!string.IsNullOrEmpty(_encodedConfig))
                     {
@@ -230,8 +242,8 @@ namespace GuiGenericBuilderDesktop
                 }
                 else
                 {
-                    Title = LocalizationManager.Get("CompilationFailedTitle");
-                    TitleText.Text = LocalizationManager.Get("CompilationFailedTitle");
+                    Title = customTitle ?? LocalizationManager.Get("CompilationFailedTitle");
+                    TitleText.Text = customTitle ?? LocalizationManager.Get("CompilationFailedTitle");
                     LogSectionTitle.Text = LocalizationManager.Get("ErrorLogs");
                 }
 
