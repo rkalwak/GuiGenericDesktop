@@ -1078,7 +1078,7 @@ namespace GuiGenericBuilderDesktop
                 return;
 
             var selectedRelease = picker.SelectedRelease;
-            string firmwareFileName = Z2SUpdateService.GetFirmwareFileName(withLogs, fullVersion);
+            string firmwareFileName = Z2SUpdateService.GetFirmwareFileName(withLogs, fullVersion, _z2sFlashSize);
 
             var confirmMessage = $"Czy na pewno wgrać firmware Z2S {selectedRelease.TagName} na urządzeniu podłączonym do {z2sPort}?\n\nPlik: {firmwareFileName}";
 
@@ -1165,6 +1165,7 @@ namespace GuiGenericBuilderDesktop
                     withLogs,
                     fullVersion,
                     clearDevice,
+                    _z2sFlashSize,
                     selectedRelease,
                     msg => Dispatcher.Invoke(() =>
                     {

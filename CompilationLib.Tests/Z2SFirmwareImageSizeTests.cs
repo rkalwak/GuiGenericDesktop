@@ -35,13 +35,32 @@ namespace CompilationLib.Tests
         // ── Firmware filename generation ──────────────────────────────────────
 
         [Theory]
-        [InlineData(true,  true,  "Z2S_Gateway.8MB.OTA.logs.full_version.bin")]
-        [InlineData(true,  false, "Z2S_Gateway.8MB.OTA.logs.update_only.bin")]
-        [InlineData(false, true,  "Z2S_Gateway.8MB.OTA.no_logs.full_version.bin")]
-        [InlineData(false, false, "Z2S_Gateway.8MB.OTA.no_logs.update_only.bin")]
-        public void GetFirmwareFileName_ReturnsExpectedName(bool withLogs, bool fullVersion, string expected)
+        [InlineData(true,  true,  "8MB",  "Z2S_Gateway.8MB.OTA.logs.full_version.bin")]
+        [InlineData(true,  false, "8MB",  "Z2S_Gateway.8MB.OTA.logs.update_only.bin")]
+        [InlineData(false, true,  "8MB",  "Z2S_Gateway.8MB.OTA.no_logs.full_version.bin")]
+        [InlineData(false, false, "8MB",  "Z2S_Gateway.8MB.OTA.no_logs.update_only.bin")]
+        [InlineData(true,  true,  "4MB",  "Z2S_Gateway.4MB.OTA.logs.full_version.bin")]
+        [InlineData(false, false, "4MB",  "Z2S_Gateway.4MB.OTA.no_logs.update_only.bin")]
+        [InlineData(true,  true,  "16MB", "Z2S_Gateway.8MB.OTA.logs.full_version.bin")]
+        [InlineData(false, false, "16MB", "Z2S_Gateway.8MB.OTA.no_logs.update_only.bin")]
+        [InlineData(true,  true,  "32MB", "Z2S_Gateway.8MB.OTA.logs.full_version.bin")]
+        [InlineData(true,  true,  "",     "Z2S_Gateway.8MB.OTA.logs.full_version.bin")]
+        [InlineData(false, false, null,   "Z2S_Gateway.8MB.OTA.no_logs.update_only.bin")]
+        public void GetFirmwareFileName_ReturnsExpectedName(bool withLogs, bool fullVersion, string flashSize, string expected)
         {
-            GetFirmwareFileName(withLogs, fullVersion).Should().Be(expected);
+            GetFirmwareFileName(withLogs, fullVersion, flashSize).Should().Be(expected);
+        }
+
+        [Theory]
+        [InlineData("4MB",  "4MB")]
+        [InlineData("8MB",  "8MB")]
+        [InlineData("16MB", "8MB")]
+        [InlineData("32MB", "8MB")]
+        [InlineData("",     "8MB")]
+        [InlineData(null,   "8MB")]
+        public void NormalizeFirmwareFlashSize_ReturnsExpectedSize(string input, string expected)
+        {
+            NormalizeFirmwareFlashSize(input).Should().Be(expected);
         }
 
         [Theory]
@@ -51,7 +70,7 @@ namespace CompilationLib.Tests
         [InlineData(false, false)]
         public void GetFirmwareFileName_HasDotBinExtension(bool withLogs, bool fullVersion)
         {
-            GetFirmwareFileName(withLogs, fullVersion).Should().EndWith(".bin");
+            GetFirmwareFileName(withLogs, fullVersion, "8MB").Should().EndWith(".bin");
         }
 
         // ── Integration: GitHub asset metadata size check ─────────────────────
@@ -75,7 +94,7 @@ namespace CompilationLib.Tests
             foreach (bool withLogs in new[] { true, false })
             foreach (bool fullVersion in new[] { true, false })
             {
-                var fileName = GetFirmwareFileName(withLogs, fullVersion);
+                var fileName = GetFirmwareFileName(withLogs, fullVersion, "8MB");
                 var asset = release.Assets.Find(a =>
                     string.Equals(a.Name, fileName, StringComparison.OrdinalIgnoreCase));
 
@@ -100,7 +119,7 @@ namespace CompilationLib.Tests
             var release = await FetchLatestReleaseAsync();
             if (release == null) return;
 
-            var fileName = GetFirmwareFileName(withLogs: false, fullVersion: false);
+            var fileName = GetFirmwareFileName(withLogs: false, fullVersion: false, flashSize: "8MB");
             var asset = release.Assets.Find(a =>
                 string.Equals(a.Name, fileName, StringComparison.OrdinalIgnoreCase));
 
@@ -132,13 +151,25 @@ namespace CompilationLib.Tests
 
         /// <summary>
         /// Mirrors Z2SUpdateService.GetFirmwareFileName — kept in sync manually.
-        /// Pattern: Z2S_Gateway.8MB.OTA.{logs|no_logs}.{full_version|update_only}.bin
+        /// Pattern: Z2S_Gateway.{firmwareSize}.OTA.{logs|no_logs}.{full_version|update_only}.bin
         /// </summary>
-        private static string GetFirmwareFileName(bool withLogs, bool fullVersion)
+        private static string GetFirmwareFileName(bool withLogs, bool fullVersion, string flashSize = "8MB")
         {
+            var sizePart    = NormalizeFirmwareFlashSize(flashSize);
             var logsPart    = withLogs    ? "logs"         : "no_logs";
             var versionPart = fullVersion ? "full_version" : "update_only";
-            return $"Z2S_Gateway.8MB.OTA.{logsPart}.{versionPart}.bin";
+            return $"Z2S_Gateway.{sizePart}.OTA.{logsPart}.{versionPart}.bin";
+        }
+
+        private static string NormalizeFirmwareFlashSize(string flashSize)
+        {
+            if (string.IsNullOrWhiteSpace(flashSize))
+                return "8MB";
+            return flashSize.Trim().ToUpperInvariant() switch
+            {
+                "4MB" => "4MB",
+                _     => "8MB",
+            };
         }
 
         private static HttpClient CreateHttpClient()
