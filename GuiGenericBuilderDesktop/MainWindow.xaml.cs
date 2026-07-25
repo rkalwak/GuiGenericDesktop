@@ -9,6 +9,7 @@ using Serilog;
 using Microsoft.Extensions.Configuration;
 using GuiGenericBuilderDesktop.Localization;
 using GuiGenericBuilderDesktop.Services;
+using CompilationLib.GithubInteractions;
 
 namespace GuiGenericBuilderDesktop
 {
@@ -1078,7 +1079,7 @@ namespace GuiGenericBuilderDesktop
                 return;
 
             var selectedRelease = picker.SelectedRelease;
-            string firmwareFileName = Z2SUpdateService.GetFirmwareFileName(withLogs, fullVersion, _z2sFlashSize);
+            string firmwareFileName = PartitionManager.GetZigbeeFirmwareFileName(withLogs, fullVersion, _z2sFlashSize);
 
             var confirmMessage = $"Czy na pewno wgrać firmware Z2S {selectedRelease.TagName} na urządzeniu podłączonym do {z2sPort}?\n\nPlik: {firmwareFileName}";
 

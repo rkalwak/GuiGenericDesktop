@@ -1,4 +1,4 @@
-namespace GuiGenericBuilderDesktop.Services
+namespace CompilationLib
 {
     /// <summary>
     /// Application-wide configuration loaded from appsettings.json.

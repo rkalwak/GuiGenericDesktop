@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
 using System.Reflection;
+using CompilationLib;
 using Octokit;
 using Serilog;
 

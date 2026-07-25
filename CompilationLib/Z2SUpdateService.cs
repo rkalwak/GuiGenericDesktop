@@ -1,11 +1,9 @@
-using System.IO;
-using System.Net.Http;
 using System.Text;
-using CompilationLib;
+using CompilationLib.GithubInteractions;
 using Octokit;
 using Serilog;
 
-namespace GuiGenericBuilderDesktop.Services
+namespace CompilationLib
 {
     public class Z2SVersionResult
     {
@@ -57,36 +55,6 @@ namespace GuiGenericBuilderDesktop.Services
 
         // How many bytes to read from SPIFFS when scanning for version.dat (64 KB is enough)
         private const long SpiffsScanSize = 0x10000;
-
-        /// <summary>
-        /// Builds the firmware asset filename based on the selected options.
-        /// <summary>
-        /// Maps a detected/selected flash size to the firmware image size that exists as a release asset.
-        /// Currently available firmware sizes: 4MB, 8MB.
-        /// Devices with larger flash (16MB, 32MB, …) use the 8MB image.
-        /// </summary>
-        public static string NormalizeFirmwareFlashSize(string flashSize)
-        {
-            if (string.IsNullOrWhiteSpace(flashSize))
-                return "8MB";
-            return flashSize.Trim().ToUpperInvariant() switch
-            {
-                "4MB" => "4MB",
-                _     => "8MB",
-            };
-        }
-
-        /// <summary>
-        /// Builds the firmware asset filename based on the selected options.
-        /// Pattern: Z2S_Gateway.{firmwareSize}.OTA.{logs|no_logs}.{full_version|update_only}.bin
-        /// </summary>
-        public static string GetFirmwareFileName(bool withLogs, bool fullVersion, string flashSize = "8MB")
-        {
-            var sizePart    = NormalizeFirmwareFlashSize(flashSize);
-            var logsPart    = withLogs    ? "logs"         : "no_logs";
-            var versionPart = fullVersion ? "full_version" : "update_only";
-            return $"Z2S_Gateway.{sizePart}.OTA.{logsPart}.{versionPart}.bin";
-        }
 
         public Z2SUpdateService(IEsptoolWrapper esptoolWrapper, AppConfig config, ILogger logger)
         {
@@ -489,7 +457,7 @@ namespace GuiGenericBuilderDesktop.Services
 
                 latestVersion = latest.TagName;
 
-                var targetFileName = GetFirmwareFileName(withLogs, fullVersion);
+                var targetFileName = PartitionManager.GetZigbeeFirmwareFileName(withLogs, fullVersion, "8MB");
                 _logger.Information("Looking for asset: {FileName}", targetFileName);
 
                 var asset = latest.Assets
@@ -524,7 +492,7 @@ namespace GuiGenericBuilderDesktop.Services
             _logger.Information("Starting Z2S flash of release {Tag} on port {Port}, chip {Chip}", release.TagName, comPort, chip);
 
             string downloadUrl;
-            var targetFileName = GetFirmwareFileName(withLogs, fullVersion, flashSize);
+            var targetFileName = PartitionManager.GetZigbeeFirmwareFileName(withLogs, fullVersion, flashSize);
             _logger.Information("Looking for asset: {FileName}", targetFileName);
 
             var asset = release.Assets

@@ -1,6 +1,6 @@
 using System.IO.Compression;
 
-namespace CompilationLib
+namespace CompilationLib.GithubInteractions
 {
     /// <summary>
     /// Downloads public GitHub repository archive (zip) and extracts it to a destination folder.

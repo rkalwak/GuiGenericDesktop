@@ -78,7 +78,7 @@ namespace CompilationLib
         /// <param name="board">Board name (e.g., "esp32", "esp32c3", "esp32c6", "esp32s3")</param>
         /// <returns>PartitionScheme or null if not found</returns>
         public static PartitionScheme GetPartitionScheme(string flashSize, string board)
-        {            
+        {
             if (string.IsNullOrEmpty(board) || string.IsNullOrEmpty(flashSize))
                 return null;
 
@@ -97,7 +97,7 @@ namespace CompilationLib
         /// <param name="board">Platform name</param>
         /// <returns>Array of supported flash sizes</returns>
         public static string[] GetSupportedFlashSizes(string board)
-        {            
+        {
             if (string.IsNullOrEmpty(board))
                 return Array.Empty<string>();
 
@@ -156,6 +156,42 @@ namespace CompilationLib
 
             var partitionFile = Path.Combine(partitionsDir, scheme.FileName);
             return File.Exists(partitionFile) ? partitionFile : null;
+        }
+
+        /// <summary>
+        /// Builds the firmware asset filename based on the selected options.
+        /// <summary>
+        /// Maps a detected/selected flash size to the firmware image size that exists as a release asset.
+        /// Currently available firmware sizes: 4MB, 8MB.
+        /// Devices with larger flash (16MB, 32MB, …) use the 8MB image.
+        /// </summary>
+        public static string NormalizeFirmwareFlashSize(string flashSize)
+        {
+            if (string.IsNullOrWhiteSpace(flashSize))
+                return "8MB";
+            return flashSize.Trim().ToUpperInvariant() switch
+            {
+                "4MB" => "4MB",
+                _ => "8MB",
+            };
+        }
+
+        /// <summary>
+        /// Builds the firmware asset filename based on the selected options.
+        /// Pattern (8MB): Z2S_Gateway.{firmwareSize}.OTA.{logs|no_logs}.{full_version|update_only}.bin
+        /// Pattern (4MB, temporary): Z2S_Gateway.4MB.no_OTA.{logs|no_logs}.{full_version|update_only}.WARNING_NEW_SIZE.bin
+        /// </summary>
+        public static string GetZigbeeFirmwareFileName(bool withLogs, bool fullVersion, string flashSize = "8MB")
+        {
+            var sizePart    = NormalizeFirmwareFlashSize(flashSize);
+            var logsPart    = withLogs    ? "logs"         : "no_logs";
+            var versionPart = fullVersion ? "full_version" : "update_only";
+
+            // TODO: remove the 4MB special-case once the upstream repo aligns its naming convention
+            if (sizePart == "4MB")
+                return $"Z2S_Gateway.4MB.no_OTA.{logsPart}.{versionPart}.WARNING_NEW_SIZE.bin";
+
+            return $"Z2S_Gateway.{sizePart}.OTA.{logsPart}.{versionPart}.bin";
         }
     }
 

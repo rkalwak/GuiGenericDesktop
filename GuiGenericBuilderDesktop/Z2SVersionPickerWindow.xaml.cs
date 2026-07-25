@@ -1,7 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
 using Serilog;
-using GuiGenericBuilderDesktop.Services;
+using CompilationLib;
+using CompilationLib.GithubInteractions;
 
 namespace GuiGenericBuilderDesktop
 {
