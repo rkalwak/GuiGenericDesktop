@@ -188,7 +188,9 @@ namespace CompilationLib
             var versionPart = fullVersion ? "full_version" : "update_only";
 
             // TODO: remove the 4MB special-case once the upstream repo aligns its naming convention
-            if (sizePart == "4MB")
+            if (sizePart == "4MB" && !fullVersion)
+                return $"Z2S_Gateway.4MB.no_OTA.{logsPart}.{versionPart}.WARNING_NEW_SIZE.bin";
+            else if (sizePart == "4MB" && fullVersion)
                 return $"Z2S_Gateway.4MB.no_OTA.{logsPart}.{versionPart}.WARNING_NEW_SIZE.bin";
 
             return $"Z2S_Gateway.{sizePart}.OTA.{logsPart}.{versionPart}.bin";
