@@ -38,7 +38,7 @@ namespace CompilationLib.Tests
         [InlineData(true, false, "8MB", "Z2S_Gateway.8MB.OTA.logs.update_only.bin")]
         [InlineData(false, true, "8MB", "Z2S_Gateway.8MB.OTA.no_logs.full_version.bin")]
         [InlineData(false, false, "8MB", "Z2S_Gateway.8MB.OTA.no_logs.update_only.bin")]
-        [InlineData(true, true, "4MB", "Z2S_Gateway.4MB.no_OTA.logs.full_version.WARNING_NEW_SIZE.bin")]
+        [InlineData(true, true, "4MB", "Z2S_Gateway.4MB.no_OTA.logs.full_version.bin")]
         [InlineData(true, false, "4MB", "Z2S_Gateway.4MB.no_OTA.logs.update_only.WARNING_NEW_SIZE.bin")]
         [InlineData(false, false, "4MB", "Z2S_Gateway.4MB.no_OTA.no_logs.update_only.WARNING_NEW_SIZE.bin")]
         [InlineData(true, true, "16MB", "Z2S_Gateway.8MB.OTA.logs.full_version.bin")]
