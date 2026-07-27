@@ -191,7 +191,7 @@ namespace CompilationLib
             if (sizePart == "4MB" && !fullVersion)
                 return $"Z2S_Gateway.4MB.no_OTA.{logsPart}.{versionPart}.WARNING_NEW_SIZE.bin";
             else if (sizePart == "4MB" && fullVersion)
-                return $"Z2S_Gateway.4MB.no_OTA.{logsPart}.{versionPart}.WARNING_NEW_SIZE.bin";
+                return $"Z2S_Gateway.4MB.no_OTA.{logsPart}.{versionPart}.bin";
 
             return $"Z2S_Gateway.{sizePart}.OTA.{logsPart}.{versionPart}.bin";
         }
