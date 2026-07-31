@@ -6066,6 +6066,87 @@
 
           ]
         },
+        "SUPLA_HCSR04KPOP": {
+          "name": "Czujnik odległości HC-SR04 na kanale pomiarowym ogólnego przeznaczenia",
+          "desc": "Ustawienia urządzenia-\u003eInne. Umożliwia obsługę czujnika odległości HC-SR04 na kanale pomiarowym ogólnego przeznaczenia.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "HC-SR04 distance sensor on general-purpose measurement channel",
+              "desc": "Device settings-\u003eOther. Enables operation of the HC-SR04 distance sensor on general-purpose measurement channel."
+            }
+          },
+          "Parameters": [
+            {
+              "Key": "Trigger",
+              "Name": "Pin TRIGGER",
+              "Type": "number",
+              "IsRequired": true,
+              "Translations": {
+                "en": {
+                  "Name": "TRIGGER Pin"
+                }
+              }
+            },
+            {
+              "Key": "Echo",
+              "Name": "Pin ECHO",
+              "Type": "number",
+              "IsRequired": true,
+              "Translations": {
+                "en": {
+                  "Name": "ECHO Pin"
+                }
+              }
+            },
+            {
+              "Key": "Min",
+              "Name": "Minimalna odległość",
+              "Type": "number",
+              "IsRequired": true,
+              "Translations": {
+                "en": {
+                  "Name": "Minimum distance"
+                }
+              }
+            },
+            {
+              "Key": "Max",
+              "Name": "Maksymalna odległość",
+              "Type": "number",
+              "IsRequired": true,
+              "Translations": {
+                "en": {
+                  "Name": "Maximum distance"
+                }
+              }
+            },
+            {
+              "Key": "Calculate",
+              "Name": "Przelicz wartość w przedziale Min/Max i wyraź w procentach",
+              "Type": "enum",
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "1",
+                  "Name": "Tak",
+                  "Description": "Przelicz."
+                },
+                {
+                  "Value": "0",
+                  "Name": "Nie",
+                  "Description": "Nie przeliczaj."
+                }
+              ],
+              "IsRequired": true,
+              "Translations": {
+                "en": {
+                  "Name": "Calculated value in the Min/Max range expressed as a percentage"
+                }
+              }
+            }
+          ]
+        },
         "SUPLA_IMPULSE_COUNTER": {
           "name": "Licznik impulsów",
           "desc": "Ustawienia urządzenia-\u003eInne. Umożliwia obsługę licznika impulsów.",
