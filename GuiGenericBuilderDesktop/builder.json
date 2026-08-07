@@ -6127,15 +6127,21 @@
               "Type": "enum",
               "DefaultValue": "0",
               "EnumValues": [
-                {
-                  "Value": "1",
-                  "Name": "Tak",
-                  "Description": "Przelicz."
-                },
+
                 {
                   "Value": "0",
                   "Name": "Nie",
                   "Description": "Nie przeliczaj."
+                },
+                {
+                  "Value": "1",
+                  "Name": "Przelicz",
+                  "Description": "Min->0%, Max->100%"
+                },
+                {
+                  "Value": "2",
+                  "Name": "Przelicz",
+                  "Description": "Przelicz Min->100%, Max->0%"
                 }
               ],
               "IsRequired": true,
