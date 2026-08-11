@@ -1,5 +1,36 @@
 ﻿# Changelog
 
+### [2026-08-11] - Version 2.0.26
+
+**GUI-Generic Builder Update**
+- Fix for GG path detection when using relative paths in `appsettings.json`
+
+## [2026-08-10] - Version 2.0.25
+
+**GUI-Generic Builder Update**
+- Enabled automatic update for GGDB.
+
+## [2026-07-31] - Version 2.0.22
+## [2026-07-31] - Version 2.0.23
+## [2026-08-07] - Version 2.0.24
+
+
+**GUI-Generic Builder Update**
+- HC-SR04 sensor as KPOP support
+
+
+## [2026-07-27] - Version 2.0.21
+
+**Zigbee Firmware Update**
+- Fixed flashsize selection during Z2S firmware update process
+
+## [2026-07-26] - Version 2.0.18
+## [2026-07-26] - Version 2.0.19
+## [2026-07-26] - Version 2.0.20
+
+**Zigbee Firmware Update**
+- Fixed flashsize selection during Z2S firmware update process
+
 ## [2026-07-16] - Version 2.0.17
 
 **Zigbee Firmware Update**
