@@ -1,5 +1,6 @@
 using CompilationLib;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -324,7 +325,9 @@ public class PlatformioCliHandler : ICompileHandler
                 var paramType = matchingFlagParameter?.Type ?? globalParam.Type;
                 string value;
                 if (string.Equals(paramType, "number", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(paramType, "enum", StringComparison.OrdinalIgnoreCase))
+                    string.Equals(paramType, "enum", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(paramType, "gpio", StringComparison.OrdinalIgnoreCase) ||
+                    IsNumericLike(valueToUse))
                     value = string.IsNullOrEmpty(valueToUse) ? "0" : valueToUse;
                 else
                     value = $"'\"{valueToUse}\"'";// Global parameters use GLOBALPARAMETERS_ prefix
@@ -343,6 +346,51 @@ public class PlatformioCliHandler : ICompileHandler
                 }
 
                 globalParametersWritten.Add(identifier);
+            }
+        }
+
+        // Remove stale flag-specific parameter definitions left behind from previous builds.
+        var expectedParameterDefines = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var flag in allowedFlags)
+        {
+            if (flag?.Parameters == null || flag.Parameters.Count == 0)
+                continue;
+
+            foreach (var p in flag.Parameters)
+            {
+                if (p == null)
+                    continue;
+
+                var identifier = (p.Identifier ?? string.Empty).Trim();
+                if (string.IsNullOrEmpty(identifier))
+                    continue;
+
+                if (globalParametersWritten.Contains(identifier))
+                    continue;
+
+                expectedParameterDefines.Add($"Parameter_{flag.Key}_{identifier}");
+            }
+        }
+
+        for (var i = startIndex + 1; i < endIndex; i++)
+        {
+            var currentLine = lines[i];
+            if (string.IsNullOrWhiteSpace(currentLine) ||
+                !currentLine.Contains("Parameter_", StringComparison.OrdinalIgnoreCase) ||
+                currentLine.Contains(_globalParameterPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            var hasExpectedMatch = expectedParameterDefines.Any(expected => currentLine.Contains(expected, StringComparison.OrdinalIgnoreCase));
+            if (!hasExpectedMatch)
+            {
+                var trimmedStart = currentLine.TrimStart();
+                if (!trimmedStart.StartsWith(";", StringComparison.Ordinal))
+                {
+                    var leadingWhitespace = currentLine.Substring(0, currentLine.Length - trimmedStart.Length);
+                    lines[i] = leadingWhitespace + ";" + trimmedStart;
+                }
             }
         }
 
@@ -399,10 +447,12 @@ public class PlatformioCliHandler : ICompileHandler
                 }
 
                 // Parameter has a value or is required, process it normally
-                // Format based on declared type: numbers as-is, strings quoted
+                // Format based on declared type: numbers and GPIO pins as-is, strings quoted
                 string value;
                 if (string.Equals(p.Type, "number", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(p.Type, "enum", StringComparison.OrdinalIgnoreCase))
+                    string.Equals(p.Type, "enum", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(p.Type, "gpio", StringComparison.OrdinalIgnoreCase) ||
+                    IsNumericLike(raw))
                     value = string.IsNullOrEmpty(raw) ? "0" : raw;
                 else // treat everything else as string
                     value = $"'\"{raw}\"'";
@@ -515,6 +565,15 @@ public class PlatformioCliHandler : ICompileHandler
             Console.WriteLine($"? Warning: Failed to set partition scheme: {ex.Message}");
             // Continue compilation with default partitions
         }
+    }
+
+    private static bool IsNumericLike(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        return decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out _) ||
+               decimal.TryParse(value, NumberStyles.Float, CultureInfo.CurrentCulture, out _);
     }
 
     private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)

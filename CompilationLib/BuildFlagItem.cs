@@ -72,6 +72,27 @@ namespace CompilationLib
         public Dictionary<string, FlagTranslation> Translations { get; set; } = new Dictionary<string, FlagTranslation>();
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public bool IsAutoEnabledByAnotherFlag(IEnumerable<BuildFlagItem> allFlags)
+        {
+            if (allFlags == null || string.IsNullOrWhiteSpace(Key))
+            {
+                return false;
+            }
+
+            return allFlags.Any(flag =>
+                flag != null &&
+                flag.EnabledByFlags != null &&
+                flag.EnabledByFlags.Any(dep => string.Equals(dep?.Trim(), Key.Trim(), StringComparison.OrdinalIgnoreCase)));
+        }
+    }
+
+    public static class BuildFlagItemExtensions
+    {
+        public static bool IsAutoEnabledByAnotherFlag(this BuildFlagItem flag, IEnumerable<BuildFlagItem> allFlags)
+        {
+            return flag?.IsAutoEnabledByAnotherFlag(allFlags) == true;
+        }
     }
 
     /// <summary>

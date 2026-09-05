@@ -1,5 +1,6 @@
 ﻿using CompilationLib;
 using System.Diagnostics;
+using System.Globalization;
 
 public class CompileHandler : ICompileHandler
 {
@@ -82,11 +83,12 @@ public class CompileHandler : ICompileHandler
 
         foreach (var flag in userBuildFlags.Where(f => f.IsEnabled))
         {
-            if (string.IsNullOrWhiteSpace(flag.Key))
+            var flagKey = (flag.Key ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(flagKey))
                 continue;
 
             // Add canonical flag token
-            parts.Add($"-D {flag.Key.Trim()}");
+            parts.Add($"-D {flagKey}");
 
             if (flag.Parameters == null)
                 continue;
@@ -96,28 +98,54 @@ public class CompileHandler : ICompileHandler
                 if (p == null)
                     continue;
 
-                var name = (p.Name ?? string.Empty).Trim();
-                if (string.IsNullOrEmpty(name))
+                var parameterKey = (p.Key ?? p.Name ?? string.Empty).Trim();
+                if (string.IsNullOrEmpty(parameterKey))
                     continue;
 
-                // Convert value to string safely
                 var raw = (p.Value?.ToString() ?? string.Empty).Trim();
+                var type = p.Type ?? string.Empty;
 
-                // Format based on declared type: numbers as-is, strings quoted
                 string value;
-                if (string.Equals(p.Type, "number", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(type, "number", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(type, "gpio", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(type, "enum", StringComparison.OrdinalIgnoreCase) ||
+                    IsNumericLike(raw))
+                {
                     value = string.IsNullOrEmpty(raw) ? "0" : raw;
-                else // treat everything else as string
+                }
+                else if (string.Equals(type, "bool", StringComparison.OrdinalIgnoreCase))
+                {
+                    value = string.Equals(raw, "true", StringComparison.OrdinalIgnoreCase) || raw == "1" ? "1" : "0";
+                }
+                else
+                {
                     value = string.IsNullOrEmpty(raw) ? "\"\"" : $"'\"{raw}\"'";
+                }
 
-                // define is FLAGNAME_ParamName=Value
-                var define = $"{flag.FlagName}_{p.Name}={value}";
+                string define;
+                if (parameterKey.StartsWith("Parameter_", StringComparison.OrdinalIgnoreCase))
+                {
+                    define = $"{parameterKey}={value}";
+                }
+                else
+                {
+                    define = $"{flagKey}_{parameterKey}={value}";
+                }
 
                 parts.Add($"-D {define}");
             }
         }
 
         return string.Join(" ", parts.Where(p => !string.IsNullOrWhiteSpace(p)));
+    }
+
+    private static bool IsNumericLike(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return false;
+
+        return decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out _) ||
+               decimal.TryParse(value, NumberStyles.Float, CultureInfo.CurrentCulture, out _);
     }
 
     private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)

@@ -43,6 +43,12 @@ namespace CompilationLib
         public Dictionary<string, Dictionary<string, string>> BuildFlagsParameters { get; set; } = new();
 
         /// <summary>
+        /// Global parameter values that are shared across flags (for example SCL/SDA or GPIO board settings).
+        /// Key is the parameter identifier, value is the parameter value.
+        /// </summary>
+        public Dictionary<string, string> GlobalParameters { get; set; } = new();
+
+        /// <summary>
         /// Gets the list of enabled flag keys from BuildFlagsParameters.
         /// This is a computed property for backward compatibility.
         /// </summary>

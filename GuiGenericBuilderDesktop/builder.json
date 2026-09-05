@@ -97,6 +97,832 @@
             "Name": "GDO2 Pin"
           }
         }
+      },
+      {
+        "Key": "GPIO_P_GUI_Generic_ESP8266",
+        "Name": "GPIO map for ESP8266",
+        "Type": "enum",
+        "IsRequired": false,
+        "DefaultValue": "1-1",
+        "EnumValues": [
+          {
+            "Value": "0",
+            "Name": "OFF"
+          },
+          {
+            "Value": "1",
+            "Name": "1-TX"
+          },
+          {
+            "Value": "2",
+            "Name": "2-D4"
+          },
+          {
+            "Value": "3",
+            "Name": "3-RX"
+          },
+          {
+            "Value": "4",
+            "Name": "4-D2"
+          },
+          {
+            "Value": "5",
+            "Name": "5-D1"
+          },
+          {
+            "Value": "9",
+            "Name": "9-FL (ESP8285)"
+          },
+          {
+            "Value": "10",
+            "Name": "10-FL (ESP8285)"
+          },
+          {
+            "Value": "12",
+            "Name": "12-D6"
+          },
+          {
+            "Value": "13",
+            "Name": "13-D7"
+          },
+          {
+            "Value": "14",
+            "Name": "14-D5"
+          },
+          {
+            "Value": "15",
+            "Name": "15-D8"
+          },
+          {
+            "Value": "16",
+            "Name": "16-D0"
+          },
+          {
+            "Value": "17",
+            "Name": "17-A0 ANALOG"
+          }
+        ],
+        "Translations": {
+          "en": {
+            "Name": "GPIO map for ESP8266"
+          }
+        }
+      },
+      {
+        "Key": "GPIO_P_GUI_Generic_ESP32",
+        "Name": "GPIO map for ESP32",
+        "Type": "enum",
+        "IsRequired": false,
+        "DefaultValue": "0",
+        "EnumValues": [
+          {
+            "Value": "0",
+            "Name": "OFF"
+          },
+          {
+            "Value": "1",
+            "Name": "1-TX"
+          },
+          {
+            "Value": "2",
+            "Name": "2-IO"
+          },
+          {
+            "Value": "3",
+            "Name": "3-RX"
+          },
+          {
+            "Value": "4",
+            "Name": "4-IO"
+          },
+          {
+            "Value": "5",
+            "Name": "5-CS/IO"
+          },
+          {
+            "Value": "12",
+            "Name": "12-IO"
+          },
+          {
+            "Value": "13",
+            "Name": "13-IO"
+          },
+          {
+            "Value": "14",
+            "Name": "14-IO"
+          },
+          {
+            "Value": "15",
+            "Name": "15-IO"
+          },
+          {
+            "Value": "16",
+            "Name": "16-IO"
+          },
+          {
+            "Value": "17",
+            "Name": "17-IO"
+          },
+          {
+            "Value": "18",
+            "Name": "18-SCK/IO"
+          },
+          {
+            "Value": "19",
+            "Name": "19-MISO/IO"
+          },
+          {
+            "Value": "21",
+            "Name": "21-SDA/IO"
+          },
+          {
+            "Value": "22",
+            "Name": "22-SCL/IO"
+          },
+          {
+            "Value": "23",
+            "Name": "23-MOSI/IO"
+          },
+          {
+            "Value": "25",
+            "Name": "25-IO"
+          },
+          {
+            "Value": "26",
+            "Name": "26-IO"
+          },
+          {
+            "Value": "27",
+            "Name": "27-IO"
+          },
+          {
+            "Value": "32",
+            "Name": "32-IO"
+          },
+          {
+            "Value": "33",
+            "Name": "33-IO"
+          },
+          {
+            "Value": "34",
+            "Name": "34-IA"
+          },
+          {
+            "Value": "35",
+            "Name": "35-IA"
+          },
+          {
+            "Value": "36",
+            "Name": "36-IA"
+          },
+          {
+            "Value": "39",
+            "Name": "39-IA"
+          }
+        ],
+        "Translations": {
+          "en": {
+            "Name": "GPIO map for ESP32"
+          }
+        }
+      },
+      {
+        "Key": "GPIO_P_GUI_Generic_ESP32C3",
+        "Name": "GPIO map for ESP32-C3",
+        "Type": "enum",
+        "IsRequired": false,
+        "DefaultValue": "0",
+        "EnumValues": [
+          {
+            "Value": "0",
+            "Name": "OFF"
+          },
+          {
+            "Value": "1",
+            "Name": "1-IO"
+          },
+          {
+            "Value": "2",
+            "Name": "2-IO"
+          },
+          {
+            "Value": "3",
+            "Name": "3-IO"
+          },
+          {
+            "Value": "4",
+            "Name": "4-SCK/IO"
+          },
+          {
+            "Value": "5",
+            "Name": "5-MISO/IO"
+          },
+          {
+            "Value": "6",
+            "Name": "6-MOSI/IO"
+          },
+          {
+            "Value": "7",
+            "Name": "7-CS/IO"
+          },
+          {
+            "Value": "8",
+            "Name": "8-SDA/IO"
+          },
+          {
+            "Value": "9",
+            "Name": "9-SCL/IO"
+          },
+          {
+            "Value": "10",
+            "Name": "10-IO"
+          },
+          {
+            "Value": "18",
+            "Name": "18-IO"
+          },
+          {
+            "Value": "19",
+            "Name": "19-IO"
+          },
+          {
+            "Value": "20",
+            "Name": "20-RX/IO"
+          },
+          {
+            "Value": "21",
+            "Name": "21-TX/IO"
+          }
+        ],
+        "Translations": {
+          "en": {
+            "Name": "GPIO map for ESP32-C3"
+          }
+        }
+      },
+      {
+        "Key": "GPIO_P_GUI_Generic_ESP32C5",
+        "Name": "GPIO map for ESP32-C5",
+        "Type": "enum",
+        "IsRequired": false,
+        "DefaultValue": "0",
+        "EnumValues": [
+          {
+            "Value": "0",
+            "Name": "OFF"
+          },
+          {
+            "Value": "1",
+            "Name": "1-IO"
+          },
+          {
+            "Value": "2",
+            "Name": "2-MISO/IO"
+          },
+          {
+            "Value": "3",
+            "Name": "3-IO"
+          },
+          {
+            "Value": "4",
+            "Name": "4-IO"
+          },
+          {
+            "Value": "5",
+            "Name": "5-CS/IO"
+          },
+          {
+            "Value": "6",
+            "Name": "6-SDA/SCK/IO"
+          },
+          {
+            "Value": "7",
+            "Name": "7-SCL/MOSI/IO"
+          },
+          {
+            "Value": "8",
+            "Name": "8-IO"
+          },
+          {
+            "Value": "9",
+            "Name": "9-IO"
+          },
+          {
+            "Value": "10",
+            "Name": "10-IO"
+          },
+          {
+            "Value": "11",
+            "Name": "11-IO"
+          },
+          {
+            "Value": "12",
+            "Name": "12-IO"
+          },
+          {
+            "Value": "13",
+            "Name": "13-IO"
+          },
+          {
+            "Value": "14",
+            "Name": "14-IO"
+          },
+          {
+            "Value": "15",
+            "Name": "15-IO"
+          },
+          {
+            "Value": "16",
+            "Name": "16-TX/IO"
+          },
+          {
+            "Value": "17",
+            "Name": "17-RX/IO"
+          },
+          {
+            "Value": "18",
+            "Name": "18-IO"
+          },
+          {
+            "Value": "19",
+            "Name": "19-IO"
+          },
+          {
+            "Value": "20",
+            "Name": "20-IO"
+          },
+          {
+            "Value": "21",
+            "Name": "21-IO"
+          },
+          {
+            "Value": "22",
+            "Name": "22-IO"
+          },
+          {
+            "Value": "23",
+            "Name": "23-IO"
+          },
+          {
+            "Value": "24",
+            "Name": "24-IO"
+          },
+          {
+            "Value": "25",
+            "Name": "25-IO"
+          },
+          {
+            "Value": "26",
+            "Name": "26-IO"
+          },
+          {
+            "Value": "27",
+            "Name": "27-IO"
+          },
+          {
+            "Value": "28",
+            "Name": "28-IO"
+          }
+        ],
+        "Translations": {
+          "en": {
+            "Name": "GPIO map for ESP32-C5"
+          }
+        }
+      },
+      {
+        "Key": "GPIO_P_GUI_Generic_ESP32C6",
+        "Name": "GPIO map for ESP32-C6",
+        "Type": "enum",
+        "IsRequired": false,
+        "DefaultValue": "0",
+        "EnumValues": [
+          {
+            "Value": "0",
+            "Name": "OFF"
+          },
+          {
+            "Value": "1",
+            "Name": "1-IO"
+          },
+          {
+            "Value": "2",
+            "Name": "2-MISO/IO"
+          },
+          {
+            "Value": "3",
+            "Name": "3-IO"
+          },
+          {
+            "Value": "4",
+            "Name": "4-IO"
+          },
+          {
+            "Value": "5",
+            "Name": "5-CS/IO"
+          },
+          {
+            "Value": "6",
+            "Name": "6-SDA/SCK/IO"
+          },
+          {
+            "Value": "7",
+            "Name": "7-SCL/MOSI/IO"
+          },
+          {
+            "Value": "8",
+            "Name": "8-IO"
+          },
+          {
+            "Value": "9",
+            "Name": "9-IO"
+          },
+          {
+            "Value": "10",
+            "Name": "10-IO"
+          },
+          {
+            "Value": "11",
+            "Name": "11-IO"
+          },
+          {
+            "Value": "12",
+            "Name": "12-IO"
+          },
+          {
+            "Value": "13",
+            "Name": "13-IO"
+          },
+          {
+            "Value": "14",
+            "Name": "14-IO"
+          },
+          {
+            "Value": "15",
+            "Name": "15-IO"
+          },
+          {
+            "Value": "16",
+            "Name": "16-TX/IO"
+          },
+          {
+            "Value": "17",
+            "Name": "17-RX/IO"
+          },
+          {
+            "Value": "18",
+            "Name": "18-IO"
+          },
+          {
+            "Value": "19",
+            "Name": "19-IO"
+          },
+          {
+            "Value": "20",
+            "Name": "20-IO"
+          },
+          {
+            "Value": "21",
+            "Name": "21-IO"
+          },
+          {
+            "Value": "22",
+            "Name": "22-IO"
+          },
+          {
+            "Value": "23",
+            "Name": "23-IO"
+          },
+          {
+            "Value": "30",
+            "Name": "30-IO"
+          }
+        ],
+        "Translations": {
+          "en": {
+            "Name": "GPIO map for ESP32-C6"
+          }
+        }
+      },
+      {
+        "Key": "GPIO_P_GUI_Generic_ESP32S2",
+        "Name": "GPIO map for ESP32-S2",
+        "Type": "enum",
+        "IsRequired": false,
+        "DefaultValue": "0",
+        "EnumValues": [
+          {
+            "Value": "0",
+            "Name": "OFF"
+          },
+          {
+            "Value": "1",
+            "Name": "1-IO"
+          },
+          {
+            "Value": "2",
+            "Name": "2-IO"
+          },
+          {
+            "Value": "3",
+            "Name": "3-IO"
+          },
+          {
+            "Value": "4",
+            "Name": "4-IO"
+          },
+          {
+            "Value": "5",
+            "Name": "5-IO"
+          },
+          {
+            "Value": "6",
+            "Name": "6-IO"
+          },
+          {
+            "Value": "7",
+            "Name": "7-IO"
+          },
+          {
+            "Value": "8",
+            "Name": "8-SDA/IO"
+          },
+          {
+            "Value": "9",
+            "Name": "9-SCL/IO"
+          },
+          {
+            "Value": "10",
+            "Name": "10-CS/IO"
+          },
+          {
+            "Value": "11",
+            "Name": "11-MOSI/IO"
+          },
+          {
+            "Value": "12",
+            "Name": "12-IO"
+          },
+          {
+            "Value": "13",
+            "Name": "13-MISO/IO"
+          },
+          {
+            "Value": "14",
+            "Name": "14-IO"
+          },
+          {
+            "Value": "15",
+            "Name": "15-IO"
+          },
+          {
+            "Value": "16",
+            "Name": "16-IO"
+          },
+          {
+            "Value": "17",
+            "Name": "17-IO"
+          },
+          {
+            "Value": "18",
+            "Name": "18-IO"
+          },
+          {
+            "Value": "19",
+            "Name": "19-IO"
+          },
+          {
+            "Value": "20",
+            "Name": "20-IO"
+          },
+          {
+            "Value": "21",
+            "Name": "21-IO"
+          },
+          {
+            "Value": "26",
+            "Name": "26-IO"
+          },
+          {
+            "Value": "33",
+            "Name": "33-IO"
+          },
+          {
+            "Value": "34",
+            "Name": "34-IO"
+          },
+          {
+            "Value": "35",
+            "Name": "35-IO"
+          },
+          {
+            "Value": "36",
+            "Name": "36-SCK/IO"
+          },
+          {
+            "Value": "37",
+            "Name": "37-IO"
+          },
+          {
+            "Value": "38",
+            "Name": "38-IO"
+          },
+          {
+            "Value": "39",
+            "Name": "39-IO"
+          },
+          {
+            "Value": "40",
+            "Name": "40-IO"
+          },
+          {
+            "Value": "41",
+            "Name": "41-IO"
+          },
+          {
+            "Value": "42",
+            "Name": "42-IO"
+          },
+          {
+            "Value": "43",
+            "Name": "43-TX/IO"
+          },
+          {
+            "Value": "44",
+            "Name": "44-RX/IO"
+          },
+          {
+            "Value": "45",
+            "Name": "45-IO"
+          },
+          {
+            "Value": "46",
+            "Name": "46-IO"
+          }
+        ],
+        "Translations": {
+          "en": {
+            "Name": "GPIO map for ESP32-S2"
+          }
+        }
+      },
+      {
+        "Key": "GPIO_P_GUI_Generic_ESP32C3",
+        "Name": "GPIO map for ESP32-S3",
+        "Type": "enum",
+        "IsRequired": false,
+        "DefaultValue": "0",
+        "EnumValues": [
+          {
+            "Value": "0",
+            "Name": "OFF"
+          },
+          {
+            "Value": "1",
+            "Name": "1-IO"
+          },
+          {
+            "Value": "2",
+            "Name": "2-IO"
+          },
+          {
+            "Value": "3",
+            "Name": "3-IO"
+          },
+          {
+            "Value": "4",
+            "Name": "4-IO"
+          },
+          {
+            "Value": "5",
+            "Name": "5-IO"
+          },
+          {
+            "Value": "6",
+            "Name": "6-IO"
+          },
+          {
+            "Value": "7",
+            "Name": "7-IO"
+          },
+          {
+            "Value": "8",
+            "Name": "8-SDA/IO"
+          },
+          {
+            "Value": "9",
+            "Name": "9-SCL/IO"
+          },
+          {
+            "Value": "10",
+            "Name": "10-CS/IO"
+          },
+          {
+            "Value": "11",
+            "Name": "11-MOSI/IO"
+          },
+          {
+            "Value": "12",
+            "Name": "12-SCK/IO"
+          },
+          {
+            "Value": "13",
+            "Name": "13-MISO/IO"
+          },
+          {
+            "Value": "14",
+            "Name": "14-IO"
+          },
+          {
+            "Value": "15",
+            "Name": "15-IO"
+          },
+          {
+            "Value": "16",
+            "Name": "16-IO"
+          },
+          {
+            "Value": "17",
+            "Name": "17-IO"
+          },
+          {
+            "Value": "18",
+            "Name": "18-IO"
+          },
+          {
+            "Value": "19",
+            "Name": "19-IO"
+          },
+          {
+            "Value": "20",
+            "Name": "20-IO"
+          },
+          {
+            "Value": "21",
+            "Name": "21-IO"
+          },
+          {
+            "Value": "35",
+            "Name": "35-IO"
+          },
+          {
+            "Value": "36",
+            "Name": "36-IO"
+          },
+          {
+            "Value": "37",
+            "Name": "37-IO"
+          },
+          {
+            "Value": "38",
+            "Name": "38-IO"
+          },
+          {
+            "Value": "39",
+            "Name": "39-IO"
+          },
+          {
+            "Value": "40",
+            "Name": "40-IO"
+          },
+          {
+            "Value": "41",
+            "Name": "41-IO"
+          },
+          {
+            "Value": "42",
+            "Name": "42-IO"
+          },
+          {
+            "Value": "43",
+            "Name": "43-TX/IO"
+          },
+          {
+            "Value": "44",
+            "Name": "44-RX/IO"
+          },
+          {
+            "Value": "45",
+            "Name": "45-IO"
+          },
+          {
+            "Value": "46",
+            "Name": "46-IO"
+          },
+          {
+            "Value": "47",
+            "Name": "47-IO"
+          },
+          {
+            "Value": "48",
+            "Name": "48-IO"
+          }
+        ],
+        "Translations": {
+          "en": {
+            "Name": "GPIO map for ESP32-S3"
+          }
+        }
       }
     ]
   },
@@ -121,7 +947,74 @@
             }
           },
           "Parameters": [
-
+            {
+              "Key": "GPIOLed",
+              "Name": "GPIO Led",
+              "Type": "gpio",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO Led"
+                }
+              }
+            },
+            {
+              "Key": "ActivationState",
+              "Name": "Stan załączenia",
+              "Type": "enum",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Stan niski (LOW)"
+                },
+                {
+                  "Value": "1",
+                  "Name": "Stan wysoki (HIGH)"
+                }
+              ],
+              "Translations": {
+                "en": {
+                  "Name": "Switching on state"
+                }
+              }
+            },
+            {
+              "Key": "GPIOButton",
+              "Name": "GPIO Przycisk",
+              "Type": "gpio",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO Button"
+                }
+              }
+            },
+            {
+              "Key": "ConfigMode",
+              "Name": "Tryb przycisku",
+              "Type": "enum",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "10 wciśnięć"
+                },
+                {
+                  "Value": "1",
+                  "Name": "Wciśniety 5 sek"
+                }
+              ],
+              "Translations": {
+                "en": {
+                  "Name": "Button mode"
+                }
+              }
+            }
           ]
         },
         "SUPLA_OTA": {
@@ -469,7 +1362,105 @@
             }
           },
           "parameters": [
-
+            {
+              "Key": "Count",
+              "Name": "Liczba",
+              "Type": "number",
+              "IsRequired": true,
+              "DefaultValue": "1",
+              "Translations": {
+                "en": {
+                  "Name": "Count"
+                }
+              }
+            },
+            {
+              "Key": "GPIO1",
+              "Name": "GPIO1",
+              "Type": "gpio",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 1"
+                }
+              }
+            },
+            {
+              "Key": "GPIO1State",
+              "Name": "GPIO1 Załączany stanem",
+              "Type": "enum",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Stan niski (LOW)"
+                },
+                {
+                  "Value": "1",
+                  "Name": "Stan wysoki (HIGH)"
+                }
+              ],
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 1 state"
+                }
+              }
+            },
+            {
+              "Key": "GPIO1LightControl",
+              "Name": "GPIO1 Sterowanie światłem",
+              "Type": "enum",
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Nie",
+                  "Description": "Wyłącza sterowanie światłem."
+                },
+                {
+                  "Value": "1",
+                  "Name": "Tak",
+                  "Description": "Włącza sterowanie światłem."
+                }
+              ],
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 1 Light Control"
+                }
+              }
+            },
+            {
+              "Key": "GPIO1ReactionAfterReset",
+              "Name": "GPIO1 Reakcja po resecie",
+              "Type": "enum",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Off",
+                  "Description": "Wyłącz."
+                },
+                {
+                  "Value": "1",
+                  "Name": "On",
+                  "Description": "Włącz."
+                },
+                {
+                  "Value": "2",
+                  "Name": "Pamiętaj stan",
+                  "Description": "Pamiętaj stan."
+                }
+              ],
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 1 Reaction After Reset"
+                }
+              }
+            },
+            
           ]
         },
         "SUPLA_BUTTON": {
@@ -558,7 +1549,378 @@
             }
           },
           "parameters": [
-
+            {
+              "Key": "Count",
+              "Name": "Count",
+              "Type": "number",
+              "IsRequired": true,
+              "DefaultValue": "1",
+              "Translations": {
+                "en": {
+                  "Name": "Count"
+                }
+              }
+            },
+            {
+              "Key": "GPIO1",
+              "Name": "GPIO1",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 1"
+                }
+              }
+            },
+            {
+              "Key": "GPIO1Pullup",
+              "Name": "GPIO1Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 1 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO2",
+              "Name": "GPIO2",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 2"
+                }
+              }
+            },
+            {
+              "Key": "GPIO2Pullup",
+              "Name": "GPIO2Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 2 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO3",
+              "Name": "GPIO3",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 3"
+                }
+              }
+            },
+            {
+              "Key": "GPIO3Pullup",
+              "Name": "GPIO3Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 3 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO4",
+              "Name": "GPIO4",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 4"
+                }
+              }
+            },
+            {
+              "Key": "GPIO4Pullup",
+              "Name": "GPIO4Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 4 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO5",
+              "Name": "GPIO5",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 5"
+                }
+              }
+            },
+            {
+              "Key": "GPIO5Pullup",
+              "Name": "GPIO5Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 5 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO6",
+              "Name": "GPIO6",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 6"
+                }
+              }
+            },
+            {
+              "Key": "GPIO6Pullup",
+              "Name": "GPIO6Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 6 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO7",
+              "Name": "GPIO7",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 7"
+                }
+              }
+            },
+            {
+              "Key": "GPIO7Pullup",
+              "Name": "GPIO7Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 7 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO8",
+              "Name": "GPIO8",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 8"
+                }
+              }
+            },
+            {
+              "Key": "GPIO8Pullup",
+              "Name": "GPIO8Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 8 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO9",
+              "Name": "GPIO9",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 9"
+                }
+              }
+            },
+            {
+              "Key": "GPIO9Pullup",
+              "Name": "GPIO9Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 9 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO10",
+              "Name": "GPIO10",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 10"
+                }
+              }
+            },
+            {
+              "Key": "GPIO10Pullup",
+              "Name": "GPIO10Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 10 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO11",
+              "Name": "GPIO11",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 11"
+                }
+              }
+            },
+            {
+              "Key": "GPIO11Pullup",
+              "Name": "GPIO11Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 11 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO12",
+              "Name": "GPIO12",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 12"
+                }
+              }
+            },
+            {
+              "Key": "GPIO12Pullup",
+              "Name": "GPIO12Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 12 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO13",
+              "Name": "GPIO13",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 13"
+                }
+              }
+            },
+            {
+              "Key": "GPIO13Pullup",
+              "Name": "GPIO13Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 13 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO14",
+              "Name": "GPIO14",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 14"
+                }
+              }
+            },
+            {
+              "Key": "GPIO14Pullup",
+              "Name": "GPIO14Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 14 pull-up"
+                }
+              }
+            },
+            {
+              "Key": "GPIO15",
+              "Name": "GPIO15",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 15"
+                }
+              }
+            },
+            {
+              "Key": "GPIO15Pullup",
+              "Name": "GPIO15Pullup",
+              "Type": "number",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "Translations": {
+                "en": {
+                  "Name": "GPIO 15 pull-up"
+                }
+              }
+            }
           ]
         },
         "SUPLA_CONDITIONS": {
@@ -586,7 +1948,39 @@
             }
           },
           "parameters": [
-
+            {
+              "Key": "GPIO",
+              "Name": "GPIO",
+              "Type": "gpio",
+              "IsRequired": false,
+              "Translations": {
+                "en": {
+                  "Name": "GPIO"
+                }
+              }
+            },
+            {
+              "Key": "ActivationState",
+              "Name": "Stan załączenia",
+              "Type": "enum",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Stan niski (LOW)"
+                },
+                {
+                  "Value": "1",
+                  "Name": "Stan wysoki (HIGH)"
+                }
+              ],
+              "Translations": {
+                "en": {
+                  "Name": "Switching on state"
+                }
+              }
+            }
           ]
         },
         "SUPLA_PUSHOVER": {

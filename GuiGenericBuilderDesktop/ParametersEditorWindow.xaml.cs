@@ -10,17 +10,22 @@ namespace GuiGenericBuilderDesktop
 {
     public partial class ParametersEditorWindow : Window
     {
+        private readonly GlobalSettings _globalSettings;
+        private readonly string _boardName;
         private List<Parameter> _parameters;
         private bool _handlingRowEditEnding;
 
-        public ParametersEditorWindow(List<Parameter> parameters, string flagTitle)
+        public ParametersEditorWindow(List<Parameter> parameters, string flagTitle, GlobalSettings globalSettings = null, string boardName = null)
         {
             InitializeComponent();
             FlagTitle.Text = flagTitle;
+            _globalSettings = globalSettings ?? new GlobalSettings();
+            _boardName = boardName ?? string.Empty;
 
             // Do not allow adding new rows via the UI
             ParamsGrid.CanUserAddRows = false;
 
+            PrepareParameterOptions(parameters);
             ParamsGrid.ItemsSource = parameters;
             _parameters = parameters;
 
@@ -28,7 +33,7 @@ namespace GuiGenericBuilderDesktop
             var textTemplate = ParamsGrid.TryFindResource("TextTemplate") as DataTemplate;
             var numberTemplate = ParamsGrid.TryFindResource("NumberTemplate") as DataTemplate;
             var enumTemplate = ParamsGrid.TryFindResource("EnumTemplate") as DataTemplate;
-            
+
             if (textTemplate != null && numberTemplate != null && enumTemplate != null)
             {
                 this.Resources["TextTemplate"] = textTemplate;
@@ -42,6 +47,24 @@ namespace GuiGenericBuilderDesktop
                     NumberTemplate = numberTemplate,
                     EnumTemplate = enumTemplate
                 };
+            }
+        }
+
+        private void PrepareParameterOptions(List<Parameter> parameters)
+        {
+            if (parameters == null)
+            {
+                return;
+            }
+
+            foreach (var parameter in parameters)
+            {
+                if (parameter == null)
+                {
+                    continue;
+                }
+
+                parameter.PopulateGpioEnumValues(_globalSettings, _boardName);
             }
         }
 
@@ -77,16 +100,33 @@ namespace GuiGenericBuilderDesktop
                     errors.Add($"� {paramName} (required)");
                 }
                 
-                // For enum type, validate that the value exists in EnumValues (only if value is provided)
-                if (!string.IsNullOrWhiteSpace(param.Value) && 
-                    param.Type?.ToLowerInvariant() == "enum" && 
-                    param.EnumValues != null && 
-                    param.EnumValues.Any())
+                // For enum/gpio types, validate that the selected value exists in EnumValues, but keep gpio values numeric.
+                if (!string.IsNullOrWhiteSpace(param.Value))
                 {
-                    if (!param.EnumValues.Any(ev => ev.Value == param.Value))
+                    var type = param.Type ?? string.Empty;
+                    if (string.Equals(type, "gpio", StringComparison.OrdinalIgnoreCase))
                     {
-                        var paramName = param.GetLocalizedName();
-                        errors.Add($"� {paramName} (invalid value)");
+                        if (!int.TryParse(param.Value, out _))
+                        {
+                            var paramName = param.GetLocalizedName();
+                            errors.Add($"� {paramName} (invalid GPIO value)");
+                        }
+                        else if (param.EnumValues != null && param.EnumValues.Any() &&
+                                 !param.EnumValues.Any(ev => ev.Value == param.Value))
+                        {
+                            var paramName = param.GetLocalizedName();
+                            errors.Add($"� {paramName} (invalid GPIO value)");
+                        }
+                    }
+                    else if (string.Equals(type, "enum", StringComparison.OrdinalIgnoreCase) &&
+                             param.EnumValues != null &&
+                             param.EnumValues.Any())
+                    {
+                        if (!param.EnumValues.Any(ev => ev.Value == param.Value))
+                        {
+                            var paramName = param.GetLocalizedName();
+                            errors.Add($"� {paramName} (invalid value)");
+                        }
                     }
                 }
             }
@@ -144,14 +184,14 @@ namespace GuiGenericBuilderDesktop
             {
                 var t = (p.Type ?? string.Empty).Trim().ToLowerInvariant();
                 
-                // Check for enum type - should use dropdown
-                if (t == "enum" && p.EnumValues != null && p.EnumValues.Any())
+                // Check for enum/gpio types - should use dropdown when options are available
+                if ((t == "enum" || t == "gpio") && p.EnumValues != null && p.EnumValues.Any())
                 {
                     return EnumTemplate;
                 }
-                
-                // Check for number type - should use number input
-                if (t == "number")
+
+                // Check for number/gpio types - fallback to integer input when no board options are available
+                if (t == "number" || t == "gpio")
                 {
                     return NumberTemplate;
                 }
@@ -218,7 +258,7 @@ namespace GuiGenericBuilderDesktop
             {
                 var currentValue = values[0]?.ToString() ?? string.Empty;
                 
-                if (param.Type?.ToLowerInvariant() == "enum" && param.EnumValues != null)
+                if ((param.Type?.ToLowerInvariant() == "enum" || param.Type?.ToLowerInvariant() == "gpio") && param.EnumValues != null)
                 {
                     var enumValue = param.EnumValues.FirstOrDefault(ev => ev.Value == currentValue);
                     if (enumValue != null)

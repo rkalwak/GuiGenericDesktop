@@ -3,6 +3,8 @@ using FluentAssertions.Execution;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace CompilationLib.Tests
@@ -101,6 +103,95 @@ namespace CompilationLib.Tests
             finally
             {
                 try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_CommentsOutStaleParameterEntriesForDisabledGpios()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_LIMIT_SWITCH
+ -D Parameter_SUPLA_LIMIT_SWITCH_GPIO1=12
+ -D Parameter_SUPLA_LIMIT_SWITCH_GPIO1Pullup=1
+ -D Parameter_SUPLA_LIMIT_SWITCH_GPIO15=15
+ -D Parameter_SUPLA_LIMIT_SWITCH_GPIO15Pullup=0
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_LIMIT_SWITCH",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "Count", Value = "1", Type = "number" },
+                            new Parameter { Key = "GPIO1", Value = "12", Type = "number" },
+                            new Parameter { Key = "GPIO1Pullup", Value = "1", Type = "number" }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+
+                var result = File.ReadAllText(temp);
+
+                using (new AssertionScope())
+                {
+                    result.Should().Contain(" -D Parameter_SUPLA_LIMIT_SWITCH_GPIO1Pullup=1");
+                    result.Should().Contain("Parameter_SUPLA_LIMIT_SWITCH_GPIO15Pullup=0");
+                    result.Should().NotContain(" -D Parameter_SUPLA_LIMIT_SWITCH_GPIO15Pullup=0");
+                    result.Should().Contain("Parameter_SUPLA_LIMIT_SWITCH_GPIO15=15");
+                    result.Should().NotContain(" -D Parameter_SUPLA_LIMIT_SWITCH_GPIO15=");
+                }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public async Task SaveConfigurationAsync_PersistsGlobalSettingsParameters()
+        {
+            var tempDir = Path.Combine(Path.GetTempPath(), $"buildcfg-{Guid.NewGuid():N}");
+            Directory.CreateDirectory(tempDir);
+
+            try
+            {
+                var manager = new BuildConfigurationManager(tempDir, null);
+                var enabledFlags = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem { Key = "SUPLA_BME280", Parameters = new List<Parameter> { new Parameter { Key = "SDA", Value = "21", Type = "number" } } },
+                    new BuildFlagItem { Key = "SUPLA_SHT3x", Parameters = new List<Parameter> { new Parameter { Key = "SCL", Value = "22", Type = "number" } } }
+                };
+                var globalSettings = new GlobalSettings
+                {
+                    Parameters = new List<Parameter>
+                    {
+                        new Parameter { Key = "GPIO_P_ESP32", Value = "1", Type = "enum" },
+                        new Parameter { Key = "SCL", Value = "22", Type = "number", IsRequired = true },
+                        new Parameter { Key = "SDA", Value = "21", Type = "number", IsRequired = true }
+                    }
+                };
+
+                await manager.SaveConfigurationAsync(enabledFlags, "Cfg", "ESP32", "platform", "COM3", null, null, "4MB", null, globalSettings);
+
+                var savedFile = Directory.GetFiles(tempDir, "Cfg.json").Single();
+                var json = await File.ReadAllTextAsync(savedFile);
+                json.Should().Contain("\"GlobalParameters\"");
+                json.Should().Contain("\"SCL\": \"22\"");
+                json.Should().Contain("\"SDA\": \"21\"");
+            }
+            finally
+            {
+                if (Directory.Exists(tempDir)) Directory.Delete(tempDir, true);
             }
         }
 
@@ -383,6 +474,45 @@ namespace CompilationLib.Tests
                     result.Should().Contain(" -D Parameter_SUPLA_COMPLEX_FLAG_TIMEOUT=500");
                     result.Should().Contain(" -D Parameter_SUPLA_COMPLEX_FLAG_NAME='\"Device1\"'");
                 }
+            }
+            finally
+            {
+                try { File.Delete(temp); } catch { }
+            }
+        }
+
+        [Fact]
+        public void CommentUnlistedFlags_GpioParameter_IsWrittenAsInteger()
+        {
+            var iniContent = @"[env:test]
+;flagsstart
+ -D SUPLA_LED
+;flagsend
+";
+            var temp = Path.GetTempFileName();
+            File.WriteAllText(temp, iniContent);
+
+            try
+            {
+                var handler = new PlatformioCliHandler();
+                var allowed = new List<BuildFlagItem>
+                {
+                    new BuildFlagItem
+                    {
+                        Key = "SUPLA_LED",
+                        Parameters = new List<Parameter>
+                        {
+                            new Parameter { Key = "GPIO", Name = "GPIO", Value = "12", Type = "gpio" }
+                        }
+                    }
+                };
+
+                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+
+                var result = File.ReadAllText(temp);
+
+                result.Should().Contain(" -D Parameter_SUPLA_LED_GPIO=12");
+                result.Should().NotContain(" -D Parameter_SUPLA_LED_GPIO='\"12\"'");
             }
             finally
             {

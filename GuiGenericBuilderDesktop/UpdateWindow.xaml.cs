@@ -33,7 +33,7 @@ namespace GuiGenericBuilderDesktop
             InstallButton.Content = LocalizationManager.Get("InstallUpdate");
             RemindLaterButton.Content = LocalizationManager.Get("RemindMeLater");
 
-            CurrentVersionText.Text = _autoUpdateService.GetCurrentVersion().ToString();
+            CurrentVersionText.Text = _autoUpdateService.GetCurrentVersion().ToString(3);
             NewVersionText.Text = _release.TagName.TrimStart('v', 'V');
             ReleaseNotesText.Text = string.IsNullOrWhiteSpace(_release.Body) 
                 ? LocalizationManager.Get("NoReleaseNotes") 

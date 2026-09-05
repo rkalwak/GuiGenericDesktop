@@ -757,20 +757,51 @@ namespace GuiGenericBuilderDesktop
                     _uiBuilderService.AddText(grid, r, 2, item.GetLocalizedName());
                     _uiBuilderService.AddText(grid, r, 3, item.GetLocalizedDescription(), enableTextWrapping: true);
 
+                    var isDependencyFlag = item.IsAutoEnabledByAnotherFlag(AllBuildFlags);
                     var btn = new Button { Content = LocalizationManager.Get("ParamsButton"), Padding = new Thickness(6, 2, 6, 2), Margin = new Thickness(2), Tag = item };
                     btn.Click += (s, e) =>
                     {
-                        if ((s as Button)?.Tag is BuildFlagItem bf)
-                        {
-                            if (bf.Parameters == null || !bf.Parameters.Any()) return;
+                        if ((s as Button)?.Tag is not BuildFlagItem bf)
+                            return;
 
-                            var editor = new ParametersEditorWindow(bf.Parameters, bf.GetLocalizedName());
-                            editor.ShowDialog();
+                        if (bf.IsAutoEnabledByAnotherFlag(AllBuildFlags))
+                        {
+                            return;
                         }
+
+                        if (string.Equals(bf.Key, "SUPLA_LIMIT_SWITCH", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var limitSwitchEditor = new LimitSwitchParametersWindow(bf, _builderConfig.GlobalSettings, _platform)
+                            {
+                                Owner = this
+                            };
+                            limitSwitchEditor.ShowDialog();
+                            return;
+                        }
+
+                        if (string.Equals(bf.Key, "SUPLA_RELAY", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var relayEditor = new RelayParametersWindow(bf, AllBuildFlags, _builderConfig.GlobalSettings, _platform)
+                            {
+                                Owner = this
+                            };
+                            relayEditor.ShowDialog();
+                            return;
+                        }
+
+                        if (bf.Parameters == null || !bf.Parameters.Any()) return;
+
+                        var editor = new ParametersEditorWindow(bf.Parameters, bf.GetLocalizedName(), _builderConfig.GlobalSettings, _platform);
+                        editor.Owner = this;
+                        editor.ShowDialog();
                     };
                     Grid.SetRow(btn, r);
                     Grid.SetColumn(btn, 4);
-                    if (item.Parameters.Any())
+                    var canShowParametersEditor = !isDependencyFlag &&
+                        (item.Parameters.Any() ||
+                         string.Equals(item.Key, "SUPLA_LIMIT_SWITCH", StringComparison.OrdinalIgnoreCase) ||
+                         string.Equals(item.Key, "SUPLA_RELAY", StringComparison.OrdinalIgnoreCase));
+                    if (canShowParametersEditor)
                     {
                         grid.Children.Add(btn);
                     }
@@ -789,6 +820,21 @@ namespace GuiGenericBuilderDesktop
         {
             if (FlagsDataGrid.SelectedItem is BuildFlagItem item)
             {
+                if (string.Equals(item.Key, "SUPLA_RELAY", StringComparison.OrdinalIgnoreCase))
+                {
+                    var relayEditor = new RelayParametersWindow(item, AllBuildFlags, _builderConfig.GlobalSettings, _board)
+                    {
+                        Owner = this
+                    };
+                    relayEditor.ShowDialog();
+                    return;
+                }
+
+                if (item.IsAutoEnabledByAnotherFlag(AllBuildFlags))
+                {
+                    return;
+                }
+
                 if (item.Parameters == null || !item.Parameters.Any())
                 {
                     MessageBox.Show(
@@ -799,7 +845,7 @@ namespace GuiGenericBuilderDesktop
                     return;
                 }
 
-                var editor = new ParametersEditorWindow(item.Parameters, item.FlagName ?? item.Key);
+                var editor = new ParametersEditorWindow(item.Parameters, item.FlagName ?? item.Key, _builderConfig.GlobalSettings, _platform);
                 var res = editor.ShowDialog();
                 if (res == true)
                 {
@@ -1726,7 +1772,7 @@ namespace GuiGenericBuilderDesktop
                     {
                         var compiledFirmwarePath = Path.Combine(result.OutputDirectory, result.OutputFile);
 
-                        await _configManager.SaveConfigurationAsync(selectedFlags, configName: configBaseName, board: _board, platform: _platform, comPort: _portCom, firmwareFilePath: compiledFirmwarePath, buildOutputDirectory: result.OutputDirectory, flashSize: _flashSize, repositoryPath: _repositoryPath);
+                        await _configManager.SaveConfigurationAsync(selectedFlags, configName: configBaseName, board: _board, platform: _platform, comPort: _portCom, firmwareFilePath: compiledFirmwarePath, buildOutputDirectory: result.OutputDirectory, flashSize: _flashSize, repositoryPath: _repositoryPath, globalSettings: _builderConfig.GlobalSettings);
                     }
                     catch (Exception ex)
                     {
@@ -1930,6 +1976,11 @@ namespace GuiGenericBuilderDesktop
         {
             if (sender is Button btn && btn.Tag is BuildFlagItem item)
             {
+                if (item.IsAutoEnabledByAnotherFlag(AllBuildFlags))
+                {
+                    return;
+                }
+
                 if (item.Parameters == null || !item.Parameters.Any())
                 {
                     MessageBox.Show(
@@ -1940,7 +1991,7 @@ namespace GuiGenericBuilderDesktop
                     return;
                 }
 
-                var editor = new ParametersEditorWindow(item.Parameters, item.FlagName ?? item.Key);
+                var editor = new ParametersEditorWindow(item.Parameters, item.FlagName ?? item.Key, _builderConfig.GlobalSettings, _platform);
                 var res = editor.ShowDialog();
                 if (res == true)
                 {
@@ -2046,6 +2097,21 @@ namespace GuiGenericBuilderDesktop
                 }
             }
 
+            // Restore global/shared parameter values first so later flag-specific restoration can reuse them.
+            if (config.GlobalParameters != null && config.GlobalParameters.Any())
+            {
+                foreach (var globalParam in config.GlobalParameters)
+                {
+                    var parameter = _builderConfig.GlobalSettings.Parameters.FirstOrDefault(p =>
+                        string.Equals((p.Identifier ?? string.Empty), globalParam.Key, StringComparison.OrdinalIgnoreCase));
+
+                    if (parameter != null)
+                    {
+                        parameter.Value = globalParam.Value;
+                    }
+                }
+            }
+
             // Restore parameter values if available
             if (config.BuildFlagsParameters != null && config.BuildFlagsParameters.Any())
             {
@@ -2054,19 +2120,10 @@ namespace GuiGenericBuilderDesktop
                     var flag = AllBuildFlags.FirstOrDefault(f =>
                         string.Equals(f.Key, flagParams.Key, StringComparison.OrdinalIgnoreCase));
 
-                    if (flag != null && flag.Parameters != null)
-                    {
-                        foreach (var paramValue in flagParams.Value)
-                        {
-                            var parameter = flag.Parameters.FirstOrDefault(p =>
-                                string.Equals(p.Identifier, paramValue.Key, StringComparison.OrdinalIgnoreCase));
+                    if (flag == null)
+                        continue;
 
-                            if (parameter != null)
-                            {
-                                parameter.Value = paramValue.Value;
-                            }
-                        }
-                    }
+                    SavedConfigurationParameterApplier.Apply(flag, flagParams.Value);
                 }
             }
 

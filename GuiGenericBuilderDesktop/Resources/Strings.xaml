@@ -29,6 +29,20 @@
     <system:String x:Key="Description">Description</system:String>
     <system:String x:Key="Parameters">Parameters</system:String>
     <system:String x:Key="ParamsButton">Params...</system:String>
+    <system:String x:Key="RelaySettingsTitle">Relay settings</system:String>
+    <system:String x:Key="RelayState">State</system:String>
+    <system:String x:Key="RelayLight">Light control</system:String>
+    <system:String x:Key="RelayAfterReset">Reaction after reset</system:String>
+    <system:String x:Key="RelayStateLow">LOW</system:String>
+    <system:String x:Key="RelayStateHigh">HIGH</system:String>
+    <system:String x:Key="RelayLightNo">No</system:String>
+    <system:String x:Key="RelayLightYes">Yes</system:String>
+    <system:String x:Key="RelayAfterResetOff">Off</system:String>
+    <system:String x:Key="RelayAfterResetOn">On</system:String>
+    <system:String x:Key="RelayAfterResetRememberState">Remember state</system:String>
+    <system:String x:Key="RelayInvalidGpio">Relay GPIO {0} value is invalid for the selected {1}.</system:String>
+    <system:String x:Key="RelayInvalidState">Relay GPIO {0} state must be 0 or 1.</system:String>
+    <system:String x:Key="RelayInvalidAfterReset">Relay GPIO {0} after reset reaction must be 0, 1 or 2.</system:String>
     
     <!-- Status Messages -->
     <system:String x:Key="DownloadingRepository">? Downloading GUI-Generic repository...</system:String>
@@ -182,7 +196,15 @@ Select compilation flags manually.</system:String>
     <system:String x:Key="Delete">Delete</system:String>
     <system:String x:Key="Copy">Copy</system:String>
     <system:String x:Key="Save">Save</system:String>
-    
+    <system:String x:Key="Cancel">Cancel</system:String>
+    <system:String x:Key="Number">#</system:String>
+    <system:String x:Key="GPIO">GPIO</system:String>
+    <system:String x:Key="InternalPullUp">Internal pull-up</system:String>
+    <system:String x:Key="LimitSwitchesTitle">Configure limit switches (up to {0})</system:String>
+    <system:String x:Key="LimitSwitchSequenceMessage">Use limit switch entries in order. If you enable a slot, all previous slots must be used first.</system:String>
+    <system:String x:Key="LimitSwitchDuplicateGpioMessage">The same GPIO number cannot be used twice: {0}.</system:String>
+    <system:String x:Key="LimitSwitchInvalidGpioMessage">Limit switch #{0} has an invalid GPIO value. Please enter a number between 1 and 50.</system:String>
+
     <!-- Compilation Results Window -->
     <system:String x:Key="CompilationSuccessTitle">Compilation Successful</system:String>
     <system:String x:Key="CompilationFailedTitle">Compilation Failed</system:String>

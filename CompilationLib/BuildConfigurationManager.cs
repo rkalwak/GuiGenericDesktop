@@ -33,7 +33,8 @@ namespace CompilationLib
             string firmwareFilePath = null,
             string buildOutputDirectory = null,
             string flashSize = null,
-            string repositoryPath = null
+            string repositoryPath = null,
+            GlobalSettings globalSettings = null
             )
         {
             if (enabledFlags == null)
@@ -60,6 +61,19 @@ namespace CompilationLib
             // Generate encoded configuration (reversible)
             var encodedConfig = BuildConfigurationHasher.EncodeOptions(enabledFlags);
 
+            var globalParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (globalSettings?.Parameters != null)
+            {
+                foreach (var parameter in globalSettings.Parameters.Where(p => p != null && !string.IsNullOrWhiteSpace(p.Identifier)))
+                {
+                    var value = parameter.Value ?? string.Empty;
+                    if (!string.IsNullOrEmpty(value) || parameter.IsRequired)
+                    {
+                        globalParameters[parameter.Identifier] = value;
+                    }
+                }
+            }
+
             var config = new SavedBuildConfiguration
             {
                 EncodedConfig = encodedConfig,
@@ -68,7 +82,8 @@ namespace CompilationLib
                 Platform = platform ?? string.Empty,
                 ComPort = comPort ?? string.Empty,
                 FlashSize = flashSize ?? string.Empty,
-                BuildFlagsParameters = flagsParameters
+                BuildFlagsParameters = flagsParameters,
+                GlobalParameters = globalParameters
             };
 
             // Use configName for filename if provided, otherwise use timestamp

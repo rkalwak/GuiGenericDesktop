@@ -15,9 +15,11 @@
 - All user-facing strings, messages, and UI text must be written in either **Polish (pl)** or **English (en)**.
 - Do not introduce strings in any other language.
 - Comments in code may be in English only.
+- For UI text in this repo, use the existing LocalizationManager resource dictionaries instead of hardcoded strings. Keep all user-facing labels in the resource files and reference them via `LocalizationManager.Get/GetFormat`.
 
 ## Testing Guidelines
 - Never make tests dependent on environment variables. Put test data (like COM port, chip name) directly in the test class as constants.
+- **Never run integration tests unless explicitly requested.**
 
 ## Line Ending Verification (PowerShell)
 ```powershell

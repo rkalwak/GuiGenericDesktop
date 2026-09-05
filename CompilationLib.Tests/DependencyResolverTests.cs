@@ -109,14 +109,25 @@ namespace CompilationLib.Tests
                 enabledByDependencies: new List<string> { "SUPLA_ROLLERSHUTTER" });
             var button = CreateFlag("SUPLA_BUTTON", 
                 enabledByDependencies: new List<string> { "SUPLA_ROLLERSHUTTER" });
-            
+
             var allFlags = new List<BuildFlagItem> { rollershutter, relay, button };
-            
+
             var result = DependencyResolver.ProcessFlagEnabled(rollershutter, allFlags);
-            
+
             Assert.Null(result);
             Assert.True(relay.IsEnabled);
             Assert.True(button.IsEnabled);
+        }
+
+        [Fact]
+        public void BuildFlagItem_IsAutoEnabledByAnotherFlag_ShouldDetectDependencyChildFlags()
+        {
+            var relay = CreateFlag("SUPLA_RELAY", enabledByDependencies: new List<string> { "SUPLA_LED" });
+            var led = CreateFlag("SUPLA_LED");
+            var allFlags = new List<BuildFlagItem> { relay, led };
+
+            Assert.False(relay.IsAutoEnabledByAnotherFlag(allFlags));
+            Assert.True(led.IsAutoEnabledByAnotherFlag(allFlags));
         }
 
         [Fact]

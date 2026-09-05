@@ -29,6 +29,20 @@
     <system:String x:Key="Description">Opis</system:String>
     <system:String x:Key="Parameters">Parametry</system:String>
     <system:String x:Key="ParamsButton">Parametry</system:String>
+    <system:String x:Key="RelaySettingsTitle">Ustawienia przekaźników</system:String>
+    <system:String x:Key="RelayState">Stan</system:String>
+    <system:String x:Key="RelayLight">Sterowanie światłem</system:String>
+    <system:String x:Key="RelayAfterReset">Reakcja po resecie</system:String>
+    <system:String x:Key="RelayStateLow">LOW</system:String>
+    <system:String x:Key="RelayStateHigh">HIGH</system:String>
+    <system:String x:Key="RelayLightNo">Nie</system:String>
+    <system:String x:Key="RelayLightYes">Tak</system:String>
+    <system:String x:Key="RelayAfterResetOff">Wyłącz</system:String>
+    <system:String x:Key="RelayAfterResetOn">Włącz</system:String>
+    <system:String x:Key="RelayAfterResetRememberState">Pamiętaj stan</system:String>
+    <system:String x:Key="RelayInvalidGpio">Wartość GPIO przekaźnika {0} jest nieprawidłowa dla wybranej {1}.</system:String>
+    <system:String x:Key="RelayInvalidState">Stan przekaźnika GPIO {0} musi być równy 0 lub 1.</system:String>
+    <system:String x:Key="RelayInvalidAfterReset">Reakcja po resecie przekaźnika GPIO {0} musi być równa 0, 1 lub 2.</system:String>
     
     <!-- Status Messages -->
     <system:String x:Key="DownloadingRepository">⏳ Pobieranie repozytorium GUI-Generic...</system:String>
@@ -181,7 +195,15 @@ Wybierz flagi kompilacji ręcznie.</system:String>
     <system:String x:Key="Delete">Usuń</system:String>
     <system:String x:Key="Copy">Kopiuj</system:String>
     <system:String x:Key="Save">Zapisz</system:String>
-    
+    <system:String x:Key="Cancel">Anuluj</system:String>
+    <system:String x:Key="Number">#</system:String>
+    <system:String x:Key="GPIO">GPIO</system:String>
+    <system:String x:Key="InternalPullUp">Wewnętrzny pull-up</system:String>
+    <system:String x:Key="LimitSwitchesTitle">Skonfiguruj przełączniki krańcowe (do {0})</system:String>
+    <system:String x:Key="LimitSwitchSequenceMessage">Używaj wpisów przełączników krańcowych w kolejności. Jeśli włączasz slot, wszystkie poprzednie sloty muszą być użyte najpierw.</system:String>
+    <system:String x:Key="LimitSwitchDuplicateGpioMessage">To samo GPIO nie może być użyte dwa razy: {0}.</system:String>
+    <system:String x:Key="LimitSwitchInvalidGpioMessage">Przełącznik krańcowy #{0} ma nieprawidłową wartość GPIO. Wprowadź liczbę od 1 do 50.</system:String>
+
     <!-- Compilation Results Window -->
     <system:String x:Key="CompilationSuccessTitle">Kompilacja Zakończona Sukcesem</system:String>
     <system:String x:Key="CompilationFailedTitle">Kompilacja Nie Powiodła Się</system:String>
