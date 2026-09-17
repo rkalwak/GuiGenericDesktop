@@ -33,10 +33,10 @@ namespace GuiGenericBuilderDesktop
             _entries = new ObservableCollection<RelayEntryViewModel>();
 
             Title = LocalizationManager.Get("RelaySettingsTitle");
-            Width = 980;
-            Height = 680;
-            MinWidth = 720;
-            MinHeight = 540;
+            Width = 1400;
+            Height = 800;
+            MinWidth = 1400;
+            MinHeight = 800;
             WindowState = WindowState.Maximized;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
             Background = Brushes.WhiteSmoke;
@@ -69,7 +69,7 @@ namespace GuiGenericBuilderDesktop
 
             var contentGrid = new Grid();
             contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(320, GridUnitType.Pixel) });
+            contentGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(400, GridUnitType.Pixel) });
 
             var dataContainer = new Border
             {
@@ -95,21 +95,21 @@ namespace GuiGenericBuilderDesktop
 
             var gridView = new GridView { AllowsColumnReorder = false };
             gridView.Columns.Add(new GridViewColumn { Header = LocalizationManager.Get("Number"), Width = 50, DisplayMemberBinding = new Binding(nameof(RelayEntryViewModel.IndexDisplay)) });
-            gridView.Columns.Add(new GridViewColumn { Header = LocalizationManager.Get("Enabled"), Width = 90, CellTemplate = CreateCheckBoxTemplate(nameof(RelayEntryViewModel.IsEnabled)) });
-            gridView.Columns.Add(new GridViewColumn { Header = LocalizationManager.Get("GPIO"), Width = 120, CellTemplate = CreateGpioComboBoxTemplate(nameof(RelayEntryViewModel.Gpio), _gpioOptions) });
-            gridView.Columns.Add(new GridViewColumn { Header = LocalizationManager.Get("RelayState"), Width = 120, CellTemplate = CreateEnumComboBoxTemplate(nameof(RelayEntryViewModel.State), new[]
+            gridView.Columns.Add(new GridViewColumn { Header = LocalizationManager.Get("Enabled"), Width = 70, CellTemplate = CreateCheckBoxTemplate(nameof(RelayEntryViewModel.IsEnabled)) });
+            gridView.Columns.Add(new GridViewColumn { Header = LocalizationManager.Get("GPIO"), Width = 140, CellTemplate = CreateGpioComboBoxTemplate(nameof(RelayEntryViewModel.Gpio), _gpioOptions) });
+            gridView.Columns.Add(new GridViewColumn { Header = LocalizationManager.Get("RelayState"), Width = 140, CellTemplate = CreateEnumComboBoxTemplate(nameof(RelayEntryViewModel.State), new[]
             {
                 new EnumValue { Value = "0", Name = LocalizationManager.Get("RelayStateLow") },
                 new EnumValue { Value = "1", Name = LocalizationManager.Get("RelayStateHigh") }
             }) });
-            gridView.Columns.Add(new GridViewColumn { Header = LocalizationManager.Get("RelayLight"), Width = 90, CellTemplate = CreateCheckBoxTemplate(nameof(RelayEntryViewModel.LightControl)) });
+            gridView.Columns.Add(new GridViewColumn { Header = LocalizationManager.Get("RelayLight"), Width = 140, CellTemplate = CreateCheckBoxTemplate(nameof(RelayEntryViewModel.LightControl)) });
             gridView.Columns.Add(new GridViewColumn { Header = LocalizationManager.Get("RelayAfterReset"), Width = 140, CellTemplate = CreateEnumComboBoxTemplate(nameof(RelayEntryViewModel.AfterResetReaction), new[]
             {
                 new EnumValue { Value = "0", Name = LocalizationManager.Get("RelayAfterResetOff") },
                 new EnumValue { Value = "1", Name = LocalizationManager.Get("RelayAfterResetOn") },
                 new EnumValue { Value = "2", Name = LocalizationManager.Get("RelayAfterResetRememberState") }
             }) });
-            gridView.Columns.Add(new GridViewColumn { Header = "Settings", Width = 100, CellTemplate = CreateSettingsButtonTemplate() });
+            gridView.Columns.Add(new GridViewColumn { Header = LocalizationManager.Get("Settings"), Width = 100, CellTemplate = CreateSettingsButtonTemplate() });
             _listView.View = gridView;
             dataContainer.Child = _listView;
             Grid.SetColumn(dataContainer, 0);
@@ -130,13 +130,13 @@ namespace GuiGenericBuilderDesktop
             {
                 FontWeight = FontWeights.Bold,
                 Margin = new Thickness(0, 0, 0, 8),
-                Text = "Settings"
+                Text = LocalizationManager.Get("Settings")
             };
 
             _relaySettingsContent = new StackPanel();
             _relaySettingsContent.Children.Add(new TextBlock
             {
-                Text = "Click settings to configure the relay",
+                Text = LocalizationManager.Get("RelaySettingsHint"),
                 Foreground = Brushes.Gray,
                 Margin = new Thickness(0, 8, 0, 0)
             });
@@ -208,7 +208,7 @@ namespace GuiGenericBuilderDesktop
             if (width <= 0)
                 return;
 
-            var fixedWidths = new List<double> { 50, 90, 120, 100, 90, 140, 100 };
+            var fixedWidths = new List<double> { 50, 90, 140, 140, 140, 140, 140 };
             var totalFixedWidth = fixedWidths.Sum();
             var remaining = Math.Max(140, width - totalFixedWidth);
 
@@ -228,7 +228,7 @@ namespace GuiGenericBuilderDesktop
         private DataTemplate CreateSettingsButtonTemplate()
         {
             var factory = new FrameworkElementFactory(typeof(Button));
-            factory.SetValue(Button.ContentProperty, "Settings");
+            factory.SetValue(Button.ContentProperty, LocalizationManager.Get("Settings"));
             factory.SetValue(Button.MinWidthProperty, 80d);
             factory.SetValue(Button.PaddingProperty, new Thickness(4, 2, 4, 2));
             factory.AddHandler(Button.ClickEvent, new RoutedEventHandler((sender, args) =>
@@ -253,7 +253,7 @@ namespace GuiGenericBuilderDesktop
             _relaySettingsContent.Children.Clear();
             _relaySettingsContent.Children.Add(new TextBlock
             {
-                Text = $"Relay #{relay.Index + 1}",
+                Text = string.Format(LocalizationManager.Get("RelayNumber"), relay.Index + 1),
                 FontWeight = FontWeights.Bold,
                 Margin = new Thickness(0, 0, 0, 8)
             });
@@ -267,7 +267,7 @@ namespace GuiGenericBuilderDesktop
                 {
                     var ledGroup = new GroupBox
                     {
-                        Header = "SUPLA__LED",
+                        Header = LocalizationManager.Get("RelayLed"),
                         Margin = new Thickness(0, 0, 0, 6),
                         Padding = new Thickness(8)
                     };
@@ -278,7 +278,7 @@ namespace GuiGenericBuilderDesktop
                     ledGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                     ledGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-                    var gpioLabel = new TextBlock { Text = "GPIO:", Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
+                    var gpioLabel = new TextBlock { Text = LocalizationManager.Get("RelayGpioLabel"), Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
                     Grid.SetRow(gpioLabel, 0);
                     Grid.SetColumn(gpioLabel, 0);
                     ledGrid.Children.Add(gpioLabel);
@@ -301,7 +301,7 @@ namespace GuiGenericBuilderDesktop
                     Grid.SetColumn(gpioCombo, 1);
                     ledGrid.Children.Add(gpioCombo);
 
-                    var stateLabel = new TextBlock { Text = "Activation state:", Margin = new Thickness(0, 0, 8, 0), VerticalAlignment = VerticalAlignment.Center };
+                    var stateLabel = new TextBlock { Text = LocalizationManager.Get("RelayActivationState"), Margin = new Thickness(0, 0, 8, 0), VerticalAlignment = VerticalAlignment.Center };
                     Grid.SetRow(stateLabel, 1);
                     Grid.SetColumn(stateLabel, 0);
                     ledGrid.Children.Add(stateLabel);
@@ -336,7 +336,7 @@ namespace GuiGenericBuilderDesktop
                 {
                     var directLinksGroup = new GroupBox
                     {
-                        Header = "SUPLA__DIRECT__LINKS",
+                        Header = LocalizationManager.Get("RelayDirectLinks"),
                         Margin = new Thickness(0, 0, 0, 6),
                         Padding = new Thickness(8)
                     };
@@ -347,7 +347,7 @@ namespace GuiGenericBuilderDesktop
                     directLinksGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
                     directLinksGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
-                    var onLabel = new TextBlock { Text = "On:", Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
+                    var onLabel = new TextBlock { Text = LocalizationManager.Get("RelayOn"), Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
                     Grid.SetRow(onLabel, 0);
                     Grid.SetColumn(onLabel, 0);
                     directLinksGrid.Children.Add(onLabel);
@@ -368,7 +368,7 @@ namespace GuiGenericBuilderDesktop
                     Grid.SetColumn(onTextBox, 1);
                     directLinksGrid.Children.Add(onTextBox);
 
-                    var offLabel = new TextBlock { Text = "Off:", Margin = new Thickness(0, 0, 8, 0), VerticalAlignment = VerticalAlignment.Center };
+                    var offLabel = new TextBlock { Text = LocalizationManager.Get("RelayOff"), Margin = new Thickness(0, 0, 8, 0), VerticalAlignment = VerticalAlignment.Center };
                     Grid.SetRow(offLabel, 1);
                     Grid.SetColumn(offLabel, 0);
                     directLinksGrid.Children.Add(offLabel);
@@ -397,7 +397,7 @@ namespace GuiGenericBuilderDesktop
                 {
                     var thermostatGroup = new GroupBox
                     {
-                        Header = "SUPLA__THERMOSTAT",
+                        Header = LocalizationManager.Get("RelayThermostat"),
                         Margin = new Thickness(0, 0, 0, 6),
                         Padding = new Thickness(8)
                     };
@@ -422,7 +422,7 @@ namespace GuiGenericBuilderDesktop
                         new EnumValue { Value = "5", Name = "Differential" }
                     };
 
-                    var typeLabel = new TextBlock { Text = "Type:", Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
+                    var typeLabel = new TextBlock { Text = LocalizationManager.Get("RelayType"), Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
                     Grid.SetRow(typeLabel, 0);
                     Grid.SetColumn(typeLabel, 0);
                     thermostatGrid.Children.Add(typeLabel);
@@ -445,7 +445,7 @@ namespace GuiGenericBuilderDesktop
                     Grid.SetColumn(typeCombo, 1);
                     thermostatGrid.Children.Add(typeCombo);
 
-                    var mainTempLabel = new TextBlock { Text = "Main temp channel:", Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
+                    var mainTempLabel = new TextBlock { Text = LocalizationManager.Get("RelayMainTempChannel"), Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
                     Grid.SetRow(mainTempLabel, 1);
                     Grid.SetColumn(mainTempLabel, 0);
                     thermostatGrid.Children.Add(mainTempLabel);
@@ -461,7 +461,7 @@ namespace GuiGenericBuilderDesktop
                     Grid.SetColumn(mainTempBox, 1);
                     thermostatGrid.Children.Add(mainTempBox);
 
-                    var additionalTempLabel = new TextBlock { Text = "Additional temp channel:", Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
+                    var additionalTempLabel = new TextBlock { Text = LocalizationManager.Get("RelayAdditionalTempChannel"), Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
                     Grid.SetRow(additionalTempLabel, 2);
                     Grid.SetColumn(additionalTempLabel, 0);
                     thermostatGrid.Children.Add(additionalTempLabel);
@@ -477,7 +477,7 @@ namespace GuiGenericBuilderDesktop
                     Grid.SetColumn(additionalTempBox, 1);
                     thermostatGrid.Children.Add(additionalTempBox);
 
-                    var hysteresisLabel = new TextBlock { Text = "Hysteresis:", Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
+                    var hysteresisLabel = new TextBlock { Text = LocalizationManager.Get("RelayHysteresis"), Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
                     Grid.SetRow(hysteresisLabel, 3);
                     Grid.SetColumn(hysteresisLabel, 0);
                     thermostatGrid.Children.Add(hysteresisLabel);
@@ -493,7 +493,7 @@ namespace GuiGenericBuilderDesktop
                     Grid.SetColumn(hysteresisBox, 1);
                     thermostatGrid.Children.Add(hysteresisBox);
 
-                    var minTempLabel = new TextBlock { Text = "Min temp:", Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
+                    var minTempLabel = new TextBlock { Text = LocalizationManager.Get("RelayMinTemp"), Margin = new Thickness(0, 0, 8, 4), VerticalAlignment = VerticalAlignment.Center };
                     Grid.SetRow(minTempLabel, 4);
                     Grid.SetColumn(minTempLabel, 0);
                     thermostatGrid.Children.Add(minTempLabel);
@@ -509,7 +509,7 @@ namespace GuiGenericBuilderDesktop
                     Grid.SetColumn(minTempBox, 1);
                     thermostatGrid.Children.Add(minTempBox);
 
-                    var maxTempLabel = new TextBlock { Text = "Max temp:", Margin = new Thickness(0, 0, 8, 0), VerticalAlignment = VerticalAlignment.Center };
+                    var maxTempLabel = new TextBlock { Text = LocalizationManager.Get("RelayMaxTemp"), Margin = new Thickness(0, 0, 8, 0), VerticalAlignment = VerticalAlignment.Center };
                     Grid.SetRow(maxTempLabel, 5);
                     Grid.SetColumn(maxTempLabel, 0);
                     thermostatGrid.Children.Add(maxTempLabel);
@@ -531,7 +531,7 @@ namespace GuiGenericBuilderDesktop
             }
             else
             {
-                _relaySettingsContent.Children.Add(new TextBlock { Text = "No related settings enabled." });
+                _relaySettingsContent.Children.Add(new TextBlock { Text = LocalizationManager.Get("RelayNoRelatedSettings") });
             }
 
             _settingsPanel.Visibility = Visibility.Visible;

@@ -250,104 +250,36 @@ public class PlatformioCliHandler : ICompileHandler
         var startIndex = lines.FindIndex(line => line.Trim().Equals(";flagsstart", StringComparison.OrdinalIgnoreCase));
         var endIndex = lines.FindIndex(line => line.Trim().Equals(";flagsend", StringComparison.OrdinalIgnoreCase));
 
+        DisableAllBuildFlagsAndParameters(allowedFlags, globalSettings, lines, startIndex, endIndex);
+
         for (int i = startIndex + 1; i < endIndex; i++)
         {
-            string lineContent = lines[i];
+            string lineContent = lines[i]; // -D SUPLA_FLAG or ; -D SUPLA_FLAG
             string lineContentWithoutComment = lineContent.Contains(";") ? lineContent.Substring(1) : lineContent;
-            lineContentWithoutComment = lineContentWithoutComment.Replace("-D ", "").Replace(";","").Trim();
+            lineContentWithoutComment = lineContentWithoutComment.Replace("-D ", "").Replace(";", "").Trim();
             bool isFlagEnabled = !lineContent.Contains(";");
             // flag already enabled, check if it should be enabled
             if (!string.IsNullOrWhiteSpace(lineContent) && isFlagEnabled)
             {
                 // lineContent has format -D but collection doesn't
-                if (!allowedFlags.Any(flag => !string.IsNullOrEmpty(flag?.Key) && lineContentWithoutComment == flag.Key) && !_excludedBuildFlagsFromManipulation.Any(x => lineContentWithoutComment.Contains(x)))
+                if (ShouldBeDisabled(allowedFlags, lineContentWithoutComment))
                 {
                     //comment out the line - remove one space
-                    lines[i] = ";" + lines[i].Substring(1);
+                    lines[i] = ";" + lines[i];
                 }
             }
             // flag is commented out, check if it should be enabled
             else
             {
-                if (allowedFlags.Any(flag => !string.IsNullOrEmpty(flag?.Key) && lineContentWithoutComment == flag.Key))
+                if (ShouldBeEnabled(allowedFlags, lineContentWithoutComment))
                 {
                     // Uncomment the line: replace first ';' with ' ' to preserve spacing
-                    lines[i] = lines[i].Replace(';', ' ');
+                    lines[i] = lines[i].Replace(";", "");
                 }
             }
         }
 
-        // Process global parameters first (only once)
-        // Collect values from BuildFlags for parameters that match global parameter definitions
-        var globalParametersWritten = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        if (globalSettings?.Parameters != null && globalSettings.Parameters.Any())
-        {
-            foreach (var globalParam in globalSettings.Parameters)
-            {
-                if (globalParam == null || string.IsNullOrEmpty(globalParam.Identifier))
-                    continue;
-
-                var identifier = globalParam.Identifier.Trim();
-                
-                // Try to find the value from any BuildFlag that has this parameter
-                string valueToUse = null;
-                Parameter matchingFlagParameter = null;
-                
-                // Search through all enabled flags to find a parameter with matching identifier
-                foreach (var flag in allowedFlags)
-                {
-                    if (flag.Parameters != null)
-                    {
-                        matchingFlagParameter = flag.Parameters.FirstOrDefault(p => 
-                            p != null && 
-                            !string.IsNullOrEmpty(p.Identifier) &&
-                            string.Equals(p.Identifier, identifier, StringComparison.OrdinalIgnoreCase));
-                        
-                        if (matchingFlagParameter != null && !string.IsNullOrEmpty(matchingFlagParameter.Value))
-                        {
-                            valueToUse = matchingFlagParameter.Value.Trim();
-                            break; // Use the first matching value found
-                        }
-                    }
-                }
-                
-                // If no value found in BuildFlags, fall back to GlobalSettings value
-                if (string.IsNullOrEmpty(valueToUse))
-                {
-                    valueToUse = (globalParam.Value ?? string.Empty).Trim();
-                }
-
-                // Skip optional global parameters without values
-                if (!globalParam.IsRequired && string.IsNullOrEmpty(valueToUse))
-                    continue;
-
-                // Format value based on type (use matchingFlagParameter type if found, otherwise globalParam type)
-                var paramType = matchingFlagParameter?.Type ?? globalParam.Type;
-                string value;
-                if (string.Equals(paramType, "number", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(paramType, "enum", StringComparison.OrdinalIgnoreCase) ||
-                    string.Equals(paramType, "gpio", StringComparison.OrdinalIgnoreCase) ||
-                    IsNumericLike(valueToUse))
-                    value = string.IsNullOrEmpty(valueToUse) ? "0" : valueToUse;
-                else
-                    value = $"'\"{valueToUse}\"'";// Global parameters use GLOBALPARAMETERS_ prefix
-                var paramDefineName = $"{_globalParameterPrefix}{identifier}";
-                var indexOfExistingParameter = lines.FindIndex(line => line.Contains(paramDefineName));
-                var define = $" -D {paramDefineName}={value}";
-
-                if (indexOfExistingParameter != -1)
-                {
-                    lines[indexOfExistingParameter] = define;
-                }
-                else
-                {
-                    lines.Insert(endIndex, define);
-                    endIndex++; // Adjust endIndex since we inserted a line
-                }
-
-                globalParametersWritten.Add(identifier);
-            }
-        }
+        HashSet<string> globalParametersWritten = DefineGlobalParameters(allowedFlags, globalSettings, lines);
 
         // Remove stale flag-specific parameter definitions left behind from previous builds.
         var expectedParameterDefines = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -394,6 +326,7 @@ public class PlatformioCliHandler : ICompileHandler
             }
         }
 
+        
         // Process flag-specific parameters (skip global ones)
         foreach (var flag in allowedFlags)
         {
@@ -464,15 +397,135 @@ public class PlatformioCliHandler : ICompileHandler
                 {
                     lines[indexOfExistingParameter] = define;
                 }
-                else
+            }
+        }
+        
+
+        File.WriteAllText(iniPath, string.Join("\n", lines) + "\n");
+    }
+
+    private void DisableAllBuildFlagsAndParameters(List<BuildFlagItem> allowedFlags, GlobalSettings globalSettings, List<string> lines, int startIndex, int endIndex)
+    {
+        for (int i = startIndex + 1; i < endIndex; i++)
+        {
+            string lineContent = lines[i]; // -D SUPLA_FLAG or ; -D SUPLA_FLAG
+            string flagName = ExtractBuildFlagName(lineContent);
+            if (_excludedBuildFlagsFromManipulation.Any(x => string.Equals(flagName, x, StringComparison.OrdinalIgnoreCase)))
+                continue;
+
+            bool isFlagEnabled = !lineContent.Contains(";");
+            // flag already enabled, check if it should be enabled
+            if (!string.IsNullOrWhiteSpace(lineContent) && isFlagEnabled)
+            {
+                // comment out the line - remove one space
+                lines[i] = ";" + lines[i];
+            }
+        }
+    }
+
+    private HashSet<string> DefineGlobalParameters(List<BuildFlagItem> allowedFlags, GlobalSettings globalSettings, List<string> lines)
+    {
+        // Process global parameters first (only once)
+        // Collect values from BuildFlags for parameters that match global parameter definitions
+        var globalParametersWritten = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (globalSettings?.Parameters != null && globalSettings.Parameters.Any())
+        {
+            foreach (var globalParam in globalSettings.Parameters)
+            {
+                if (globalParam == null || string.IsNullOrEmpty(globalParam.Identifier))
+                    continue;
+
+                var identifier = globalParam.Identifier.Trim();
+
+                // Try to find the value from any BuildFlag that has this parameter
+                string valueToUse = null;
+                Parameter matchingFlagParameter = null;
+
+                // Search through all enabled flags to find a parameter with matching identifier
+                foreach (var flag in allowedFlags)
                 {
-                    lines.Insert(endIndex, define);
-                    endIndex++; // Adjust endIndex since we inserted a line
+                    if (flag.Parameters != null)
+                    {
+                        matchingFlagParameter = flag.Parameters.FirstOrDefault(p =>
+                            p != null &&
+                            !string.IsNullOrEmpty(p.Identifier) &&
+                            string.Equals(p.Identifier, identifier, StringComparison.OrdinalIgnoreCase));
+
+                        if (matchingFlagParameter != null && !string.IsNullOrEmpty(matchingFlagParameter.Value))
+                        {
+                            valueToUse = matchingFlagParameter.Value.Trim();
+                            break; // Use the first matching value found
+                        }
+                    }
                 }
+
+                // If no value found in BuildFlags, fall back to GlobalSettings value
+                if (string.IsNullOrEmpty(valueToUse))
+                {
+                    valueToUse = (globalParam.Value ?? string.Empty).Trim();
+                }
+
+                // Skip optional global parameters without values
+                if (!globalParam.IsRequired && string.IsNullOrEmpty(valueToUse))
+                    continue;
+
+                // Format value based on type (use matchingFlagParameter type if found, otherwise globalParam type)
+                var paramType = matchingFlagParameter?.Type ?? globalParam.Type;
+                string value;
+                if (string.Equals(paramType, "number", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(paramType, "enum", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(paramType, "gpio", StringComparison.OrdinalIgnoreCase) ||
+                    IsNumericLike(valueToUse))
+                    value = string.IsNullOrEmpty(valueToUse) ? "0" : valueToUse;
+                else
+                    value = $"'\"{valueToUse}\"'";// Global parameters use GLOBALPARAMETERS_ prefix
+                var paramDefineName = $"{_globalParameterPrefix}{identifier}";
+                var indexOfExistingParameter = lines.FindIndex(line => line.Contains(paramDefineName));
+                var define = $" -D {paramDefineName}={value}";
+
+                if (indexOfExistingParameter != -1)
+                {
+                    lines[indexOfExistingParameter] = define;
+                }
+
+                globalParametersWritten.Add(identifier);
             }
         }
 
-        File.WriteAllText(iniPath, string.Join("\n", lines) + "\n");
+        return globalParametersWritten;
+    }
+
+    private static bool ShouldBeEnabled(List<BuildFlagItem> allowedFlags, string lineContentWithoutComment)
+    {
+        var flagName = ExtractBuildFlagName(lineContentWithoutComment);
+        bool isAllowedFlag = allowedFlags.Any(flag => !string.IsNullOrEmpty(flag?.Key) && string.Equals(flagName, flag.Key, StringComparison.OrdinalIgnoreCase));
+
+        return isAllowedFlag;
+    }
+
+    private bool ShouldBeDisabled(List<BuildFlagItem> allowedFlags, string lineContentWithoutComment)
+    {
+        var flagName = ExtractBuildFlagName(lineContentWithoutComment);
+        bool isNotAllowedFlag = !allowedFlags.Any(flag => !string.IsNullOrEmpty(flag?.Key) && string.Equals(flagName, flag.Key, StringComparison.OrdinalIgnoreCase))
+            && !_excludedBuildFlagsFromManipulation.Any(x => string.Equals(flagName, x, StringComparison.OrdinalIgnoreCase));
+
+        return isNotAllowedFlag;
+    }
+
+    private static string ExtractBuildFlagName(string lineContent)
+    {
+        if (string.IsNullOrWhiteSpace(lineContent))
+            return string.Empty;
+
+        var normalized = lineContent.Trim();
+        normalized = normalized.TrimStart(';');
+        normalized = normalized.Replace("-D ", string.Empty, StringComparison.OrdinalIgnoreCase).Replace(";", string.Empty).Trim();
+
+        var valueSeparatorIndex = normalized.IndexOfAny(new[] { '=', ' ', '\t' });
+        if (valueSeparatorIndex >= 0)
+            normalized = normalized.Substring(0, valueSeparatorIndex);
+
+        return normalized.Trim();
     }
 
     /// <summary>

@@ -19,7 +19,26 @@
 
 ## Testing Guidelines
 - Never make tests dependent on environment variables. Put test data (like COM port, chip name) directly in the test class as constants.
+- Keep test arrange and assertion values explicit and static: write literal expected values in the test itself instead of generating them dynamically from helper methods, LINQ, or runtime loops.
+- Do not use LINQ, reflection-based generation, or helper methods to build expected test data or assertion values in unit tests.
 - **Never run integration tests unless explicitly requested.**
+
+## Test Style Expectations
+- Prefer straightforward, readable test setup with fixed literal values and direct assertions.
+- When verifying flag state, assert both the commented and uncommented forms explicitly in the same test: allowed/commented flags must be uncommented and unlisted/uncommented flags must be commented.
+- Use static string literals for expected flag lines and parameter values; do not derive them from model data or collection transformations in the test body.
+
+## Line Ending Verification (PowerShell)
+```powershell
+$b = [System.IO.File]::ReadAllBytes($path)
+$crlf = 0; $lf = 0
+for ($i = 0; $i -lt $b.Length - 1; $i++) {
+    if ($b[$i] -eq 13 -and $b[$i+1] -eq 10) { $crlf++ }
+    elseif ($b[$i] -eq 10 -and ($i -eq 0 -or $b[$i-1] -ne 13)) { $lf++ }
+}
+# Expected: crlf=0, lf>0, first byte != 239 (no BOM)
+```
+
 
 ## Line Ending Verification (PowerShell)
 ```powershell

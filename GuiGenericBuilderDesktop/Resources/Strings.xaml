@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
@@ -29,6 +29,35 @@
     <system:String x:Key="Description">Description</system:String>
     <system:String x:Key="Parameters">Parameters</system:String>
     <system:String x:Key="ParamsButton">Params...</system:String>
+    <system:String x:Key="Settings">Settings</system:String>
+    <system:String x:Key="RelaySettingsHint">Click settings to configure the relay</system:String>
+    <system:String x:Key="RelayNumber">Relay #{0}</system:String>
+    <system:String x:Key="RelayLed">LED</system:String>
+    <system:String x:Key="RelayDirectLinks">Direct links</system:String>
+    <system:String x:Key="RelayThermostat">Thermostat</system:String>
+    <system:String x:Key="RelayGpioLabel">GPIO:</system:String>
+    <system:String x:Key="RelayActivationState">Activation state:</system:String>
+    <system:String x:Key="RelayOn">On:</system:String>
+    <system:String x:Key="RelayOff">Off:</system:String>
+    <system:String x:Key="RelayType">Type:</system:String>
+    <system:String x:Key="RelayMainTempChannel">Main temp channel:</system:String>
+    <system:String x:Key="RelayAdditionalTempChannel">Additional temp channel:</system:String>
+    <system:String x:Key="RelayHysteresis">Hysteresis:</system:String>
+    <system:String x:Key="RelayMinTemp">Min temp:</system:String>
+    <system:String x:Key="RelayMaxTemp">Max temp:</system:String>
+    <system:String x:Key="RelayNoRelatedSettings">No related settings enabled.</system:String>
+    <system:String x:Key="CC1101SettingsTitle">CC1101 radio module settings</system:String>
+    <system:String x:Key="CC1101PinMISO">MISO</system:String>
+    <system:String x:Key="CC1101PinMOSI">MOSI</system:String>
+    <system:String x:Key="CC1101PinCLK">CLK</system:String>
+    <system:String x:Key="CC1101PinCS">CS</system:String>
+    <system:String x:Key="CC1101PinGDO0">GDO0</system:String>
+    <system:String x:Key="CC1101PinGDO2">GDO2</system:String>
+    <system:String x:Key="CC1101SensorType">Type</system:String>
+    <system:String x:Key="CC1101SensorId">Sensor ID</system:String>
+    <system:String x:Key="CC1101SensorKey">Sensor key</system:String>
+    <system:String x:Key="CC1101SensorProperty">Property</system:String>
+    <system:String x:Key="CC1101SensorChannel">Channel</system:String>
     <system:String x:Key="RelaySettingsTitle">Relay settings</system:String>
     <system:String x:Key="RelayState">State</system:String>
     <system:String x:Key="RelayLight">Light control</system:String>

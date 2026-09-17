@@ -1014,6 +1014,28 @@
                   "Name": "Button mode"
                 }
               }
+            },
+            {
+              "Key": "ForceRestartOnConnectionLoss",
+              "Name": "Wymuś restart przy utracie połączenia",
+              "Type": "enum",
+              "IsRequired": false,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "Nie"
+                },
+                {
+                  "Value": "1",
+                  "Name": "Tak"
+                }
+              ],
+              "Translations": {
+                "en": {
+                  "Name": "Force restart on connection loss"
+                }
+              }
             }
           ]
         },

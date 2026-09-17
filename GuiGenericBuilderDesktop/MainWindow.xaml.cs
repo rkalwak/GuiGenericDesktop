@@ -789,6 +789,16 @@ namespace GuiGenericBuilderDesktop
                             return;
                         }
 
+                        if (string.Equals(bf.Key, "SUPLA_CC1101", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var cc1101Editor = new Cc1101ParametersWindow(bf, _builderConfig.GlobalSettings, _platform)
+                            {
+                                Owner = this
+                            };
+                            cc1101Editor.ShowDialog();
+                            return;
+                        }
+
                         if (bf.Parameters == null || !bf.Parameters.Any()) return;
 
                         var editor = new ParametersEditorWindow(bf.Parameters, bf.GetLocalizedName(), _builderConfig.GlobalSettings, _platform);
@@ -800,7 +810,8 @@ namespace GuiGenericBuilderDesktop
                     var canShowParametersEditor = !isDependencyFlag &&
                         (item.Parameters.Any() ||
                          string.Equals(item.Key, "SUPLA_LIMIT_SWITCH", StringComparison.OrdinalIgnoreCase) ||
-                         string.Equals(item.Key, "SUPLA_RELAY", StringComparison.OrdinalIgnoreCase));
+                         string.Equals(item.Key, "SUPLA_RELAY", StringComparison.OrdinalIgnoreCase) ||
+                         string.Equals(item.Key, "SUPLA_CC1101", StringComparison.OrdinalIgnoreCase));
                     if (canShowParametersEditor)
                     {
                         grid.Children.Add(btn);
@@ -827,6 +838,16 @@ namespace GuiGenericBuilderDesktop
                         Owner = this
                     };
                     relayEditor.ShowDialog();
+                    return;
+                }
+
+                if (string.Equals(item.Key, "SUPLA_CC1101", StringComparison.OrdinalIgnoreCase))
+                {
+                    var cc1101Editor = new Cc1101ParametersWindow(item, _builderConfig.GlobalSettings, _board)
+                    {
+                        Owner = this
+                    };
+                    cc1101Editor.ShowDialog();
                     return;
                 }
 

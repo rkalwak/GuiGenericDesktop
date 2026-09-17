@@ -27,9 +27,9 @@ namespace GuiGenericBuilderDesktop
 
             Title = string.Format(LocalizationManager.Get("LimitSwitchesTitle"), _maxLimitSwitches);
             Width = 820;
-            Height = 620;
-            MinWidth = 640;
-            MinHeight = 540;
+            Height = 700;
+            MinWidth = 800;
+            MinHeight = 700;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
             Background = Brushes.WhiteSmoke;
             SizeChanged += LimitSwitchParametersWindow_SizeChanged;

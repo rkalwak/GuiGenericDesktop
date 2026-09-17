@@ -9,7 +9,7 @@ using FluentAssertions;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace CompilationLib.Tests
+namespace CompilationLib.Tests.IntegrationTests
 {
     /// <summary>
     /// End-to-end integration test for the Z2S firmware flash/upgrade/backup/restore flow.

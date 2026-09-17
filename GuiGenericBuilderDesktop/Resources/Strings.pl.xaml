@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:system="clr-namespace:System;assembly=mscorlib">
@@ -29,6 +29,35 @@
     <system:String x:Key="Description">Opis</system:String>
     <system:String x:Key="Parameters">Parametry</system:String>
     <system:String x:Key="ParamsButton">Parametry</system:String>
+    <system:String x:Key="Settings">Ustawienia</system:String>
+    <system:String x:Key="RelaySettingsHint">Kliknij Ustawienia, aby skonfigurować przekaźnik</system:String>
+    <system:String x:Key="RelayNumber">Przekaźnik #{0}</system:String>
+    <system:String x:Key="RelayLed">LED</system:String>
+    <system:String x:Key="RelayDirectLinks">Połączenia bezpośrednie</system:String>
+    <system:String x:Key="RelayThermostat">Termostat</system:String>
+    <system:String x:Key="RelayGpioLabel">GPIO:</system:String>
+    <system:String x:Key="RelayActivationState">Stan aktywacji:</system:String>
+    <system:String x:Key="RelayOn">Wł:</system:String>
+    <system:String x:Key="RelayOff">Wył:</system:String>
+    <system:String x:Key="RelayType">Typ:</system:String>
+    <system:String x:Key="RelayMainTempChannel">Główny kanał temperatury:</system:String>
+    <system:String x:Key="RelayAdditionalTempChannel">Dodatkowy kanał temperatury:</system:String>
+    <system:String x:Key="RelayHysteresis">Histereza:</system:String>
+    <system:String x:Key="RelayMinTemp">Min. temp.:</system:String>
+    <system:String x:Key="RelayMaxTemp">Maks. temp.:</system:String>
+    <system:String x:Key="RelayNoRelatedSettings">Brak powiązanych ustawień.</system:String>
+    <system:String x:Key="CC1101SettingsTitle">Ustawienia modułu radiowego CC1101</system:String>
+    <system:String x:Key="CC1101PinMISO">MISO</system:String>
+    <system:String x:Key="CC1101PinMOSI">MOSI</system:String>
+    <system:String x:Key="CC1101PinCLK">CLK</system:String>
+    <system:String x:Key="CC1101PinCS">CS</system:String>
+    <system:String x:Key="CC1101PinGDO0">GDO0</system:String>
+    <system:String x:Key="CC1101PinGDO2">GDO2</system:String>
+    <system:String x:Key="CC1101SensorType">Typ</system:String>
+    <system:String x:Key="CC1101SensorId">ID czujnika</system:String>
+    <system:String x:Key="CC1101SensorKey">Klucz czujnika</system:String>
+    <system:String x:Key="CC1101SensorProperty">Właściwość</system:String>
+    <system:String x:Key="CC1101SensorChannel">Kanał</system:String>
     <system:String x:Key="RelaySettingsTitle">Ustawienia przekaźników</system:String>
     <system:String x:Key="RelayState">Stan</system:String>
     <system:String x:Key="RelayLight">Sterowanie światłem</system:String>
