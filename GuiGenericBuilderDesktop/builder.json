@@ -5,7 +5,7 @@
       {
         "Key": "SCL",
         "Name": "Pin SCL",
-        "Type": "number",
+        "Type": "gpio",
         "IsRequired": false,
         "DefaultValue": "22",
         "Translations": {
@@ -17,7 +17,7 @@
       {
         "Key": "SDA",
         "Name": "Pin SDA",
-        "Type": "number",
+        "Type": "gpio",
         "IsRequired": false,
         "DefaultValue": "21",
         "Translations": {
@@ -29,7 +29,7 @@
       {
         "Key": "MISO",
         "Name": "Pin MISO",
-        "Type": "number",
+        "Type": "gpio",
         "IsRequired": false,
         "DefaultValue": "",
         "Translations": {
@@ -41,7 +41,7 @@
       {
         "Key": "MOSI",
         "Name": "Pin MOSI",
-        "Type": "number",
+        "Type": "gpio",
         "IsRequired": false,
         "DefaultValue": "",
         "Translations": {
@@ -53,7 +53,7 @@
       {
         "Key": "CLK",
         "Name": "Pin CLK",
-        "Type": "number",
+        "Type": "gpio",
         "IsRequired": false,
         "DefaultValue": "",
         "Translations": {
@@ -65,7 +65,7 @@
       {
         "Key": "CS",
         "Name": "Pin CS",
-        "Type": "number",
+        "Type": "gpio",
         "IsRequired": false,
         "DefaultValue": "",
         "Translations": {
@@ -77,7 +77,7 @@
       {
         "Key": "GDO0",
         "Name": "Pin GDO0",
-        "Type": "number",
+        "Type": "gpio",
         "IsRequired": false,
         "DefaultValue": "",
         "Translations": {
@@ -89,7 +89,7 @@
       {
         "Key": "GDO2",
         "Name": "Pin GDO2",
-        "Type": "number",
+        "Type": "gpio",
         "IsRequired": false,
         "DefaultValue": "",
         "Translations": {
@@ -2216,7 +2216,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2228,7 +2228,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2299,7 +2299,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2311,7 +2311,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2361,7 +2361,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2373,7 +2373,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2423,7 +2423,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2435,7 +2435,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2460,7 +2460,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2472,7 +2472,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2514,7 +2514,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2526,7 +2526,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2551,7 +2551,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2563,7 +2563,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2605,7 +2605,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2617,7 +2617,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2642,7 +2642,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2654,7 +2654,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2679,7 +2679,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2691,7 +2691,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2723,7 +2723,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2735,7 +2735,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2777,7 +2777,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2789,7 +2789,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2814,7 +2814,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2826,7 +2826,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2872,7 +2872,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2884,7 +2884,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2909,7 +2909,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2921,7 +2921,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -2979,7 +2979,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -2991,7 +2991,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -3093,7 +3093,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -3105,7 +3105,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -3207,7 +3207,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -3219,7 +3219,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -3321,7 +3321,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -3333,7 +3333,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
@@ -3435,7 +3435,7 @@
             {
               "Key": "SCL",
               "Name": "Pin SCL",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "22",
               "Translations": {
@@ -3447,7 +3447,7 @@
             {
               "Key": "SDA",
               "Name": "Pin SDA",
-              "Type": "number",
+              "Type": "gpio",
               "IsRequired": true,
               "DefaultValue": "21",
               "Translations": {
