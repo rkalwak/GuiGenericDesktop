@@ -643,7 +643,7 @@ namespace GuiGenericBuilderDesktop
                     if (string.IsNullOrWhiteSpace(identifier))
                         continue;
 
-                    var countMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:Parameter_SUPLA_RELAY_)?Count$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    var countMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:P_SUPLA_RELAY_)?Count$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                     if (countMatch.Success && int.TryParse(parameter.Value, out var count))
                     {
                         enabledRelayCount = Math.Clamp(count, 0, _maxRelays);
@@ -704,56 +704,56 @@ namespace GuiGenericBuilderDesktop
                         continue;
                     }
 
-                    var directLinksOnMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:Parameter_SUPLA_RELAY_)?GPIO(\d+)DirectLinksOn$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    var directLinksOnMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:P_SUPLA_RELAY_)?GPIO(\d+)DirectLinksOn$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                     if (directLinksOnMatch.Success && int.TryParse(directLinksOnMatch.Groups[1].Value, out var directLinksOnIndex))
                     {
                         directLinksOnByIndex[directLinksOnIndex] = parameter.Value ?? string.Empty;
                         continue;
                     }
 
-                    var directLinksOffMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:Parameter_SUPLA_RELAY_)?GPIO(\d+)DirectLinksOff$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    var directLinksOffMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:P_SUPLA_RELAY_)?GPIO(\d+)DirectLinksOff$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                     if (directLinksOffMatch.Success && int.TryParse(directLinksOffMatch.Groups[1].Value, out var directLinksOffIndex))
                     {
                         directLinksOffByIndex[directLinksOffIndex] = parameter.Value ?? string.Empty;
                         continue;
                     }
 
-                    var thermostatTypeMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:Parameter_SUPLA_RELAY_)?GPIO(\d+)ThermostatType$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    var thermostatTypeMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:P_SUPLA_RELAY_)?GPIO(\d+)ThermostatType$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                     if (thermostatTypeMatch.Success && int.TryParse(thermostatTypeMatch.Groups[1].Value, out var thermostatIndex) && int.TryParse(parameter.Value, out var thermostatTypeValue))
                     {
                         thermostatTypeByIndex[thermostatIndex] = thermostatTypeValue;
                         continue;
                     }
 
-                    var thermostatMainTempChannelMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:Parameter_SUPLA_RELAY_)?GPIO(\d+)ThermostatMainTempChannel$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    var thermostatMainTempChannelMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:P_SUPLA_RELAY_)?GPIO(\d+)ThermostatMainTempChannel$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                     if (thermostatMainTempChannelMatch.Success && int.TryParse(thermostatMainTempChannelMatch.Groups[1].Value, out var mainTempIndex) && int.TryParse(parameter.Value, out var mainTempChannelValue))
                     {
                         thermostatMainTempChannelByIndex[mainTempIndex] = mainTempChannelValue;
                         continue;
                     }
 
-                    var thermostatAdditionalTempChannelMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:Parameter_SUPLA_RELAY_)?GPIO(\d+)ThermostatAdditionalTempChannel$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    var thermostatAdditionalTempChannelMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:P_SUPLA_RELAY_)?GPIO(\d+)ThermostatAdditionalTempChannel$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                     if (thermostatAdditionalTempChannelMatch.Success && int.TryParse(thermostatAdditionalTempChannelMatch.Groups[1].Value, out var additionalTempIndex) && int.TryParse(parameter.Value, out var additionalTempChannelValue))
                     {
                         thermostatAdditionalTempChannelByIndex[additionalTempIndex] = additionalTempChannelValue;
                         continue;
                     }
 
-                    var thermostatHisteresisMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:Parameter_SUPLA_RELAY_)?GPIO(\d+)ThermostatHisteresis$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    var thermostatHisteresisMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:P_SUPLA_RELAY_)?GPIO(\d+)ThermostatHisteresis$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                     if (thermostatHisteresisMatch.Success && int.TryParse(thermostatHisteresisMatch.Groups[1].Value, out var hysteresisIndex) && TryConvertThermostatValue(parameter.Value, out var hysteresisValue))
                     {
                         thermostatHisteresisByIndex[hysteresisIndex] = hysteresisValue;
                         continue;
                     }
 
-                    var thermostatMinTempMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:Parameter_SUPLA_RELAY_)?GPIO(\d+)ThermostatMinTemp$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    var thermostatMinTempMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:P_SUPLA_RELAY_)?GPIO(\d+)ThermostatMinTemp$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                     if (thermostatMinTempMatch.Success && int.TryParse(thermostatMinTempMatch.Groups[1].Value, out var minTempIndex) && TryConvertThermostatValue(parameter.Value, out var minTempValue))
                     {
                         thermostatMinTempByIndex[minTempIndex] = minTempValue;
                         continue;
                     }
 
-                    var thermostatMaxTempMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:Parameter_SUPLA_RELAY_)?GPIO(\d+)ThermostatMaxTemp$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    var thermostatMaxTempMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:P_SUPLA_RELAY_)?GPIO(\d+)ThermostatMaxTemp$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                     if (thermostatMaxTempMatch.Success && int.TryParse(thermostatMaxTempMatch.Groups[1].Value, out var maxTempIndex) && TryConvertThermostatValue(parameter.Value, out var maxTempValue))
                     {
                         thermostatMaxTempByIndex[maxTempIndex] = maxTempValue;

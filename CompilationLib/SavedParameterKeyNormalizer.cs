@@ -12,12 +12,12 @@ namespace CompilationLib
             }
 
             var trimmed = key.Trim();
-            if (!trimmed.StartsWith("Parameter_", StringComparison.OrdinalIgnoreCase))
+            if (!trimmed.StartsWith("P_", StringComparison.OrdinalIgnoreCase))
             {
                 return trimmed;
             }
 
-            var suffix = trimmed.Substring("Parameter_".Length);
+            var suffix = trimmed.Substring("P_".Length);
             if (!string.IsNullOrWhiteSpace(flagKey))
             {
                 var normalizedFlagKey = flagKey.Trim();

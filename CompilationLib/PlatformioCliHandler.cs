@@ -300,7 +300,7 @@ public class PlatformioCliHandler : ICompileHandler
                 if (globalParametersWritten.Contains(identifier))
                     continue;
 
-                expectedParameterDefines.Add($"Parameter_{flag.Key}_{identifier}");
+                expectedParameterDefines.Add($"P_{flag.Key}_{identifier}");
             }
         }
 
@@ -308,7 +308,7 @@ public class PlatformioCliHandler : ICompileHandler
         {
             var currentLine = lines[i];
             if (string.IsNullOrWhiteSpace(currentLine) ||
-                !currentLine.Contains("Parameter_", StringComparison.OrdinalIgnoreCase) ||
+                !currentLine.Contains("P_", StringComparison.OrdinalIgnoreCase) ||
                 currentLine.Contains(_globalParameterPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 continue;
@@ -355,7 +355,7 @@ public class PlatformioCliHandler : ICompileHandler
                 // Check if parameter is optional and has no value
                 bool isOptionalWithoutValue = !p.IsRequired && string.IsNullOrEmpty(raw);
 
-                var paramDefineName = $"Parameter_{flag.Key}_{identifier}";
+                var paramDefineName = $"P_{flag.Key}_{identifier}";
                 var indexOfExistingParameter = lines.FindIndex(line => line.Contains(paramDefineName));
 
                 if (isOptionalWithoutValue)
@@ -390,7 +390,7 @@ public class PlatformioCliHandler : ICompileHandler
                 else // treat everything else as string
                     value = $"'\"{raw}\"'";
 
-                // define is Parameter_FLAGNAME_ParamIdentifier=Value
+                // define is P_FLAGNAME_ParamIdentifier=Value
                 var define = $" -D {paramDefineName}={value}";
 
                 if (indexOfExistingParameter != -1)

@@ -20,7 +20,7 @@ namespace CompilationLib.Tests
                 result.Should().Contain($" -D {allowedFlag}");
             }
 
-            result.Should().NotContain("Parameter_");
+            result.Should().NotContain("P_");
             result.Should().NotContain("GLOBALPARAMETERS_");
         }
 
@@ -54,7 +54,7 @@ namespace CompilationLib.Tests
         }
 
         [Fact]
-        public void CommentUnlistedFlagsBetweenMarkers_DisablesEveryOtherBuildFlagAndParameter_WhenOnlyOneFlagIsAllowed()
+        public void CommentUnlistedFlagsBetweenMarkers_DisablesEveryOtherBuildFlagAndP_WhenOnlyOneFlagIsAllowed()
         {
             var iniPath = Path.Combine(Path.GetTempPath(), $"platformio-{Guid.NewGuid():N}.ini");
 
@@ -63,8 +63,8 @@ namespace CompilationLib.Tests
             ";flagsstart",
             " -D SUPLA_AHTX0",
             " -D SUPLA_RELAY",
-            " -D Parameter_SUPLA_AHTX0_SDA=22",
-            " -D Parameter_SUPLA_RELAY_SDA=27",
+            " -D P_SUPLA_AHTX0_SDA=22",
+            " -D P_SUPLA_RELAY_SDA=27",
             ";flagsend"
         };
 
@@ -99,12 +99,12 @@ namespace CompilationLib.Tests
                     lines[0].Should().Be(";flagsstart");
                     lines[1].Should().Be(" -D SUPLA_AHTX0");
                     lines[2].Should().StartWith(";").And.Contain("SUPLA_RELAY");
-                    lines[3].Should().Be(" -D Parameter_SUPLA_AHTX0_SDA=22");
-                    lines[4].Should().StartWith(";").And.Contain("Parameter_SUPLA_RELAY_SDA");
+                    lines[3].Should().Be(" -D P_SUPLA_AHTX0_SDA=22");
+                    lines[4].Should().StartWith(";").And.Contain("P_SUPLA_RELAY_SDA");
 
                     lines.Count(line => line.Contains("SUPLA_AHTX0", StringComparison.OrdinalIgnoreCase) && !line.TrimStart().StartsWith(";")).Should().Be(2);
                     lines.Count(line => line.Contains("SUPLA_RELAY", StringComparison.OrdinalIgnoreCase) && !line.TrimStart().StartsWith(";")).Should().Be(0);
-                    lines.Count(line => line.Contains("Parameter_SUPLA_RELAY_SDA", StringComparison.OrdinalIgnoreCase) && !line.TrimStart().StartsWith(";")).Should().Be(0);
+                    lines.Count(line => line.Contains("P_SUPLA_RELAY_SDA", StringComparison.OrdinalIgnoreCase) && !line.TrimStart().StartsWith(";")).Should().Be(0);
                 }
             }
             finally
@@ -119,32 +119,32 @@ namespace CompilationLib.Tests
             var iniContent = @"[env:test]
 ;flagsstart
  -D SUPLA_CC1101
- -D Parameter_SUPLA_CC1101_MISO=12
- -D Parameter_SUPLA_CC1101_MOSI=13
- -D Parameter_SUPLA_CC1101_Enabled1=1
- -D Parameter_SUPLA_CC1101_SensorType1=0
- -D Parameter_SUPLA_CC1101_SensorID1=meter-1
- -D Parameter_SUPLA_CC1101_SensorKey1=key-1
- -D Parameter_SUPLA_CC1101_SensorProperty1=0
- -D Parameter_SUPLA_CC1101_SensorChannel1=0
- -D Parameter_SUPLA_CC1101_Enabled2=1
- -D Parameter_SUPLA_CC1101_SensorType2=1
- -D Parameter_SUPLA_CC1101_SensorID2=meter-2
- -D Parameter_SUPLA_CC1101_SensorKey2=key-2
- -D Parameter_SUPLA_CC1101_SensorProperty2=1
- -D Parameter_SUPLA_CC1101_SensorChannel2=1
- -D Parameter_SUPLA_CC1101_Enabled3=0
- -D Parameter_SUPLA_CC1101_SensorType3=2
- -D Parameter_SUPLA_CC1101_SensorID3=meter-3
- -D Parameter_SUPLA_CC1101_SensorKey3=key-3
- -D Parameter_SUPLA_CC1101_SensorProperty3=2
- -D Parameter_SUPLA_CC1101_SensorChannel3=2
- -D Parameter_SUPLA_CC1101_Enabled10=0
- -D Parameter_SUPLA_CC1101_SensorType10=9
- -D Parameter_SUPLA_CC1101_SensorID10=meter-10
- -D Parameter_SUPLA_CC1101_SensorKey10=key-10
- -D Parameter_SUPLA_CC1101_SensorProperty10=0
- -D Parameter_SUPLA_CC1101_SensorChannel10=0
+ -D P_SUPLA_CC1101_MISO=12
+ -D P_SUPLA_CC1101_MOSI=13
+ -D P_SUPLA_CC1101_Enabled1=1
+ -D P_SUPLA_CC1101_SensorType1=0
+ -D P_SUPLA_CC1101_SensorID1=meter-1
+ -D P_SUPLA_CC1101_SensorKey1=key-1
+ -D P_SUPLA_CC1101_SensorProperty1=0
+ -D P_SUPLA_CC1101_SensorChannel1=0
+ -D P_SUPLA_CC1101_Enabled2=1
+ -D P_SUPLA_CC1101_SensorType2=1
+ -D P_SUPLA_CC1101_SensorID2=meter-2
+ -D P_SUPLA_CC1101_SensorKey2=key-2
+ -D P_SUPLA_CC1101_SensorProperty2=1
+ -D P_SUPLA_CC1101_SensorChannel2=1
+ -D P_SUPLA_CC1101_Enabled3=0
+ -D P_SUPLA_CC1101_SensorType3=2
+ -D P_SUPLA_CC1101_SensorID3=meter-3
+ -D P_SUPLA_CC1101_SensorKey3=key-3
+ -D P_SUPLA_CC1101_SensorProperty3=2
+ -D P_SUPLA_CC1101_SensorChannel3=2
+ -D P_SUPLA_CC1101_Enabled10=0
+ -D P_SUPLA_CC1101_SensorType10=9
+ -D P_SUPLA_CC1101_SensorID10=meter-10
+ -D P_SUPLA_CC1101_SensorKey10=key-10
+ -D P_SUPLA_CC1101_SensorProperty10=0
+ -D P_SUPLA_CC1101_SensorChannel10=0
 ;flagsend
 ";
             var temp = Path.GetTempFileName();
@@ -184,14 +184,14 @@ namespace CompilationLib.Tests
 
                 using (new AssertionScope())
                 {
-                    result.Should().Contain(" -D Parameter_SUPLA_CC1101_Enabled1=1");
-                    result.Should().Contain(" -D Parameter_SUPLA_CC1101_SensorProperty1=0");
-                    result.Should().Contain(" -D Parameter_SUPLA_CC1101_Enabled2=1");
-                    result.Should().Contain(" -D Parameter_SUPLA_CC1101_SensorProperty2=1");
-                    result.Should().Contain("; -D Parameter_SUPLA_CC1101_Enabled3=0");
-                    result.Should().Contain("; -D Parameter_SUPLA_CC1101_SensorProperty3=2");
-                    result.Should().Contain("; -D Parameter_SUPLA_CC1101_Enabled10=0");
-                    result.Should().Contain("; -D Parameter_SUPLA_CC1101_SensorProperty10=0");
+                    result.Should().Contain(" -D P_SUPLA_CC1101_Enabled1=1");
+                    result.Should().Contain(" -D P_SUPLA_CC1101_SensorProperty1=0");
+                    result.Should().Contain(" -D P_SUPLA_CC1101_Enabled2=1");
+                    result.Should().Contain(" -D P_SUPLA_CC1101_SensorProperty2=1");
+                    result.Should().Contain("; -D P_SUPLA_CC1101_Enabled3=0");
+                    result.Should().Contain("; -D P_SUPLA_CC1101_SensorProperty3=2");
+                    result.Should().Contain("; -D P_SUPLA_CC1101_Enabled10=0");
+                    result.Should().Contain("; -D P_SUPLA_CC1101_SensorProperty10=0");
                 }
             }
             finally
@@ -207,8 +207,8 @@ namespace CompilationLib.Tests
 ;flagsstart
  -D SUPLA_CC1101
  ; -D SUPLA_CC1101
- -D Parameter_SUPLA_CC1101_MISO=12
- ; -D Parameter_SUPLA_CC1101_GDO2=17
+ -D P_SUPLA_CC1101_MISO=12
+ ; -D P_SUPLA_CC1101_GDO2=17
  -D SUPLA_ENABLE_GUI
  ; -D SUPLA_ENABLE_SSL
 ;flagsend
@@ -242,9 +242,9 @@ namespace CompilationLib.Tests
                     result.Should().NotContain("; -D SUPLA_CC1101");
                     result.Should().Contain("; -D SUPLA_ENABLE_GUI");
                     result.Should().Contain(" ; -D SUPLA_ENABLE_SSL");
-                    result.Should().Contain(" -D Parameter_SUPLA_CC1101_MISO=12");
-                    result.Should().Contain(" -D Parameter_SUPLA_CC1101_GDO2=17");
-                    result.Should().NotContain(" ; -D Parameter_SUPLA_CC1101_GDO2=17");
+                    result.Should().Contain(" -D P_SUPLA_CC1101_MISO=12");
+                    result.Should().Contain(" -D P_SUPLA_CC1101_GDO2=17");
+                    result.Should().NotContain(" ; -D P_SUPLA_CC1101_GDO2=17");
                 }
             }
             finally
@@ -396,10 +396,10 @@ namespace CompilationLib.Tests
             var iniContent = @"[env:test]
 ;flagsstart
  -D SUPLA_LIMIT_SWITCH
- -D Parameter_SUPLA_LIMIT_SWITCH_GPIO1=12
- -D Parameter_SUPLA_LIMIT_SWITCH_GPIO1Pullup=1
- -D Parameter_SUPLA_LIMIT_SWITCH_GPIO15=15
- -D Parameter_SUPLA_LIMIT_SWITCH_GPIO15Pullup=0
+ -D P_SUPLA_LIMIT_SWITCH_GPIO1=12
+ -D P_SUPLA_LIMIT_SWITCH_GPIO1Pullup=1
+ -D P_SUPLA_LIMIT_SWITCH_GPIO15=15
+ -D P_SUPLA_LIMIT_SWITCH_GPIO15Pullup=0
 ;flagsend
 ";
             var temp = Path.GetTempFileName();
@@ -428,10 +428,10 @@ namespace CompilationLib.Tests
 
                 using (new AssertionScope())
                 {
-                    result.Should().Contain(" -D Parameter_SUPLA_LIMIT_SWITCH_GPIO1=12");
-                    result.Should().Contain(" -D Parameter_SUPLA_LIMIT_SWITCH_GPIO1Pullup=1");
-                    result.Should().Contain("; -D Parameter_SUPLA_LIMIT_SWITCH_GPIO15=15");
-                    result.Should().Contain("; -D Parameter_SUPLA_LIMIT_SWITCH_GPIO15Pullup=0");
+                    result.Should().Contain(" -D P_SUPLA_LIMIT_SWITCH_GPIO1=12");
+                    result.Should().Contain(" -D P_SUPLA_LIMIT_SWITCH_GPIO1Pullup=1");
+                    result.Should().Contain("; -D P_SUPLA_LIMIT_SWITCH_GPIO15=15");
+                    result.Should().Contain("; -D P_SUPLA_LIMIT_SWITCH_GPIO15Pullup=0");
                 }
             }
             finally
@@ -545,8 +545,8 @@ namespace CompilationLib.Tests
             var iniContent = @"[env:test]
 ;flagsstart
  -D SUPLA_SENSOR
- -D Parameter_SUPLA_SENSOR_Temperature=21
- -D Parameter_SUPLA_SENSOR_TemperatureEnabled=1
+ -D P_SUPLA_SENSOR_Temperature=21
+ -D P_SUPLA_SENSOR_TemperatureEnabled=1
 ;flagsend
 ";
             var temp = Path.GetTempFileName();
@@ -576,9 +576,9 @@ namespace CompilationLib.Tests
 
                 using (new AssertionScope())
                 {
-                    result.IndexOf("Parameter_SUPLA_SENSOR_Temperature=21", StringComparison.OrdinalIgnoreCase)
+                    result.IndexOf("P_SUPLA_SENSOR_Temperature=21", StringComparison.OrdinalIgnoreCase)
                         .Should().BeGreaterThan(start).And.BeLessThan(end);
-                    result.IndexOf("Parameter_SUPLA_SENSOR_TemperatureEnabled=1", StringComparison.OrdinalIgnoreCase)
+                    result.IndexOf("P_SUPLA_SENSOR_TemperatureEnabled=1", StringComparison.OrdinalIgnoreCase)
                         .Should().BeGreaterThan(start).And.BeLessThan(end);
                 }
             }
@@ -629,7 +629,7 @@ namespace CompilationLib.Tests
         }
 
         [Fact]
-        public void CommentUnlistedFlags_EnumParameter_FormattedAsNumber()
+        public void CommentUnlistedFlags_EnumP_FormattedAsNumber()
         {
             var iniContent = @"[env:test]
 ;flagsstart
@@ -668,7 +668,7 @@ namespace CompilationLib.Tests
         }
 
         [Fact]
-        public void CommentUnlistedFlags_NumberParameter_FormattedAsNumber()
+        public void CommentUnlistedFlags_NumberP_FormattedAsNumber()
         {
             var iniContent = @"[env:test]
 ;flagsstart
@@ -707,7 +707,7 @@ namespace CompilationLib.Tests
         }
 
         [Fact]
-        public void CommentUnlistedFlags_TextParameter_FormattedWithQuotes()
+        public void CommentUnlistedFlags_TextP_FormattedWithQuotes()
         {
             var iniContent = @"[env:test]
 ;flagsstart
@@ -776,7 +776,7 @@ namespace CompilationLib.Tests
                 var result = File.ReadAllText(temp);
 
                 AssertOnlyAllowedFlagsRemain(result, "SUPLA_FLAG");
-                result.Should().NotContain("Parameter_SUPLA_FLAG_TIMEOUT");
+                result.Should().NotContain("P_SUPLA_FLAG_TIMEOUT");
             }
             finally
             {
@@ -790,7 +790,7 @@ namespace CompilationLib.Tests
             var iniContent = @"[env:test]
 ;flagsstart
  -D SUPLA_FLAG
- -D Parameter_SUPLA_FLAG_MODE=1
+ -D P_SUPLA_FLAG_MODE=1
 ;flagsend
 ";
             var temp = Path.GetTempFileName();
@@ -818,8 +818,8 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     result.Should().Contain(" -D SUPLA_FLAG");
-                    result.Should().Contain(" -D Parameter_SUPLA_FLAG_MODE=3");
-                    result.Should().NotContain(" -D Parameter_SUPLA_FLAG_MODE=1");
+                    result.Should().Contain(" -D P_SUPLA_FLAG_MODE=3");
+                    result.Should().NotContain(" -D P_SUPLA_FLAG_MODE=1");
                 }
             }
             finally
@@ -861,7 +861,7 @@ namespace CompilationLib.Tests
                 var result = File.ReadAllText(temp);
 
                 AssertOnlyAllowedFlagsRemain(result, "SUPLA_COMPLEX_FLAG");
-                result.Should().NotContain("Parameter_SUPLA_COMPLEX_FLAG_");
+                result.Should().NotContain("P_SUPLA_COMPLEX_FLAG_");
             }
             finally
             {
@@ -870,7 +870,7 @@ namespace CompilationLib.Tests
         }
 
         [Fact]
-        public void CommentUnlistedFlags_GpioParameter_IsWrittenAsInteger()
+        public void CommentUnlistedFlags_GpioP_IsWrittenAsInteger()
         {
             var iniContent = @"[env:test]
 ;flagsstart
@@ -900,7 +900,7 @@ namespace CompilationLib.Tests
                 var result = File.ReadAllText(temp);
 
                 AssertOnlyAllowedFlagsRemain(result, "SUPLA_LED");
-                result.Should().NotContain("Parameter_SUPLA_LED_GPIO='\"12\"'");
+                result.Should().NotContain("P_SUPLA_LED_GPIO='\"12\"'");
             }
             finally
             {
@@ -947,7 +947,7 @@ namespace CompilationLib.Tests
                 var result = File.ReadAllText(temp);
 
                 AssertOnlyAllowedFlagsRemain(result, "SUPLA_INITIAL_CONFIG_MODE");
-                result.Should().NotContain("Parameter_SUPLA_INITIAL_CONFIG_MODE_");
+                result.Should().NotContain("P_SUPLA_INITIAL_CONFIG_MODE_");
             }
             finally
             {
@@ -993,7 +993,7 @@ namespace CompilationLib.Tests
                 var result = File.ReadAllText(temp);
 
                 AssertOnlyAllowedFlagsRemain(result, "SUPLA_INITIAL_CONFIG_MODE");
-                result.Should().NotContain("Parameter_SUPLA_INITIAL_CONFIG_MODE_");
+                result.Should().NotContain("P_SUPLA_INITIAL_CONFIG_MODE_");
             }
             finally
             {
@@ -1038,7 +1038,7 @@ namespace CompilationLib.Tests
                 var result = File.ReadAllText(temp);
 
                 AssertOnlyAllowedFlagsRemain(result, "SUPLA_TEST_FLAG");
-                result.Should().NotContain("Parameter_SUPLA_TEST_FLAG_");
+                result.Should().NotContain("P_SUPLA_TEST_FLAG_");
             }
             finally
             {
@@ -1086,7 +1086,7 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     result.Should().Contain(" -D SUPLA_FLAG");
-                    result.Should().NotContain("Parameter_SUPLA_FLAG_OptionalParam");
+                    result.Should().NotContain("P_SUPLA_FLAG_OptionalParam");
                 }
             }
             finally
@@ -1135,7 +1135,7 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     AssertOnlyAllowedFlagsRemain(result, "SUPLA_FLAG");
-                    result.Should().NotContain("Parameter_SUPLA_FLAG_OptionalParam");
+                    result.Should().NotContain("P_SUPLA_FLAG_OptionalParam");
                 }
             }
             finally
@@ -1184,7 +1184,7 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     AssertOnlyAllowedFlagsRemain(result, "SUPLA_FLAG");
-                    result.Should().NotContain("Parameter_SUPLA_FLAG_RequiredParam");
+                    result.Should().NotContain("P_SUPLA_FLAG_RequiredParam");
                 }
             }
             finally
@@ -1199,7 +1199,7 @@ namespace CompilationLib.Tests
             var iniContent = @"[env:test]
 ;flagsstart
  -D SUPLA_FLAG
- -D Parameter_SUPLA_FLAG_OptionalParam=100
+ -D P_SUPLA_FLAG_OptionalParam=100
 ;flagsend
 ";
             var temp = Path.GetTempFileName();
@@ -1234,8 +1234,8 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     result.Should().Contain(" -D SUPLA_FLAG");
-                    result.Should().Contain("; -D Parameter_SUPLA_FLAG_OptionalParam=100");
-                    result.Should().NotContain("\n -D Parameter_SUPLA_FLAG_OptionalParam=");
+                    result.Should().Contain("; -D P_SUPLA_FLAG_OptionalParam=100");
+                    result.Should().NotContain("\n -D P_SUPLA_FLAG_OptionalParam=");
                 }
             }
             finally
@@ -1250,7 +1250,7 @@ namespace CompilationLib.Tests
             var iniContent = @"[env:test]
 ;flagsstart
  -D SUPLA_FLAG
-;-D Parameter_SUPLA_FLAG_OptionalParam=100
+;-D P_SUPLA_FLAG_OptionalParam=100
 ;flagsend
 ";
             var temp = Path.GetTempFileName();
@@ -1285,7 +1285,7 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     result.Should().Contain(" -D SUPLA_FLAG");
-                    result.Should().Contain(";-D Parameter_SUPLA_FLAG_OptionalParam=100");
+                    result.Should().Contain(";-D P_SUPLA_FLAG_OptionalParam=100");
                 }
             }
             finally
@@ -1347,9 +1347,9 @@ namespace CompilationLib.Tests
                 using (new AssertionScope())
                 {
                     AssertOnlyAllowedFlagsRemain(result, "SUPLA_COMPLEX");
-                    result.Should().NotContain("Parameter_SUPLA_COMPLEX_OptionalTimeout");
-                    result.Should().NotContain("Parameter_SUPLA_COMPLEX_RequiredMode");
-                    result.Should().NotContain("Parameter_SUPLA_COMPLEX_OptionalName");
+                    result.Should().NotContain("P_SUPLA_COMPLEX_OptionalTimeout");
+                    result.Should().NotContain("P_SUPLA_COMPLEX_RequiredMode");
+                    result.Should().NotContain("P_SUPLA_COMPLEX_OptionalName");
                 }
             }
             finally
@@ -1395,7 +1395,7 @@ namespace CompilationLib.Tests
                 var result = File.ReadAllText(temp);
 
                 AssertOnlyAllowedFlagsRemain(result, "SUPLA_FLAG");
-                result.Should().NotContain("Parameter_SUPLA_FLAG_OptionalMode");
+                result.Should().NotContain("P_SUPLA_FLAG_OptionalMode");
             }
             finally
             {
@@ -1440,7 +1440,7 @@ namespace CompilationLib.Tests
                 var result = File.ReadAllText(temp);
 
                 AssertOnlyAllowedFlagsRemain(result, "SUPLA_FLAG");
-                result.Should().NotContain("Parameter_SUPLA_FLAG_OptionalText");
+                result.Should().NotContain("P_SUPLA_FLAG_OptionalText");
             }
             finally
             {
@@ -1449,7 +1449,7 @@ namespace CompilationLib.Tests
         }
 
         [Fact]
-        public void DirectLinkWithoutParameter_DoesNotEnableTemperatureSensor()
+        public void DirectLinkWithoutP_DoesNotEnableTemperatureSensor()
         {
             var iniContent = @"[env:test]
 ;flagsstart
@@ -1527,8 +1527,8 @@ namespace CompilationLib.Tests
                 {
                     AssertOnlyAllowedFlagsRemain(result, "SUPLA_RELAY", "SUPLA_BUTTON");
                     result.Should().NotContain("GLOBALPARAMETERS_");
-                    result.Should().NotContain("Parameter_SUPLA_RELAY_");
-                    result.Should().NotContain("Parameter_SUPLA_BUTTON_");
+                    result.Should().NotContain("P_SUPLA_RELAY_");
+                    result.Should().NotContain("P_SUPLA_BUTTON_");
                 }
             }
             finally
@@ -1544,8 +1544,8 @@ namespace CompilationLib.Tests
 ;flagsstart
  -D SUPLA_BME280
  -D SUPLA_SHT3x
- -D Parameter_SUPLA_BME280_SCL=0
- -D Parameter_SUPLA_BME280_SDA=0
+ -D P_SUPLA_BME280_SCL=0
+ -D P_SUPLA_BME280_SDA=0
  -D GLOBALPARAMETERS_SCL=0
  -D GLOBALPARAMETERS_SDA=0
 ;flagsend
@@ -1585,8 +1585,8 @@ namespace CompilationLib.Tests
                 {
                     lines[2].Should().Be(" -D SUPLA_BME280");
                     lines[3].Should().Be("; -D SUPLA_SHT3x");
-                    lines[4].Should().Be("; -D Parameter_SUPLA_BME280_SCL=0");
-                    lines[5].Should().Be("; -D Parameter_SUPLA_BME280_SDA=0");
+                    lines[4].Should().Be("; -D P_SUPLA_BME280_SCL=0");
+                    lines[5].Should().Be("; -D P_SUPLA_BME280_SDA=0");
                     lines[6].Should().Be(" -D GLOBALPARAMETERS_SCL=22");
                     lines[7].Should().Be(" -D GLOBALPARAMETERS_SDA=21");
                 }

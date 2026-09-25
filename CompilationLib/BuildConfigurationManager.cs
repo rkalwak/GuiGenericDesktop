@@ -361,27 +361,5 @@ namespace CompilationLib
                 return (null, null);
             }
         }
-
-        /// <summary>
-        /// Extracts chip type from platform name
-        /// </summary>
-        private static string GetChipFromPlatform(string platform)
-        {
-            if (string.IsNullOrEmpty(platform))
-                return "esp32";
-
-            var platformLower = platform.ToLowerInvariant();
-
-            if (platformLower.Contains("esp32c6"))
-                return "esp32c6";
-            if (platformLower.Contains("esp32c3"))
-                return "esp32c3";
-            if (platformLower.Contains("esp32s3"))
-                return "esp32s3";
-            if (platformLower.Contains("esp32s2"))
-                return "esp32s2";
-
-            return "esp32";
-        }
     }
 }

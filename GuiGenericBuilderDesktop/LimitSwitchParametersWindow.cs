@@ -253,13 +253,13 @@ namespace GuiGenericBuilderDesktop
                     if (string.IsNullOrWhiteSpace(identifier))
                         continue;
 
-                    var countMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:Parameter_SUPLA_LIMIT_SWITCH_)?Count$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    var countMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:P_SUPLA_LIMIT_SWITCH_)?Count$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                     if (countMatch.Success && int.TryParse(value, out var count))
                     {
                         enabledCount = Math.Clamp(count, 0, _maxLimitSwitches);
                     }
 
-                    var gpioMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:Parameter_SUPLA_LIMIT_SWITCH_)?GPIO(\d+)$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    var gpioMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:P_SUPLA_LIMIT_SWITCH_)?GPIO(\d+)$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                     if (gpioMatch.Success && int.TryParse(value, out var gpio))
                     {
                         var index = int.Parse(gpioMatch.Groups[1].Value) - 1;
@@ -269,7 +269,7 @@ namespace GuiGenericBuilderDesktop
                         }
                     }
 
-                    var pullupMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:Parameter_SUPLA_LIMIT_SWITCH_)?GPIO(\d+)Pullup$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
+                    var pullupMatch = System.Text.RegularExpressions.Regex.Match(identifier, @"(?i)^(?:P_SUPLA_LIMIT_SWITCH_)?GPIO(\d+)Pullup$", System.Text.RegularExpressions.RegexOptions.CultureInvariant);
                     if (pullupMatch.Success)
                     {
                         var index = int.Parse(pullupMatch.Groups[1].Value) - 1;

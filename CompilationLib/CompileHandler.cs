@@ -123,7 +123,7 @@ public class CompileHandler : ICompileHandler
                 }
 
                 string define;
-                if (parameterKey.StartsWith("Parameter_", StringComparison.OrdinalIgnoreCase))
+                if (parameterKey.StartsWith("P_", StringComparison.OrdinalIgnoreCase))
                 {
                     define = $"{parameterKey}={value}";
                 }
