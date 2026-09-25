@@ -1,5 +1,12 @@
 ﻿# Changelog
 
+### [2026-09-05] - Version 2.0.27
+### [2026-09-25] - Version 2.0.28
+
+**GUI-Generic Builder Update**
+- Added support for parameters for SUPLA_LIMIT_SWITCH, SUPLA_RELAY and its settings with separate windows for each sensor type.
+- Created SUPLA_CC1101 parameters window.
+
 ### [2026-08-11] - Version 2.0.26
 
 **GUI-Generic Builder Update**

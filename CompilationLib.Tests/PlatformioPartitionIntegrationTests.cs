@@ -64,7 +64,7 @@ board_build.partitions = partitions/min_spiffs_8mb.csv
             var result = File.ReadAllText(_testIniPath);
             result.Should().Contain("board_build.partitions = partitions/min_spiffs_8mb.csv");
             result.Should().Contain(" -D SUPLA_CONFIG"); // Uncommented
-            result.Should().Contain(";-D SUPLA_RELAY"); // Commented out (no space after semicolon)
+            result.Should().Contain("; -D SUPLA_RELAY"); // Commented out (no space after semicolon)
         }
 
         [Theory]
