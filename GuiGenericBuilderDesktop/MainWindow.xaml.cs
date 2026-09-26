@@ -33,6 +33,8 @@ namespace GuiGenericBuilderDesktop
         private ComboBox comPortSelector;
         private ComboBox flashSizeSelector;
         private ComboBox languageSelector;
+        private ComboBox builderSelector;
+        private string _selectedBuilder = "PlatformIO";
         private CheckBox deployCheckBox;
         private CheckBox backupCheckBox;
         private CheckBox eraseFlashCheckBox;
@@ -41,8 +43,17 @@ namespace GuiGenericBuilderDesktop
         private Button checkDeviceButton;
         private Button compileButton;
         private TextBlock statusText;
+
+        private static ICompileHandler CreateCompileHandler(string selectedBuilder)
+        {
+            if (string.Equals(selectedBuilder, "ArduinoCLI", StringComparison.OrdinalIgnoreCase))
+                return new CompileHandler();
+
+            return new PlatformioCliHandler();
+        }
         private CancellationTokenSource _compilationCancellation;
         private BuilderConfig _builderConfig = new BuilderConfig();
+        private AppConfig appConfig = new AppConfig();
 
         // Service layer
         private ValidationService _validationService;
@@ -118,7 +129,7 @@ namespace GuiGenericBuilderDesktop
             _configManager = new BuildConfigurationManager(configDir, _esptoolWrapper);
 
             // Load application configuration from appsettings.json and environment variables
-            var appConfig = new ConfigurationBuilder()
+            appConfig = new ConfigurationBuilder()
                 .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: true)
                 .Build()
@@ -170,9 +181,6 @@ namespace GuiGenericBuilderDesktop
             // Update version display and window title on startup
             var (suplaVersion, ggVersion) = _versionService.GetVersions();
             Title = _versionService.GenerateWindowTitle(suplaVersion, ggVersion);
-
-            // Validate PlatformIO installation on startup
-            _validationService.ShowPlatformIOWarningIfNeeded();
 
             // Add Window Loaded event handler for automatic update check
             Loaded += MainWindow_Loaded;
@@ -360,6 +368,7 @@ namespace GuiGenericBuilderDesktop
             };
             boardSelector = new ComboBox { Width = 80, Margin = new Thickness(4, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
             boardSelector.Items.Add(new ComboBoxItem { Content = LocalizationManager.Get("None"), Tag = "None", IsSelected = true });
+            boardSelector.Items.Add(new ComboBoxItem { Content = "ESP8266", Tag = "GUI_Generic_ESP8266" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32", Tag = "GUI_Generic_ESP32" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C3", Tag = "GUI_Generic_ESP32C3" });
             boardSelector.Items.Add(new ComboBoxItem { Content = "ESP32-C6", Tag = "GUI_Generic_ESP32C6" });
@@ -485,6 +494,34 @@ namespace GuiGenericBuilderDesktop
                 }
             };
 
+            var builderLabel = new TextBlock(new Run(LocalizationManager.Get("Builder")))
+            {
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(12, 0, 4, 0),
+                VerticalAlignment = VerticalAlignment.Center
+            };
+
+            builderSelector = new ComboBox
+            {
+                Width = 120,
+                Margin = new Thickness(4, 0, 0, 0),
+                VerticalAlignment = VerticalAlignment.Center,
+                ToolTip = LocalizationManager.Get("BuilderTooltip")
+            };
+
+            builderSelector.Items.Add(new ComboBoxItem { Content = LocalizationManager.Get("BuilderPlatformIO"), Tag = "PlatformIO" });
+            builderSelector.Items.Add(new ComboBoxItem { Content = LocalizationManager.Get("BuilderArduinoCli"), Tag = "ArduinoCLI" });
+            builderSelector.SelectedIndex = appConfig.DefaultCompileHandler == "PlatformIO" ? 0 : 1;
+            _selectedBuilder = appConfig.DefaultCompileHandler;
+
+            builderSelector.SelectionChanged += (s, e) =>
+            {
+                if (builderSelector.SelectedItem is ComboBoxItem item)
+                {
+                    _selectedBuilder = (item.Tag as string) ?? (item.Content as string) ?? appConfig.DefaultCompileHandler;
+                }
+            };
+
             // Help button - dock to right (added first so it appears rightmost)
             var helpButton = new Button
             {
@@ -529,8 +566,9 @@ namespace GuiGenericBuilderDesktop
             devicePanel.Children.Add(flashSizeSelector);
             devicePanel.Children.Add(languageLabel);
             devicePanel.Children.Add(languageSelector);
-            
-            // Dock buttons to the right
+            devicePanel.Children.Add(builderLabel);
+            devicePanel.Children.Add(builderSelector);
+
             DockPanel.SetDock(helpButton, Dock.Right);
             devicePanel.Children.Add(helpButton);
             DockPanel.SetDock(changelogButton, Dock.Right);
@@ -1577,6 +1615,27 @@ namespace GuiGenericBuilderDesktop
                 return;
             }
 
+            var isArduinoCli = string.Equals(_selectedBuilder, "ArduinoCLI", StringComparison.OrdinalIgnoreCase);
+            if (!isArduinoCli && !_validationService.ValidatePlatformIOInstallation())
+            {
+                MessageBox.Show(
+                    LocalizationManager.GetFormat("PlatformIONotFoundMessage", _validationService.GetPlatformIOPath()),
+                    LocalizationManager.Get("PlatformIONotFoundTitle"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            if (isArduinoCli && !_validationService.ValidateArduinoCliInstallation(out var arduinoCliPath))
+            {
+                MessageBox.Show(
+                    LocalizationManager.Get("ArduinoCliNotFoundMessage"),
+                    LocalizationManager.Get("ArduinoCliNotFoundTitle"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
             // Check if GUI-Generic repository exists and is not empty
             if (string.IsNullOrEmpty(_repositoryPath) || !Directory.Exists(_repositoryPath))
             {
@@ -1601,7 +1660,17 @@ namespace GuiGenericBuilderDesktop
 
             // Verify essential files exist in the repository
             var platformioIniPath = Path.Combine(_repositoryPath, "platformio.ini");
-            if (!File.Exists(platformioIniPath))
+            if (!isArduinoCli && string.Equals(_platform, "GUI_Generic_ESP8266", StringComparison.OrdinalIgnoreCase))
+            {
+                MessageBox.Show(
+                    LocalizationManager.Get("Esp8266RequiresArduinoCli"),
+                    LocalizationManager.Get("Esp8266BuilderRequiredTitle"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            if (!isArduinoCli && !File.Exists(platformioIniPath))
             {
                 MessageBox.Show(
                     LocalizationManager.GetFormat("IncompleteRepository", _repositoryPath),
@@ -1633,6 +1702,22 @@ namespace GuiGenericBuilderDesktop
                 return;
             }
 
+            if (isArduinoCli)
+            {
+                var coreId = string.Equals(_platform, "GUI_Generic_ESP8266", StringComparison.OrdinalIgnoreCase)
+                    ? "esp8266"
+                    : "esp32";
+                if (!_validationService.ValidateArduinoCliCoreInstallation(coreId, out var corePath))
+                {
+                    MessageBox.Show(
+                        LocalizationManager.GetFormat("ArduinoCliCoreNotFoundMessage", coreId, corePath),
+                        LocalizationManager.Get("ArduinoCliCoreNotFoundTitle"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    return;
+                }
+            }
+
             // Validate platform compatibility
             var incompatibleFlags = _validationService.ValidatePlatformCompatibility(_board, selectedFlags);
             if (incompatibleFlags.Any())
@@ -1662,7 +1747,8 @@ namespace GuiGenericBuilderDesktop
 
             // Get and validate flash size selection
             var selectedFlashSize = _flashSize;
-            if (!string.IsNullOrEmpty(selectedFlashSize) && !selectedFlashSize.Equals("None", StringComparison.OrdinalIgnoreCase))
+            if (!_board.Equals("esp8266", StringComparison.OrdinalIgnoreCase) &&
+                !string.IsNullOrEmpty(selectedFlashSize) && !selectedFlashSize.Equals("None", StringComparison.OrdinalIgnoreCase))
             {
                 // Validate flash size is compatible with platform
                 if (!PartitionManager.ValidateFlashSize(_board, selectedFlashSize))
@@ -1738,7 +1824,7 @@ namespace GuiGenericBuilderDesktop
                     BuildFlags = selectedFlags,
                     EnvironmentName = _platform,
                     Board = _board,
-                    ProjectPath = Path.Combine(_repositoryPath, "src"),
+                    ProjectPath = _repositoryPath,
                     ProjectDirectory = _repositoryPath,
                     LibrariesPath = Path.Combine(_repositoryPath, "lib"),
                     PortCom = _portCom,
@@ -1749,18 +1835,27 @@ namespace GuiGenericBuilderDesktop
                     GlobalSettings = _builderConfig.GlobalSettings,
                     ConfigTimestamp = timestamp
                 };
-                
-                var handler = new PlatformioCliHandler();
-                
-                // Subscribe to output events for live log streaming
-                handler.OutputLine += (s, line) => resultsWindow?.AppendLog(line);
-                handler.ErrorLine += (s, line) => resultsWindow?.AppendLog(line);
-                
+
+                var handler = CreateCompileHandler(_selectedBuilder);
+
+                if (handler is PlatformioCliHandler platformioHandler)
+                {
+                    platformioHandler.OutputLine += (s, line) => resultsWindow?.AppendLog(line);
+                    platformioHandler.ErrorLine += (s, line) => resultsWindow?.AppendLog(line);
+                }
+                else if (handler is CompileHandler arduinoHandler)
+                {
+                    arduinoHandler.OutputLine += (s, line) => resultsWindow?.AppendLog(line);
+                    arduinoHandler.ErrorLine += (s, line) => resultsWindow?.AppendLog(line);
+                }
+
+
+                _logger.Information("Using compile handler: {Builder}", _selectedBuilder);
+
                 var result = await handler.Handle(ggRequest, _compilationCancellation.Token);
 
                 // Get elapsed time from results window
                 var compilationTime = resultsWindow?.GetElapsedSeconds() ?? 0;
-
                 // Check if compilation was cancelled
                 if (_compilationCancellation.IsCancellationRequested)
                 {

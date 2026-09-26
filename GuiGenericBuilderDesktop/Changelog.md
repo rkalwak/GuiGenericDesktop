@@ -1,5 +1,16 @@
 ﻿# Changelog
 
+### [2026-10-10] - Version 20.0.31
+***GUI-Generic Builder Update**
+- Support for Arduino-CLI as alternative compiler to Platform.io
+
+### [2026-09-25] - Version 20.0.29
+### [2026-09-26] - VErsion 20.0.30 
+
+***GUI-Generic Builder Update**
+- Shortened parameter names to format: P_{SUPLA_BUILD_FLAG}_{ParameterName}
+- Added ADS1115 sensor support
+
 ### [2026-09-05] - Version 2.0.27
 ### [2026-09-25] - Version 2.0.28
 

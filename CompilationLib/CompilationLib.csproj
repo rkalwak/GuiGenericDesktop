@@ -12,10 +12,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="arduino-cli.exe" />
     <None Remove="esptool.exe" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="arduino-cli.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="esptool.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

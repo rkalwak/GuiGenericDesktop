@@ -364,7 +364,7 @@ namespace CompilationLib
             return sanitized.ToString().Trim().Trim('.', ' ');
         }
 
-        private static long GetFirmwareFlashOffset(bool fullVersion)
+        internal static long GetFirmwareFlashOffset(bool fullVersion)
         {
             // OTA/update-only assets are app images and must land in the app0 partition.
             // Full-version assets are complete flash images and are written from 0x0.

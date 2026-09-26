@@ -55,5 +55,11 @@ namespace CompilationLib
         /// When provided, authenticated requests have a higher rate limit.
         /// </summary>
         public string GitHubPat { get; set; }
+
+        /// <summary>
+        /// Defines the default compile handler to use when no specific handler is specified.
+        /// Options: ArduinoCli, PlatformIO.
+        /// </summary>
+        public string DefaultCompileHandler { get; set; } = "PlatformIO";
     }
 }

@@ -91,7 +91,7 @@ namespace CompilationLib.Tests
                 }
             };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(iniPath, allowedFlags, new GlobalSettings());
+                handler.EditIniFileWithRequestedFlags(iniPath, allowedFlags, new GlobalSettings());
 
                 var lines = File.ReadAllLines(iniPath);
                 using (new AssertionScope())
@@ -178,7 +178,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -232,7 +232,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -285,7 +285,7 @@ namespace CompilationLib.Tests
                 };
 
                 // Don't use global settings for this test to avoid affecting line positions
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllLines(temp);
 
@@ -327,7 +327,7 @@ namespace CompilationLib.Tests
                 };
 
                 // Don't use global settings for this test to avoid affecting line positions
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllLines(temp);
 
@@ -368,7 +368,7 @@ namespace CompilationLib.Tests
                 };
 
                 // Don't use global settings for this test to avoid affecting line positions
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllLines(temp);
 
@@ -422,7 +422,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -474,7 +474,7 @@ namespace CompilationLib.Tests
                 };
 
                 // Don't use global settings for this test to avoid affecting line positions
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllLines(temp);
 
@@ -527,7 +527,7 @@ namespace CompilationLib.Tests
                     new BuildFlagItem { FlagName = "SUPLA_X" }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var after = File.ReadAllText(temp);
 
@@ -560,6 +560,7 @@ namespace CompilationLib.Tests
                     new BuildFlagItem
                     {
                         Key = "SUPLA_SENSOR",
+                        IsEnabled = true,
                         Parameters = new List<Parameter>
                         {
                             new Parameter { Key = "Temperature", Value = "21", Type = "number" },
@@ -568,7 +569,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
                 var start = result.IndexOf(";flagsstart", StringComparison.OrdinalIgnoreCase);
@@ -590,13 +591,17 @@ namespace CompilationLib.Tests
 
 
         [Fact]
-        public async Task DisabledGlobalSettingsParametersShouldBeEnabled()
+        public void DisabledGlobalSettingsParametersShouldBeEnabled()
         {
             var tempDir = Path.Combine(Path.GetTempPath(), $"buildcfg-{Guid.NewGuid():N}");
             Directory.CreateDirectory(tempDir);
             var iniContent = @"[env:test]
 ;flagsstart
 ; -D GLOBALPARAMETERS_SCL=0
+; -D GLOBALPARAMETERS_SDA=0
+; -D SUPLA_TEST
+; -D P_SUPLA_TEST_SCL=0
+; -D P_SUPLA_TEST_SDA=0
 ;flagsend
 ";
             var iniPath = Path.Combine(tempDir, "platformio.ini");
@@ -606,7 +611,12 @@ namespace CompilationLib.Tests
                 var handler = new PlatformioCliHandler();
                 var enabledFlags = new List<BuildFlagItem>
                 {
-                    
+                    new BuildFlagItem{ Key = "SUPLA_TEST" , IsEnabled = true , Parameters = new List<Parameter>
+                    {
+                        new Parameter { Key = "SCL", Value = "22", Type = "number", IsRequired = true },
+                        new Parameter { Key = "SDA", Value = "21", Type = "number", IsRequired = true }
+                    }
+                    }
                 };
                 var globalSettings = new GlobalSettings
                 {
@@ -617,7 +627,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(iniPath, enabledFlags, globalSettings);
+                handler.EditIniFileWithRequestedFlags(iniPath, enabledFlags, globalSettings);
 
                 var lines = File.ReadAllLines(iniPath).ToList();
                 lines[2].Should().Be(" -D GLOBALPARAMETERS_SCL=22");
@@ -634,6 +644,7 @@ namespace CompilationLib.Tests
             var iniContent = @"[env:test]
 ;flagsstart
  -D SUPLA_INITIAL_CONFIG_MODE
+; -D P_SUPLA_INITIAL_CONFIG_MODE_Mode=0
 ;flagsend
 ";
             var temp = Path.GetTempFileName();
@@ -647,6 +658,7 @@ namespace CompilationLib.Tests
                     new BuildFlagItem
                     {
                         Key = "SUPLA_INITIAL_CONFIG_MODE",
+                        IsEnabled = true,
                         Parameters = new List<Parameter>
                         {
                             new Parameter { Key = "Mode", Name = "Tryb", Value = "2", Type = "enum" }
@@ -654,12 +666,11 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
-                var result = File.ReadAllText(temp);
-
-                AssertOnlyAllowedFlagsRemain(result, "SUPLA_INITIAL_CONFIG_MODE");
-                result.Should().NotContain("'\"2\"'");
+                var lines = File.ReadAllLines(temp).ToList();
+                lines[2].Should().Be(" -D SUPLA_INITIAL_CONFIG_MODE");
+                lines[3].Should().Be(" -D P_SUPLA_INITIAL_CONFIG_MODE_Mode=2");
             }
             finally
             {
@@ -668,11 +679,12 @@ namespace CompilationLib.Tests
         }
 
         [Fact]
-        public void CommentUnlistedFlags_NumberP_FormattedAsNumber()
+        public void NumberParameterShouldBeFormattedAsNumber()
         {
             var iniContent = @"[env:test]
 ;flagsstart
  -D SUPLA_MS5611
+ -D P_SUPLA_MS5611_Altitude=0
 ;flagsend
 ";
             var temp = Path.GetTempFileName();
@@ -693,12 +705,13 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
-
-                AssertOnlyAllowedFlagsRemain(result, "SUPLA_MS5611");
-                result.Should().NotContain("'\"150\"'");
+                var lines = File.ReadAllLines(temp).ToList();
+                lines[2].Should().Be(" -D SUPLA_MS5611");
+                lines[3].Should().Be(" -D P_SUPLA_MS5611_Altitude=150");
+                lines[3].Should().NotContain("-D P_SUPLA_MS5611_Altitude='\"150\"'");
             }
             finally
             {
@@ -707,11 +720,12 @@ namespace CompilationLib.Tests
         }
 
         [Fact]
-        public void CommentUnlistedFlags_TextP_FormattedWithQuotes()
+        public void TextParameterShouldBeFormattedWithQuotes()
         {
             var iniContent = @"[env:test]
 ;flagsstart
  -D SUPLA_DEVICE
+; -D P_SUPLA_DEVICE_Name='""'
 ;flagsend
 ";
             var temp = Path.GetTempFileName();
@@ -725,19 +739,20 @@ namespace CompilationLib.Tests
                     new BuildFlagItem
                     {
                         Key = "SUPLA_DEVICE",
+                        IsEnabled = true,
                         Parameters = new List<Parameter>
                         {
-                            new Parameter { Key = "NAME", Name = "Device Name", Value = "MyDevice", Type = "text" }
+                            new Parameter { Key = "Name", Name = "Device Name", Value = "MyDevice", Type = "text" }
                         }
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
-                var result = File.ReadAllText(temp);
+                var lines = File.ReadAllLines(temp).ToList();
 
-                AssertOnlyAllowedFlagsRemain(result, "SUPLA_DEVICE");
-                result.Should().NotContain("\"MyDevice\"");
+                lines[2].Should().Be(" -D SUPLA_DEVICE");
+                lines[3].Should().Be(" -D P_SUPLA_DEVICE_Name='\"MyDevice\"'");
             }
             finally
             {
@@ -771,7 +786,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -811,7 +826,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -856,7 +871,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -895,7 +910,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -942,7 +957,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -988,7 +1003,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -1033,7 +1048,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -1079,7 +1094,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -1128,7 +1143,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -1177,7 +1192,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -1227,7 +1242,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -1278,7 +1293,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -1340,7 +1355,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -1390,7 +1405,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -1435,7 +1450,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -1473,7 +1488,7 @@ namespace CompilationLib.Tests
                     }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, null);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, null);
 
                 var result = File.ReadAllText(temp);
 
@@ -1519,7 +1534,7 @@ namespace CompilationLib.Tests
                     new BuildFlagItem { Key = "SUPLA_BUTTON" }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, globalSettings);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, globalSettings);
 
                 var result = File.ReadAllText(temp);
 
@@ -1578,7 +1593,7 @@ namespace CompilationLib.Tests
                     },
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(temp, allowed, globalSettings);
+                handler.EditIniFileWithRequestedFlags(temp, allowed, globalSettings);
 
                 var lines = File.ReadAllLines(temp);
                 using (new AssertionScope())
@@ -1622,7 +1637,7 @@ namespace CompilationLib.Tests
                     new BuildFlagItem { Key = "SUPLA_AHTX0" }
                 };
 
-                handler.CommentUnlistedFlagsBetweenMarkers(iniPath, allowedFlags, new GlobalSettings());
+                handler.EditIniFileWithRequestedFlags(iniPath, allowedFlags, new GlobalSettings());
 
                 var lines = File.ReadAllLines(iniPath);
                 using (new AssertionScope())

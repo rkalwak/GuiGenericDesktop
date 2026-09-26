@@ -139,8 +139,11 @@ Available platforms:
 � ESP32 (default)
 � ESP32-C3
 � ESP32-C6
-� ESP32-S3</system:String>
+� ESP32-S3
+� ESP8266 (Arduino CLI only)</system:String>
     <system:String x:Key="PlatformRequiredTitle">Platform Required</system:String>
+    <system:String x:Key="Esp8266BuilderRequiredTitle">Arduino CLI Required</system:String>
+    <system:String x:Key="Esp8266RequiresArduinoCli">ESP8266 is supported only through Arduino CLI. Select Arduino CLI in the Builder list to compile this board.</system:String>
     <system:String x:Key="PlatformIONotFoundTitle">PlatformIO Not Found</system:String>
     <system:String x:Key="PlatformIONotFoundMessage">
 		PlatformIO was not found at the default installation location:
@@ -163,6 +166,14 @@ Available platforms:
 		After installation, restart this application.
 
 		Note: If PlatformIO is installed in a custom location, compilation may still fail.</system:String>
+    <system:String x:Key="ArduinoCliNotFoundTitle">Arduino CLI Not Found</system:String>
+    <system:String x:Key="ArduinoCliNotFoundMessage">Arduino CLI was not found in the application folder or PATH. Install Arduino CLI or make sure it is available in PATH before compiling.</system:String>
+    <system:String x:Key="ArduinoCliCoreNotFoundTitle">Arduino Board Core Not Found</system:String>
+    <system:String x:Key="ArduinoCliCoreNotFoundMessage">The Arduino CLI core '{0}' is not installed in the default data directory:
+
+{1}
+
+Install the core with Arduino CLI before compiling this board.</system:String>
     <system:String x:Key="PlatformCompatibilityError">The following flags are not compatible with selected platform ({0}):
 
 {1}
@@ -218,7 +229,13 @@ Select compilation flags manually.</system:String>
     <system:String x:Key="Language">Language:</system:String>
     <system:String x:Key="LanguageTooltip">Select application language</system:String>
     <system:String x:Key="LanguageChanged">Language changed to: {0}</system:String>
-    
+
+    <!-- Builder -->
+    <system:String x:Key="Builder">Builder:</system:String>
+    <system:String x:Key="BuilderTooltip">Select the compiler backend used for firmware builds</system:String>
+    <system:String x:Key="BuilderPlatformIO">PlatformIO</system:String>
+    <system:String x:Key="BuilderArduinoCli">Arduino CLI</system:String>
+
     <!-- Common -->
     <system:String x:Key="Close">Close</system:String>
     <system:String x:Key="Load">Load</system:String>

@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 using Newtonsoft.Json;
 
 namespace CompilationLib
@@ -127,6 +127,7 @@ namespace CompilationLib
                         paths = await CreateMergedZipFileAsync(
                             sanitizedName,
                             buildOutputDirectory,
+                            firmwareFilePath,
                             platform,
                             flashSize,
                             repositoryPath,
@@ -225,6 +226,7 @@ namespace CompilationLib
         private async Task<(string zipFilePath, string mergedBinPath)> CreateMergedZipFileAsync(
             string sanitizedName,
             string buildOutputDirectory,
+            string firmwareFilePath,
             string platform,
             string flashSize,
             string repositoryPath,
@@ -247,29 +249,50 @@ namespace CompilationLib
                 if (_esptoolWrapper != null &&
                     !string.IsNullOrEmpty(platform) &&
                     !string.IsNullOrEmpty(flashSize) &&
-                    !flashSize.Equals("None", StringComparison.OrdinalIgnoreCase))
+                    !flashSize.Equals("None", StringComparison.OrdinalIgnoreCase) &&
+                    File.Exists(firmwareFilePath))
                 {
                     try
                     {
-                        mergedBinPath = Path.Combine(_configurationsDirectory, $"{sanitizedName}_complete.bin");
-
-                        Console.WriteLine($"Creating merged firmware binary...");
-                        var result = await _esptoolWrapper.MergeFirmwareFiles(
-                            buildOutputDirectory,
-                            mergedBinPath,
-                            platform,
-                            flashSize,
-                            board,
-                            repositoryPath);
-
-                        if (string.IsNullOrEmpty(result))
+                        var bootloaderPath = FindBuildArtifact(buildOutputDirectory, "bootloader.bin", ".bootloader.bin");
+                        var partitionsPath = FindBuildArtifact(buildOutputDirectory, "partitions.bin", ".partitions.bin");
+                        if (bootloaderPath == null || partitionsPath == null)
                         {
-                            Console.WriteLine($"⚠ Warning: Failed to create merged bin file");
-                            mergedBinPath = null;
+                            throw new FileNotFoundException("Bootloader and partition binaries are required to create a merged firmware image.");
                         }
-                        else
+
+                        mergedBinPath = Path.Combine(_configurationsDirectory, $"{sanitizedName}_complete.bin");
+                        var mergeInputDirectory = Path.Combine(Path.GetTempPath(), $"GuiGenericBuilder_{Guid.NewGuid():N}");
+                        Directory.CreateDirectory(mergeInputDirectory);
+
+                        try
                         {
-                            Console.WriteLine($"✓ Created merged bin file: {Path.GetFileName(mergedBinPath)}");
+                            File.Copy(firmwareFilePath, Path.Combine(mergeInputDirectory, "firmware.bin"));
+                            File.Copy(bootloaderPath, Path.Combine(mergeInputDirectory, "bootloader.bin"));
+                            File.Copy(partitionsPath, Path.Combine(mergeInputDirectory, "partitions.bin"));
+
+                            Console.WriteLine("Creating merged firmware binary...");
+                            var result = await _esptoolWrapper.MergeFirmwareFiles(
+                                mergeInputDirectory,
+                                mergedBinPath,
+                                platform,
+                                flashSize,
+                                board,
+                                repositoryPath);
+
+                            if (string.IsNullOrEmpty(result))
+                            {
+                                Console.WriteLine("⚠ Warning: Failed to create merged bin file");
+                                mergedBinPath = null;
+                            }
+                            else
+                            {
+                                Console.WriteLine($"✓ Created merged bin file: {Path.GetFileName(mergedBinPath)}");
+                            }
+                        }
+                        finally
+                        {
+                            Directory.Delete(mergeInputDirectory, recursive: true);
                         }
                     }
                     catch (Exception ex)
@@ -282,26 +305,9 @@ namespace CompilationLib
                 // Create ZIP file
                 using (var zip = ZipFile.Open(zipFilePath, ZipArchiveMode.Create))
                 {
-                    // Add firmware.bin
-                    var firmwarePath = Path.Combine(buildOutputDirectory, "firmware.bin");
-                    if (File.Exists(firmwarePath))
-                    {
-                        zip.CreateEntryFromFile(firmwarePath, "firmware.bin", CompressionLevel.Optimal);
-                    }
-
-                    // Add bootloader.bin
-                    var bootloaderPath = Path.Combine(buildOutputDirectory, "bootloader.bin");
-                    if (File.Exists(bootloaderPath))
-                    {
-                        zip.CreateEntryFromFile(bootloaderPath, "bootloader.bin", CompressionLevel.Optimal);
-                    }
-
-                    // Add partitions.bin
-                    var partitionsPath = Path.Combine(buildOutputDirectory, "partitions.bin");
-                    if (File.Exists(partitionsPath))
-                    {
-                        zip.CreateEntryFromFile(partitionsPath, "partitions.bin", CompressionLevel.Optimal);
-                    }
+                    AddBuildArtifactToZip(zip, firmwareFilePath, "firmware.bin");
+                    AddBuildArtifactToZip(zip, FindBuildArtifact(buildOutputDirectory, "bootloader.bin", ".bootloader.bin"), "bootloader.bin");
+                    AddBuildArtifactToZip(zip, FindBuildArtifact(buildOutputDirectory, "partitions.bin", ".partitions.bin"), "partitions.bin");
 
                     // Add merged complete binary if it was created successfully
                     if (!string.IsNullOrEmpty(mergedBinPath) && File.Exists(mergedBinPath))
@@ -359,6 +365,26 @@ namespace CompilationLib
             {
                 Console.WriteLine($"Failed to create merged ZIP file: {ex.Message}");
                 return (null, null);
+            }
+        }
+
+        private static string FindBuildArtifact(string buildOutputDirectory, string expectedFileName, string arduinoCliSuffix)
+        {
+            var expectedPath = Path.Combine(buildOutputDirectory, expectedFileName);
+            if (File.Exists(expectedPath))
+            {
+                return expectedPath;
+            }
+
+            return Directory.EnumerateFiles(buildOutputDirectory, "*.bin", SearchOption.TopDirectoryOnly)
+                .FirstOrDefault(path => Path.GetFileName(path).EndsWith(arduinoCliSuffix, StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static void AddBuildArtifactToZip(ZipArchive zip, string sourcePath, string entryName)
+        {
+            if (!string.IsNullOrEmpty(sourcePath) && File.Exists(sourcePath))
+            {
+                zip.CreateEntryFromFile(sourcePath, entryName, CompressionLevel.Optimal);
             }
         }
     }

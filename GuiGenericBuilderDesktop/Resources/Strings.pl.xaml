@@ -139,8 +139,11 @@ Dostępne platformy:
 • ESP32 (domyślna)
 • ESP32-C3
 • ESP32-C6
-• ESP32-S3</system:String>
+• ESP32-S3
+• ESP8266 (tylko Arduino CLI)</system:String>
     <system:String x:Key="PlatformRequiredTitle">Wymagana Platforma</system:String>
+    <system:String x:Key="Esp8266BuilderRequiredTitle">Wymagane Arduino CLI</system:String>
+    <system:String x:Key="Esp8266RequiresArduinoCli">ESP8266 jest obsługiwany tylko przez Arduino CLI. Wybierz Arduino CLI na liście Kompilator, aby skompilować tę płytkę.</system:String>
     <system:String x:Key="PlatformIONotFoundTitle">Nie Znaleziono PlatformIO</system:String>
     <system:String x:Key="PlatformIONotFoundMessage">PlatformIO nie został znaleziony w domyślnej lokalizacji instalacji:
 
@@ -162,6 +165,14 @@ Zainstaluj PlatformIO używając jednej z metod:
 Po instalacji uruchom ponownie tę aplikację.
 
 Uwaga: Jeśli PlatformIO jest zainstalowany w niestandardowej lokalizacji, kompilacja może się nie powieść.</system:String>
+    <system:String x:Key="ArduinoCliNotFoundTitle">Nie znaleziono Arduino CLI</system:String>
+    <system:String x:Key="ArduinoCliNotFoundMessage">Nie znaleziono Arduino CLI w folderze aplikacji ani w zmiennej PATH. Zainstaluj Arduino CLI lub upewnij się, że jest dostępne w zmiennej PATH przed kompilacją.</system:String>
+    <system:String x:Key="ArduinoCliCoreNotFoundTitle">Nie znaleziono rdzenia płytki Arduino</system:String>
+    <system:String x:Key="ArduinoCliCoreNotFoundMessage">Rdzeń Arduino CLI '{0}' nie jest zainstalowany w domyślnym katalogu danych:
+
+{1}
+
+Zainstaluj rdzeń za pomocą Arduino CLI przed kompilacją tej płytki.</system:String>
     <system:String x:Key="PlatformCompatibilityError">Następujące flagi nie są kompatybilne z wybraną platformą ({0}):
 
 {1}
@@ -217,7 +228,13 @@ Wybierz flagi kompilacji ręcznie.</system:String>
     <system:String x:Key="Language">Język:</system:String>
     <system:String x:Key="LanguageTooltip">Wybierz język aplikacji</system:String>
     <system:String x:Key="LanguageChanged">Język zmieniony na: {0}</system:String>
-    
+
+    <!-- Builder -->
+    <system:String x:Key="Builder">Builder:</system:String>
+    <system:String x:Key="BuilderTooltip">Wybierz backend kompilacji używany do budowy firmware</system:String>
+    <system:String x:Key="BuilderPlatformIO">PlatformIO</system:String>
+    <system:String x:Key="BuilderArduinoCli">Arduino CLI</system:String>
+
     <!-- Common -->
     <system:String x:Key="Close">Zamknij</system:String>
     <system:String x:Key="Load">Załaduj</system:String>

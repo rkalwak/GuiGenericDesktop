@@ -1,4 +1,4 @@
-﻿using CompilationLib;
+using CompilationLib;
 
 public class CompileRequest
 {
@@ -14,6 +14,7 @@ public class CompileRequest
     public bool ShouldDeploy { get; set; }
     public bool ShouldBackup { get; set; }
     public bool ShouldEraseFlash { get; set; }
+    public bool UseSketchApproach { get; set; } = true;
     
     /// <summary>
     /// Flash size (e.g., "4MB", "8MB", "16MB", "32MB")

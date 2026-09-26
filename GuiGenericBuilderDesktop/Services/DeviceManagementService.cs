@@ -61,6 +61,9 @@ namespace GuiGenericBuilderDesktop.Services
                 return null;
 
             var chipLower = chipType.ToLowerInvariant();
+
+            if (chipLower.Contains("esp8266"))
+                return "GUI_Generic_ESP8266";
             
             if (chipLower.Contains("c6") || chipLower.Contains("c-6"))
                 return "GUI_Generic_ESP32C6";

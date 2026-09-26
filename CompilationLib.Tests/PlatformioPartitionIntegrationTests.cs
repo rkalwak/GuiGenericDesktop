@@ -58,7 +58,7 @@ board_build.partitions = partitions/min_spiffs_8mb.csv
             var handler = new PlatformioCliHandler();
 
             // Act
-            handler.CommentUnlistedFlagsBetweenMarkers(_testIniPath, buildFlags, new GlobalSettings());
+            handler.EditIniFileWithRequestedFlags(_testIniPath, buildFlags, new GlobalSettings());
 
             // Assert
             var result = File.ReadAllText(_testIniPath);

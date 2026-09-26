@@ -11,11 +11,67 @@ namespace GuiGenericBuilderDesktop.Services
     public class ValidationService
     {
         private readonly ILogger _logger;
-        private static bool _platformioWarningShown = false;
 
         public ValidationService(ILogger logger)
         {
             _logger = logger;
+        }
+
+        public bool ValidateArduinoCliInstallation(out string arduinoCliPath)
+        {
+            try
+            {
+                var executableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                    ? "arduino-cli.exe"
+                    : "arduino-cli";
+                var bundledPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, executableName);
+                if (System.IO.File.Exists(bundledPath))
+                {
+                    arduinoCliPath = bundledPath;
+                    _logger.Information("Bundled Arduino CLI found at: {Path}", arduinoCliPath);
+                    return true;
+                }
+
+                arduinoCliPath = new ArduinoCliDetector().FindArduinoCliInPath();
+                if (string.IsNullOrWhiteSpace(arduinoCliPath) || !System.IO.File.Exists(arduinoCliPath))
+                {
+                    _logger.Warning("Arduino CLI executable was not found");
+                    return false;
+                }
+
+                _logger.Information("Arduino CLI found at: {Path}", arduinoCliPath);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                arduinoCliPath = null;
+                _logger.Error(ex, "Error checking Arduino CLI installation");
+                return false;
+            }
+        }
+
+        public bool ValidateArduinoCliCoreInstallation(string coreId, out string corePath)
+        {
+            corePath = System.IO.Path.Combine(GetArduinoCliDataDirectory(), "packages", coreId, "hardware", coreId);
+            try
+            {
+                var isInstalled = System.IO.Directory.Exists(corePath) &&
+                    System.IO.Directory.EnumerateDirectories(corePath).Any();
+
+                if (!isInstalled)
+                {
+                    _logger.Warning("Arduino CLI core {CoreId} was not found at: {Path}", coreId, corePath);
+                    return false;
+                }
+
+                _logger.Information("Arduino CLI core {CoreId} found at: {Path}", coreId, corePath);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error checking Arduino CLI core {CoreId}", coreId);
+                return false;
+            }
         }
 
         /// <summary>
@@ -172,7 +228,7 @@ namespace GuiGenericBuilderDesktop.Services
         /// <summary>
         /// Gets the expected PlatformIO executable path based on the operating system
         /// </summary>
-        private string GetPlatformIOPath()
+        public string GetPlatformIOPath()
         {
             var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             
@@ -191,25 +247,20 @@ namespace GuiGenericBuilderDesktop.Services
             }
         }
 
-        /// <summary>
-        /// Shows a warning message if PlatformIO is not installed (only once per session)
-        /// </summary>
-        public void ShowPlatformIOWarningIfNeeded()
+        private string GetArduinoCliDataDirectory()
         {
-            if (_platformioWarningShown)
-                return;
+            var userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
 
-            if (!ValidatePlatformIOInstallation())
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                _platformioWarningShown = true;
-                var platformioPath = GetPlatformIOPath();
-                
-                System.Windows.MessageBox.Show(
-                    LocalizationManager.GetFormat("PlatformIONotFoundMessage", platformioPath),
-                    LocalizationManager.Get("PlatformIONotFoundTitle"),
-                    System.Windows.MessageBoxButton.OK,
-                    System.Windows.MessageBoxImage.Warning);
+                var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                return System.IO.Path.Combine(localAppData, "Arduino15");
             }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                return System.IO.Path.Combine(userProfile, "Library", "Arduino15");
+
+            return System.IO.Path.Combine(userProfile, ".arduino15");
         }
     }
 }

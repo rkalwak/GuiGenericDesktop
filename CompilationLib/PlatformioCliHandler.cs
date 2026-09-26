@@ -65,7 +65,7 @@ public class PlatformioCliHandler : ICompileHandler
         SetPartitionScheme(request.ProjectDirectory, request.EnvironmentName, request.FlashSize, request.Board);
       
         // PlatformIO uses 'run' command for compilation
-        CommentUnlistedFlagsBetweenMarkers(Path.Combine(request.ProjectDirectory, "platformio.ini"), request.BuildFlags, request.GlobalSettings);
+        EditIniFileWithRequestedFlags(Path.Combine(request.ProjectDirectory, "platformio.ini"), request.BuildFlags, request.GlobalSettings);
 
         // Create backup before deployment if both deploying and backup are enabled
         if (request.ShouldDeploy && request.ShouldBackup && !string.IsNullOrEmpty(request.PortCom))
@@ -244,14 +244,28 @@ public class PlatformioCliHandler : ICompileHandler
     /// <param name="iniPath">Path to platformio.ini file.</param>
     /// <param name="allowedFlags">List of allowed build flag strings (e.g., "-D SUPLA_AHTX0").</param>
     /// <param name="globalSettings">Global settings containing globally defined parameters (e.g., SCL/SDA for I2C devices).</param>
-    public void CommentUnlistedFlagsBetweenMarkers(string iniPath, List<BuildFlagItem> allowedFlags, GlobalSettings globalSettings)
+    public void EditIniFileWithRequestedFlags(string iniPath, List<BuildFlagItem> allowedFlags, GlobalSettings globalSettings)
     {
         var lines = File.ReadAllLines(iniPath).ToList();
         var startIndex = lines.FindIndex(line => line.Trim().Equals(";flagsstart", StringComparison.OrdinalIgnoreCase));
         var endIndex = lines.FindIndex(line => line.Trim().Equals(";flagsend", StringComparison.OrdinalIgnoreCase));
 
         DisableAllBuildFlagsAndParameters(allowedFlags, globalSettings, lines, startIndex, endIndex);
-
+        var enabledFlags = allowedFlags.Where(flag => flag.IsEnabled).ToList();
+        var enabledFlagNames = new HashSet<string>(enabledFlags.Select(flag => flag.Key), StringComparer.OrdinalIgnoreCase);
+        var enabledParameters = enabledFlags.Select(flag => new { Flag = flag, Parameters = flag.Parameters ?? new List<Parameter>() })
+                                            .SelectMany(x => x.Parameters.Select(p => new { FlagKey = x.Flag.Key, Parameter = p }));
+        var enabledParametersNames = enabledParameters
+                                            .Select(x => Parameter.GetFullName(x.FlagKey, x.Parameter.Identifier))
+                                            .ToList();
+        var enabledGlobalParameters = enabledFlags.Select(flag => new { Flag = flag, Parameters = flag.Parameters ?? new List<Parameter>() })
+                                            .SelectMany(x => x.Parameters.Select(p => new { FlagKey = x.Flag.Key, Parameter = p }))
+                                            .Where(x => globalSettings != null && globalSettings.Parameters != null && globalSettings.Parameters.Any(gp => string.Equals(gp.Identifier, x.Parameter.Identifier, StringComparison.OrdinalIgnoreCase)));
+        var enabledGlobalParameterNames =  enabledGlobalParameters
+                                            .Select(x => Parameter.GetGlobalParameterFullName(x.Parameter.Identifier))
+                                            .ToList();
+        enabledFlagNames.UnionWith(enabledParametersNames);
+        enabledFlagNames.UnionWith(enabledGlobalParameterNames);
         for (int i = startIndex + 1; i < endIndex; i++)
         {
             string lineContent = lines[i]; // -D SUPLA_FLAG or ; -D SUPLA_FLAG
@@ -457,12 +471,6 @@ public class PlatformioCliHandler : ICompileHandler
                             break; // Use the first matching value found
                         }
                     }
-                }
-
-                // If no value found in BuildFlags, fall back to GlobalSettings value
-                if (string.IsNullOrEmpty(valueToUse))
-                {
-                    valueToUse = (globalParam.Value ?? string.Empty).Trim();
                 }
 
                 // Skip optional global parameters without values

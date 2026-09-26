@@ -14,11 +14,30 @@ namespace CompilationLib
                 ? new[] { "arduino-cli.exe", "arduino-cli" }
                 : new[] { "arduino-cli" };
 
-            var pathEnv = Environment.GetEnvironmentVariable("PATH");
-            if (string.IsNullOrWhiteSpace(pathEnv))
-                return null;
+            var searchRoots = new List<string>();
 
-            foreach (var dir in pathEnv.Split(Path.PathSeparator))
+            var pathEnv = Environment.GetEnvironmentVariable("PATH");
+            if (!string.IsNullOrWhiteSpace(pathEnv))
+            {
+                searchRoots.AddRange(pathEnv.Split(Path.PathSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
+            }
+
+            var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (!string.IsNullOrWhiteSpace(localAppData))
+            {
+                searchRoots.Add(Path.Combine(localAppData, "Arduino15"));
+                searchRoots.Add(Path.Combine(localAppData, "Arduino15", "bin"));
+            }
+
+            var programFiles = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            if (!string.IsNullOrWhiteSpace(programFiles))
+            {
+                searchRoots.Add(programFiles);
+                searchRoots.Add(Path.Combine(programFiles, "Arduino CLI"));
+                searchRoots.Add(Path.Combine(programFiles, "Arduino"));
+            }
+
+            foreach (var dir in searchRoots.Distinct(StringComparer.OrdinalIgnoreCase))
             {
                 if (string.IsNullOrWhiteSpace(dir)) continue;
                 try
@@ -29,20 +48,35 @@ namespace CompilationLib
                         if (File.Exists(candidate))
                             return Path.GetFullPath(candidate);
                     }
+
+                    if (Directory.Exists(dir))
+                    {
+                        foreach (var file in Directory.EnumerateFiles(dir, "arduino-cli*", SearchOption.AllDirectories))
+                        {
+                            if (exeNames.Contains(Path.GetFileName(file), StringComparer.OrdinalIgnoreCase))
+                                return Path.GetFullPath(file);
+                        }
+                    }
                 }
                 catch
                 {
                     // ignore individual path errors
                 }
             }
+
             return null;
+        }
+
+        private static bool IsMatchingExecutableName(string candidateName, IEnumerable<string> expectedNames)
+        {
+            return expectedNames.Any(name => string.Equals(candidateName, name, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Attempts to detect arduino-cli and query its version.
         /// Returns a tuple: (Found, ResolvedPathOrCommand, VersionText, ErrorText).
         /// </summary>
-        public  async Task<(bool Found, string PathOrCommand, string Version, string Error)> TryGetArduinoCliAsync(CancellationToken cancellation = default)
+        public async Task<(bool Found, string PathOrCommand, string Version, string Error)> TryGetArduinoCliAsync(CancellationToken cancellation = default)
         {
             // Prefer exact path from PATH
             var path = FindArduinoCliInPath() ?? (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "arduino-cli.exe" : "arduino-cli");

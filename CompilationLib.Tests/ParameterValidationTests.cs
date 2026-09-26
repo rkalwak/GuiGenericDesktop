@@ -344,5 +344,94 @@ namespace CompilationLib.Tests
             result.Should().Contain("-D SUPLA_RELAY_GPIO2=15");
             result.Should().NotContain("SUPLA_RELAY_GPIO2='\"15\"'");
         }
+
+        [Fact]
+        public void CompileHandler_StringType_ShouldSerializeWithQuotedCStringLiteral()
+        {
+            var buildFlags = new List<BuildFlagItem>
+            {
+                new BuildFlagItem
+                {
+                    Key = "SUPLA_INITIALCONFIG",
+                    IsEnabled = true,
+                    Parameters = new List<Parameter>
+                    {
+                        new Parameter
+                        {
+                            Key = "DeviceName",
+                            Name = "Device name",
+                            Type = "string",
+                            Value = "GG BD"
+                        }
+                    }
+                }
+            };
+
+            var method = typeof(CompileHandler).GetMethod("BuildFlagsStringForCompilation", BindingFlags.NonPublic | BindingFlags.Static);
+            method.Should().NotBeNull();
+
+            var result = (string)method.Invoke(null, new object[] { buildFlags });
+
+            result.Should().Contain("\"-DSUPLA_INITIALCONFIG_DeviceName=\"GG BD\"\"");
+            result.Should().NotContain("SUPLA_INITIALCONFIG_DeviceName=\\\"GG\\040BD\\\"");
+        }
+
+        [Fact]
+        public void CompileHandler_StringAndNumericFlags_ShouldMatchArduinoCliBuildExtraFlagsPattern()
+        {
+            var buildFlags = new List<BuildFlagItem>
+            {
+                new BuildFlagItem
+                {
+                    Key = "FLAG_STRING",
+                    IsEnabled = true,
+                    Parameters = new List<Parameter>
+                    {
+                        new Parameter { Key = "TEXT", Name = "TEXT", Type = "string", Value = "alpha beta" }
+                    }
+                },
+                new BuildFlagItem
+                {
+                    Key = "FLAG_NUMERIC",
+                    IsEnabled = true,
+                    Parameters = new List<Parameter>
+                    {
+                        new Parameter { Key = "COUNT", Name = "COUNT", Type = "number", Value = "7" },
+                        new Parameter { Key = "GPIO", Name = "GPIO", Type = "gpio", Value = "12" }
+                    }
+                }
+            };
+
+            var method = typeof(CompileHandler).GetMethod("BuildFlagsStringForCompilation", BindingFlags.NonPublic | BindingFlags.Static);
+            method.Should().NotBeNull();
+
+            var result = (string)method.Invoke(null, new object[] { buildFlags });
+
+            result.Should().Be("-D FLAG_STRING=1 \"-DFLAG_STRING_TEXT=\"alpha beta\"\" -D FLAG_NUMERIC=1 -D FLAG_NUMERIC_COUNT=7 -D FLAG_NUMERIC_GPIO=12");
+        }
+
+        [Fact]
+        public void CompileHandler_MetadataDefineValue_ShouldReturnQuotedCStringLiteral()
+        {
+            var method = typeof(CompileHandler).GetMethod("NormalizeMetadataDefineValue", BindingFlags.NonPublic | BindingFlags.Static);
+            method.Should().NotBeNull();
+
+            var result = (string)method.Invoke(null, new object[] { "'\"R26.09.17\"'" });
+
+            result.Should().Be("\"R26.09.17\"");
+        }
+        
+
+        [Fact]
+        public void CompileHandler_Esp32Fqbn_ShouldContributeEsp32TargetDefine()
+        {
+            var method = typeof(CompileHandler).GetMethod("GetTargetDefinesForFqbn", BindingFlags.NonPublic | BindingFlags.Static);
+            method.Should().NotBeNull();
+
+            var result = (string)method.Invoke(null, new object[] { "esp32:esp32:esp32" });
+
+            result.Should().Contain("-D ESP32");
+            result.Should().Contain("-D CONFIG_CRYPTO_MBEDTLS");
+        }
     }
 }

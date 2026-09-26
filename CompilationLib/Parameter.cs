@@ -37,6 +37,16 @@ namespace CompilationLib
         /// </summary>
         [JsonIgnore]
         public string Identifier => !string.IsNullOrEmpty(Key) ? Key : Name;
+
+        public static string GetFullName(string flagKey, string identifier)
+        {
+            return $"P_{flagKey}_{identifier}";
+        }
+
+        public static string GetGlobalParameterFullName(string flagKey)
+        {
+            return "GLOBALSETTINGS_" + flagKey;
+        }
     }
 
     /// <summary>
