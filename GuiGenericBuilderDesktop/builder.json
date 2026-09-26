@@ -2699,7 +2699,7 @@
                   "Name": "SDA Pin"
                 }
               }
-            }        
+            }
           ]
         },
         "SUPLA_MS5611": {
@@ -3530,6 +3530,104 @@
                 {
                   "Value": "16",
                   "Name": "0x4F"
+                }
+              ]
+            }
+          ]
+        },
+        "SUPLA_ADS1115_KPOP": {
+          "name": "Sensor ADS1115 KPOP",
+          "desc": "Ustawienia urządzenia-\u003eI2C. Umożliwia obsługę sensorów ADS1115 KPOP.",
+          "defOn": false,
+          "translations": {
+            "en": {
+              "name": "ADS1115 KPOP sensor",
+              "desc": "Device settings-\u003eI2C. It enables the support of ADS1115 KPOP sensors."
+            }
+          },
+          "Parameters": [
+            {
+              "Key": "SCL",
+              "Name": "Pin SCL",
+              "Type": "gpio",
+              "IsRequired": true,
+              "DefaultValue": "22",
+              "Translations": {
+                "en": {
+                  "Name": "SCL Pin"
+                }
+              }
+            },
+            {
+              "Key": "SDA",
+              "Name": "Pin SDA",
+              "Type": "gpio",
+              "IsRequired": true,
+              "DefaultValue": "21",
+              "Translations": {
+                "en": {
+                  "Name": "SDA Pin"
+                }
+              }
+            },
+            {
+              "Key": "Gain",
+              "Name": "Wzmocnienie",
+              "Type": "enum",
+              "IsRequired": true,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "±6.144V"
+                },
+                {
+                  "Value": "1",
+                  "Name": "±4.096V"
+                },
+                {
+                  "Value": "2",
+                  "Name": "±2.048V"
+                },
+                {
+                  "Value": "3",
+                  "Name": "±1.024V"
+                },
+                {
+                  "Value": "4",
+                  "Name": "±0.512V"
+                },
+                {
+                  "Value": "5",
+                  "Name": "±0.256V"
+                }
+            },
+            {
+              "Key": "Address",
+              "Name": "Adres I2C",
+              "Type": "enum",
+              "IsRequired": true,
+              "DefaultValue": "0",
+              "EnumValues": [
+                {
+                  "Value": "0",
+                  "Name": "OFF"
+                },
+                {
+                  "Value": "1",
+                  "Name": "0x48"
+                },
+                {
+                  "Value": "2",
+                  "Name": "0x49"
+                },
+                {
+                  "Value": "3",
+                  "Name": "0x4A"
+                },
+                {
+                  "Value": "4",
+                  "Name": "0x4B"
                 }
               ]
             }
