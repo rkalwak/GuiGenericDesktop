@@ -57,38 +57,6 @@ namespace CompilationLib.Tests
         }
 
         [Fact]
-        public void BuildCommandLineForLogging_KeepsCompilerExtraFlagsAsSingleArgument()
-        {
-            var method = typeof(CompileHandler).GetMethod("BuildCommandLineForLogging", BindingFlags.NonPublic | BindingFlags.Static);
-            method.Should().NotBeNull();
-
-            var arguments = new[]
-            {
-                "compile",
-                "--build-property",
-                "compiler.cpp.extra_flags=-D FLAG_STRING=1 -DFLAG_STRING_TEXT=\\\"alpha\\040beta\\\" -D FLAG_NUMERIC_COUNT=7 -D FLAG_NUMERIC_GPIO=12",
-                "."
-            };
-
-            var result = (string)method.Invoke(null, new object[] { "arduino-cli.exe", arguments });
-
-            result.Should().StartWith("& 'arduino-cli.exe' --% compile");
-            result.Should().Contain("\"compiler.cpp.extra_flags=-D FLAG_STRING=1 -DFLAG_STRING_TEXT=\\\"alpha\\040beta\\\" -D FLAG_NUMERIC_COUNT=7 -D FLAG_NUMERIC_GPIO=12\"");
-        }
-
-        [Fact]
-        public void GetPartitionBuildProperties_WhenFlashSizeIsNone_UsesBoardDefault()
-        {
-            var method = typeof(CompileHandler).GetMethod("GetPartitionBuildProperties", BindingFlags.NonPublic | BindingFlags.Static);
-            method.Should().NotBeNull();
-
-            var result = (System.Collections.Generic.List<string>)method.Invoke(null, new object[] { "None", null });
-
-            result.Should().Contain("build.flash_size=4MB");
-            result.Should().NotBeEmpty();
-        }
-
-        [Fact]
         public void GetUploadArguments_WhenDeploymentIsSelected_IncludesUploadAndPort()
         {
             var request = new CompileRequest

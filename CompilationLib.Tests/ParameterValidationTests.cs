@@ -306,9 +306,9 @@ namespace CompilationLib.Tests
             var result = (string)method.Invoke(null, new object[] { buildFlags });
 
             // Assert
-            result.Should().Contain("-D ESP32_GPIO1=12");
-            result.Should().NotContain("ESP32_GPIO1=\"12\"");
-            result.Should().NotContain("ESP32_GPIO1='\"12\"'");
+            result.Should().Contain("-D P_ESP32_GPIO1=12");
+            result.Should().NotContain("P_ESP32_GPIO1=\"12\"");
+            result.Should().NotContain("P_ESP32_GPIO1='\"12\"'");
         }
 
         [Fact]
@@ -341,7 +341,7 @@ namespace CompilationLib.Tests
             var result = (string)method.Invoke(null, new object[] { buildFlags });
 
             // Assert
-            result.Should().Contain("-D SUPLA_RELAY_GPIO2=15");
+            result.Should().Contain("-D P_SUPLA_RELAY_GPIO2=15");
             result.Should().NotContain("SUPLA_RELAY_GPIO2='\"15\"'");
         }
 
@@ -372,8 +372,8 @@ namespace CompilationLib.Tests
 
             var result = (string)method.Invoke(null, new object[] { buildFlags });
 
-            result.Should().Contain("\"-DSUPLA_INITIALCONFIG_DeviceName=\"GG BD\"\"");
-            result.Should().NotContain("SUPLA_INITIALCONFIG_DeviceName=\\\"GG\\040BD\\\"");
+            result.Should().Be("-D SUPLA_INITIALCONFIG=1 -DP_SUPLA_INITIALCONFIG_DeviceName=\"GG\\040BD\"");
+            result.Should().NotContain("P_SUPLA_INITIALCONFIG_DeviceName=\\\"GG\\040BD\\\"");
         }
 
         [Fact]
@@ -407,7 +407,7 @@ namespace CompilationLib.Tests
 
             var result = (string)method.Invoke(null, new object[] { buildFlags });
 
-            result.Should().Be("-D FLAG_STRING=1 \"-DFLAG_STRING_TEXT=\"alpha beta\"\" -D FLAG_NUMERIC=1 -D FLAG_NUMERIC_COUNT=7 -D FLAG_NUMERIC_GPIO=12");
+            result.Should().Be("-D FLAG_STRING=1 -DP_FLAG_STRING_TEXT=\"alpha\\040beta\" -D FLAG_NUMERIC=1 -D P_FLAG_NUMERIC_COUNT=7 -D P_FLAG_NUMERIC_GPIO=12");
         }
 
         [Fact]
